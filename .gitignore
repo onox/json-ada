@@ -1,0 +1,9 @@
+/lib/
+/obj/
+/test/unit/obj/
+/bin/
+*.swp
+.DS_Store
+.#*#
+auto.cgpr
+test/unit/test_bindings

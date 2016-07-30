@@ -1,0 +1,82 @@
+--  Copyright (c) 2016 onox <denkpadje@gmail.com>
+--
+--  Licensed under the Apache License, Version 2.0 (the "License");
+--  you may not use this file except in compliance with the License.
+--  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--  Unless required by applicable law or agreed to in writing, software
+--  distributed under the License is distributed on an "AS IS" BASIS,
+--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--  See the License for the specific language governing permissions and
+--  limitations under the License.
+
+abstract project Config is
+
+   for Source_Dirs use ();
+
+   type Build_Type is ("debug", "release");
+   Mode : Build_Type := external ("build", "release");
+
+   Common_Switches := (
+      "-fstack-check",  --  Stack overflow checking
+      "-gnato13",       --  Numeric overflow checking
+      "-gnateE",        --  Extra information in exceptions
+      "-gnata",         --  Enable assertions
+      "-gnatf",         --  Full errors
+      "-gnatVa",        --  All validity checks
+      "-gnatwa",        --  All optional warnings
+      "-gnatwFl.l.n.s",
+      "-gnaty",         --  Default style checks
+      "-gnatyAdOSux-msbc",
+      "-gnat2012",      --  Use Ada 2012
+      "-Wall",          --  All GCC warnings
+      "-O2", "-march=native"
+   );
+
+   Hardening_Switches := (
+      "-Werror=format-security",
+      "-U_FORTIFY_SOURCE", "-D_FORTIFY_SOURCE=2",
+      "-Wl,-z,now"
+   );
+
+   Common_Compiler_Switches := Common_Switches & Hardening_Switches;
+
+   package Ide is
+      for Vcs_Kind use "Git";
+   end Ide;
+
+   package Builder is
+      case Mode is
+         when "debug" =>
+            for Default_Switches ("ada") use ("-s",
+                                              "-gnatE",
+                                              "-g");
+         when "release" =>
+            for Default_Switches ("ada") use ("-s");
+      end case;
+   end Builder;
+
+   package Compiler is
+      case Mode is
+         when "debug" =>
+            for Default_Switches ("ada") use Common_Compiler_Switches & ("-g");
+         when "release" =>
+            for Default_Switches ("ada") use Common_Compiler_Switches & ("-gnatn2", "-fomit-frame-pointer");
+      end case;
+
+      for Local_Configuration_Pragmas use "gnat.adc";
+   end Compiler;
+
+   package Binder is
+      case Mode is
+         when "debug" =>
+            --  Store tracebacks in exception occurrences
+            for Default_Switches ("ada") use ("-E");
+         when "release" =>
+            null;
+      end case;
+   end Binder;
+
+end Config;

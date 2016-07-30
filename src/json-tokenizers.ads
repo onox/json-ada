@@ -1,0 +1,61 @@
+--  Copyright (c) 2016 onox <denkpadje@gmail.com>
+--
+--  Licensed under the Apache License, Version 2.0 (the "License");
+--  you may not use this file except in compliance with the License.
+--  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--  Unless required by applicable law or agreed to in writing, software
+--  distributed under the License is distributed on an "AS IS" BASIS,
+--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--  See the License for the specific language governing permissions and
+--  limitations under the License.
+
+with Ada.Strings.Unbounded;
+
+with JSON.Streams;
+
+package JSON.Tokenizers is
+   pragma Preelaborate;
+
+   type Token_Kind is
+     (Begin_Array_Token,
+      Begin_Object_Token,
+      End_Array_Token,
+      End_Object_Token,
+      Name_Separator_Token,
+      Value_Separator_Token,
+      String_Token,
+      Integer_Token,
+      Float_Token,
+      Boolean_Token,
+      Null_Token,
+      EOF_Token,
+      Invalid_Token);
+
+   package SU renames Ada.Strings.Unbounded;
+
+   type Token (Kind : Token_Kind := Invalid_Token) is record
+      case Kind is
+         when String_Token =>
+            String_Value  : SU.Unbounded_String;
+         when Integer_Token =>
+            Integer_Value : Long_Integer;
+         when Float_Token =>
+            Float_Value   : Long_Float;
+         when Boolean_Token =>
+            Boolean_Value : Boolean;
+         when others =>
+            null;
+      end case;
+   end record;
+
+   procedure Read_Token (Stream     : in out Streams.Stream'Class;
+                         Next_Token : out Token;
+                         Expect_EOF : Boolean := False)
+     with Post => Next_Token.Kind /= Invalid_Token and (Expect_EOF = (Next_Token.Kind = EOF_Token));
+
+   Tokenizer_Error : exception;
+
+end JSON.Tokenizers;
