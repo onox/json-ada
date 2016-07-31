@@ -3,12 +3,17 @@
 json-ada
 ========
 
-Ada 2012 bindings for JSON ([RFC 7159][url-rfc]).
+An Ada 2012 library for parsing JSON ([RFC 7159][url-rfc]). The RFC does
+not support comments, thus this library does not support it either. If
+your JSON data contains comments, you should minify the data so that
+comments are removed.
+
+The library currently does not support Unicode yet.
 
 Dependencies
 ------------
 
-In order to build the bindings, you need to have:
+In order to build the library, you need to have:
 
  * An Ada 2012 compiler
 
@@ -45,7 +50,7 @@ After having build the tests, run the unit tests:
 License
 -------
 
-The Ada bindings and unit tests are licensed under the [Apache License 2.0][url-apache].
+The Ada code and unit tests are licensed under the [Apache License 2.0][url-apache].
 
   [url-rfc]: https://tools.ietf.org/html/rfc7159
   [url-ahven]: http://ahven.stronglytyped.org
