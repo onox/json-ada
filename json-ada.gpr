@@ -16,10 +16,11 @@ library project JSON_Ada is
 
    for Languages use ("Ada");
 
-   for Source_Files use ("../../include/json_ada");
+   for Source_Files use ("../../include/json-ada");
 
-   for Library_Name use "json_ada";
-   for Library_Dir  use "../../lib/json_ada";
+   for Library_Name use "json-ada";
+   for Library_Dir  use "../../lib";
+   for Library_ALI_Dir use "../../lib/json-ada";
    for Library_Kind use "relocatable";
 
    for Externally_Built use "true";
