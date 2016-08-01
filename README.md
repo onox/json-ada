@@ -34,7 +34,7 @@ Using json-ada in your project
 
 Specify the dependency in your \*.gpr project file:
 
-    with "json-ada";
+    with "json_ada";
 
 Tests
 -----

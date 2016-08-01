@@ -16,7 +16,7 @@ library project JSON_Ada is
 
    for Languages use ("Ada");
 
-   for Source_Files use ("../../include/json-ada");
+   for Source_Dirs use ("../../include/json-ada");
 
    for Library_Name use "json-ada";
    for Library_Dir  use "../../lib";

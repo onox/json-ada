@@ -54,7 +54,7 @@ install:
 
 	$(INSTALL_DATA) $(SRC_DIR)/*.ad[bs] $(includedir)
 	$(INSTALL_ALI) $(LIB_DIR)/json-ada/*.ali $(alidir)
-	$(INSTALL_DATA) json-ada.gpr $(gprdir)
+	$(INSTALL_DATA) json_ada.gpr $(gprdir)
 
 	$(INSTALL) $(LIB_DIR)/$(SO_LIBRARY) $(libdir)
 	cd $(libdir) && ln -sf $(SO_LIBRARY) $(SO_FILE).$(MAJOR)
