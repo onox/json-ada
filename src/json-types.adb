@@ -131,6 +131,11 @@ package body JSON.Types is
       return Natural (Object.Map.Length);
    end Length;
 
+   function Contains (Object : JSON_Object_Value; Key : String) return Boolean is
+   begin
+      return Object.Map.Contains (Key);
+   end Contains;
+
    function Get (Object : JSON_Object_Value; Key : String) return JSON_String_Value'Class is
    begin
       return JSON_String_Value (Object.Map.Element (Key));

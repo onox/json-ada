@@ -86,6 +86,8 @@ package JSON.Types is
 
    function Length (Object : JSON_Object_Value) return Natural;
 
+   function Contains (Object : JSON_Object_Value; Key : String) return Boolean;
+
    function Get (Object : JSON_Object_Value; Key : String) return JSON_String_Value'Class;
    function Get (Object : JSON_Object_Value; Key : String) return JSON_Integer_Value'Class;
    function Get (Object : JSON_Object_Value; Key : String) return JSON_Float_Value'Class;
