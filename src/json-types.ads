@@ -50,8 +50,6 @@ package JSON.Types is
    --                               JSON Array                                --
    -----------------------------------------------------------------------------
 
-   package JSON_Vectors is new Ada.Containers.Indefinite_Vectors (Positive, JSON_Value'Class);
-
    type JSON_Array_Value is new JSON_Value with private
      with Default_Iterator  => Iterate,
           Iterator_Element  => JSON_Value'Class,
@@ -68,17 +66,14 @@ package JSON.Types is
    function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Null_Value'Class;
    function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Array_Value'Class;
 
-   function Constant_Reference (Object : JSON_Array_Value; Position : JSON_Vectors.Cursor)
-     return JSON_Vectors.Constant_Reference_Type;
-
-   function Iterate (Object : JSON_Array_Value)
-     return JSON_Vectors.Vector_Iterator_Interfaces.Reversible_Iterator'Class;
-
    -----------------------------------------------------------------------------
    --                               JSON Object                               --
    -----------------------------------------------------------------------------
 
-   type JSON_Object_Value is new JSON_Value with private;
+   type JSON_Object_Value is new JSON_Value with private
+     with Default_Iterator  => Iterate,
+          Iterator_Element  => String,
+          Constant_Indexing => Constant_Key;
 
    procedure Insert (Object : in out JSON_Object_Value;
                      Key    : JSON_String_Value'Class;
@@ -118,11 +113,25 @@ package JSON.Types is
 
 private
 
+   package JSON_Vectors is new Ada.Containers.Indefinite_Vectors (Positive, JSON_Value'Class);
+
+   function Constant_Reference (Object : JSON_Array_Value; Position : JSON_Vectors.Cursor)
+     return JSON_Vectors.Constant_Reference_Type;
+
+   function Iterate (Object : JSON_Array_Value)
+     return JSON_Vectors.Vector_Iterator_Interfaces.Reversible_Iterator'Class;
+
    package JSON_Maps is new Ada.Containers.Indefinite_Hashed_Maps
      (Key_Type        => String,
       Element_Type    => JSON_Value'Class,
       Hash            => Ada.Strings.Hash,
       Equivalent_Keys => "=");
+
+   function Constant_Key (Object : JSON_Object_Value; Position : JSON_Maps.Cursor)
+     return String;
+
+   function Iterate (Object : JSON_Object_Value)
+     return JSON_Maps.Map_Iterator_Interfaces.Forward_Iterator'Class;
 
    type JSON_String_Value is new JSON_Value with record
       String_Value : SU.Unbounded_String;

@@ -47,6 +47,7 @@ private
    procedure Test_Empty_Object_Text;
    procedure Test_One_Member_Object_Text;
    procedure Test_Multiple_Members_Object_Text;
+   procedure Test_Object_Iterable;
 
    procedure Test_Array_Object_Array;
    procedure Test_Object_Array_Object;

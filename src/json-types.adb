@@ -171,4 +171,16 @@ package body JSON.Types is
       return JSON_Object_Value (Object.Map.Element (Key));
    end Get;
 
+   function Constant_Key (Object : JSON_Object_Value; Position : JSON_Maps.Cursor)
+     return String is
+   begin
+      return JSON_Maps.Key (Position);
+   end Constant_Key;
+
+   function Iterate (Object : JSON_Object_Value)
+     return JSON_Maps.Map_Iterator_Interfaces.Forward_Iterator'Class is
+   begin
+      return Object.Map.Iterate;
+   end Iterate;
+
 end JSON.Types;

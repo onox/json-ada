@@ -40,11 +40,12 @@ package body Test_Parsers is
       T.Add_Test_Routine (Test_Empty_Array_Text'Access, "Parse text '[]'");
       T.Add_Test_Routine (Test_One_Element_Array_Text'Access, "Parse text '[""test""]'");
       T.Add_Test_Routine (Test_Multiple_Elements_Array_Text'Access, "Parse text '[3.14, true]'");
-      T.Add_Test_Routine (Test_Array_Iterable'Access, "Iterate over [false, ""test"", 0.271e1]");
+      T.Add_Test_Routine (Test_Array_Iterable'Access, "Iterate over '[false, ""test"", 0.271e1]'");
 
       T.Add_Test_Routine (Test_Empty_Object_Text'Access, "Parse text '{}'");
       T.Add_Test_Routine (Test_One_Member_Object_Text'Access, "Parse text '{""foo"":""bar""}'");
       T.Add_Test_Routine (Test_Multiple_Members_Object_Text'Access, "Parse text '{""foo"":1,""bar"":2}'");
+      T.Add_Test_Routine (Test_Object_Iterable'Access, "Iterate over '{""foo"":1,""bar"":2}'");
 
       T.Add_Test_Routine (Test_Array_Object_Array'Access, "Parse text '[{""foo"":[true, 42]}]'");
       T.Add_Test_Routine (Test_Object_Array_Object'Access, "Parse text '{""foo"":[null, {""bar"": 42}]}'");
@@ -264,6 +265,38 @@ package body Test_Parsers is
       Assert (JSON_Object_Value (Value).Get ("foo").Value = 1, "Expected integer value of 'foo' to be 1");
       Assert (JSON_Object_Value (Value).Get ("bar").Value = 2, "Expected integer value of 'bar' to be 2");
    end Test_Multiple_Members_Object_Text;
+
+   procedure Test_Object_Iterable is
+      Text : aliased String := "{""foo"":1,""bar"":2}";
+      Iterations_Message : constant String := "Unexpected number of iterations";
+      All_Keys_Message   : constant String := "Did not iterate over all expected keys";
+
+      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+   begin
+      Assert (Value in JSON_Object_Value, "Not JSON_Object_Value");
+      Assert (JSON_Object_Value (Value).Length = 2, "Expected length of object to be 2");
+
+      declare
+         Object_Value : constant JSON_Object_Value'Class := JSON_Object_Value (Value);
+         Iterations  : Natural := 0;
+         Retrieved_Foo : Boolean := False;
+         Retrieved_Bar : Boolean := False;
+      begin
+         for Key of Object_Value loop
+            Iterations := Iterations + 1;
+            if Iterations in 1 .. 2 then
+               Assert (Key in String, "Not String");
+               Assert (Key in "foo" | "bar", "Expected string value to be equal to 'foo' or 'bar'");
+
+               Retrieved_Foo := Retrieved_Foo or Key = "foo";
+               Retrieved_Bar := Retrieved_Bar or Key = "bar";
+            end if;
+         end loop;
+         Assert (Iterations = Object_Value.Length, Iterations_Message);
+         Assert (Retrieved_Foo and Retrieved_Bar, All_Keys_Message);
+      end;
+   end Test_Object_Iterable;
 
    procedure Test_Array_Object_Array is
       Text : aliased String := "[{""foo"":[true, 42]}]";
