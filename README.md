@@ -19,6 +19,13 @@ In order to build the library, you need to have:
 
  * [Ahven 2.x][url-ahven] if you want to build and run the unit tests
 
+Using json-ada in your project
+------------------------------
+
+Specify the dependency in your \*.gpr project file:
+
+    with "json_ada";
+
 Compilation
 -----------
 
@@ -27,25 +34,25 @@ the source code:
 
     $ make
 
-Use `make test` to build the unit tests.
-
-Using json-ada in your project
-------------------------------
-
-Specify the dependency in your \*.gpr project file:
-
-    with "json_ada";
-
 Tests
 -----
 
-The project contains a set of unit tests. These can be run by build by uing `make`:
+The project contains a set of unit tests. Use `make test` to build the unit tests:
 
     $ make test
 
 After having build the tests, run the unit tests:
 
     $ make run_unit_tests
+
+Installation
+------------
+
+After having compiled the source code, the library can be installed by executing:
+
+    $ make PREFIX=/usr install
+
+Change `PREFIX` to the preferred destination folder.
 
 License
 -------
