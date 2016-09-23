@@ -14,16 +14,18 @@
 
 abstract project Config is
 
+   Version := "1.0";
+
    for Source_Dirs use ();
 
-   type Build_Type is ("debug", "release");
-   Mode : Build_Type := external ("build", "release");
+   type Mode_Type is ("debug", "release");
+   Mode : Mode_Type := external ("Mode", "release");
 
-   Common_Switches := (
+   Compiler_Flags := external_as_list ("Compiler_Flags", " ");
+
+   Compiler_Switches := (
       "-fstack-check",  --  Stack overflow checking
-      "-gnato13",       --  Numeric overflow checking
       "-gnateE",        --  Extra information in exceptions
-      "-gnata",         --  Enable assertions
       "-gnatf",         --  Full errors
       "-gnatVa",        --  All validity checks
       "-gnatwa",        --  All optional warnings
@@ -31,17 +33,13 @@ abstract project Config is
       "-gnaty",         --  Default style checks
       "-gnatyAdOSux-msbc",
       "-gnat2012",      --  Use Ada 2012
-      "-Wall",          --  All GCC warnings
-      "-O2", "-march=native"
-   );
+      "-Wall"           --  All GCC warnings
+   ) & Compiler_Flags;
 
-   Hardening_Switches := (
-      "-Werror=format-security",
-      "-U_FORTIFY_SOURCE", "-D_FORTIFY_SOURCE=2",
-      "-Wl,-z,now"
+   Dev_Switches := (
+      "-gnato13",       --  Numeric overflow checking
+      "-gnata"          --  Enable assertions
    );
-
-   Common_Compiler_Switches := Common_Switches & Hardening_Switches;
 
    package Ide is
       for Vcs_Kind use "Git";
@@ -50,9 +48,7 @@ abstract project Config is
    package Builder is
       case Mode is
          when "debug" =>
-            for Default_Switches ("ada") use ("-s",
-                                              "-gnatE",
-                                              "-g");
+            for Default_Switches ("ada") use ("-s", "-g");
          when "release" =>
             for Default_Switches ("ada") use ("-s");
       end case;
@@ -61,9 +57,9 @@ abstract project Config is
    package Compiler is
       case Mode is
          when "debug" =>
-            for Default_Switches ("ada") use Common_Compiler_Switches & ("-g");
+            for Default_Switches ("ada") use Compiler_Switches & Dev_Switches & ("-g");
          when "release" =>
-            for Default_Switches ("ada") use Common_Compiler_Switches & ("-gnatn2", "-fomit-frame-pointer");
+            for Default_Switches ("ada") use Compiler_Switches & Dev_Switches & ("-gnatn2", "-fomit-frame-pointer", "-flto");
       end case;
 
       for Local_Configuration_Pragmas use "gnat.adc";

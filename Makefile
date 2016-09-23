@@ -1,4 +1,10 @@
-GNATMAKE  = gprbuild -p
+MODE ?= release
+
+GNAT_FLAGS ?=
+CFLAGS  ?= -O2 -march=native
+LDFLAGS ?= -Wl,-z,relro -Wl,-z,now
+
+GNATMAKE  = gprbuild $(GNAT_FLAGS) -p -XCompiler_Flags="$(CFLAGS)" -XMode=$(MODE)
 GNATCLEAN = gprclean -q
 
 INSTALL         = install
@@ -21,17 +27,14 @@ libdir     = $(PREFIX)/lib
 alidir     = $(libdir)/json-ada
 
 build_src:
-	$(GNATMAKE) -P json_ada_lib.gpr -Xbuild=release
-
-build_src_debug:
-	$(GNATMAKE) -P json_ada_lib.gpr -Xbuild=debug
+	$(GNATMAKE) -P json_ada.gpr -largs $(LDFLAGS)
 
 clean_src:
-	$(GNATCLEAN) -P json_ada_lib.gpr
+	$(GNATCLEAN) -P json_ada.gpr
 	rmdir lib/json-ada lib obj
 
 build_unit_tests:
-	$(GNATMAKE) -P test/unit/unit_tests.gpr
+	$(GNATMAKE) -P test/unit/unit_tests.gpr -largs $(LDFLAGS)
 
 clean_unit_tests:
 	$(GNATCLEAN) -P test/unit/unit_tests.gpr
@@ -54,7 +57,7 @@ install:
 
 	$(INSTALL_DATA) $(SRC_DIR)/*.ad[bs] $(includedir)
 	$(INSTALL_ALI) $(LIB_DIR)/json-ada/*.ali $(alidir)
-	$(INSTALL_DATA) json_ada.gpr $(gprdir)
+	$(INSTALL_DATA) gnat/json_ada.gpr $(gprdir)
 
 	$(INSTALL) $(LIB_DIR)/$(SO_LIBRARY) $(libdir)
 	cd $(libdir) && ln -sf $(SO_LIBRARY) $(SO_FILE).$(MAJOR)
