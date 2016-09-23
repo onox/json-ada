@@ -22,25 +22,45 @@ package JSON.Types is
 
    package SU renames Ada.Strings.Unbounded;
 
-   type JSON_Value is interface;
+   type JSON_Value is abstract tagged private;
+
+   --  Value will raise an Invalid_Type_Error exception if
+   --  the JSON value is of the wrong kind
+   function Value (Object : JSON_Value) return String;
+   function Value (Object : JSON_Value) return Long_Integer;
+   function Value (Object : JSON_Value) return Long_Float;
+   function Value (Object : JSON_Value) return Boolean;
+
+   function Length (Object : JSON_Value) return Natural;
+
+   function Contains (Object : JSON_Value; Key : String) return Boolean;
+
+   function Get (Object : JSON_Value; Index : Positive) return JSON_Value'Class;
+   function Get (Object : JSON_Value; Key : String) return JSON_Value'Class;
+
+   Invalid_Type_Error : exception;
 
    type JSON_String_Value is new JSON_Value with private;
 
+   overriding
    function Value (Object : JSON_String_Value) return String
      with Inline;
 
    type JSON_Integer_Value is new JSON_Value with private;
 
+   overriding
    function Value (Object : JSON_Integer_Value) return Long_Integer
      with Inline;
 
    type JSON_Float_Value is new JSON_Value with private;
 
+   overriding
    function Value (Object : JSON_Float_Value) return Long_Float
      with Inline;
 
    type JSON_Boolean_Value is new JSON_Value with private;
 
+   overriding
    function Value (Object : JSON_Boolean_Value) return Boolean
      with Inline;
 
@@ -57,14 +77,12 @@ package JSON.Types is
 
    procedure Append (Object : in out JSON_Array_Value; Value : JSON_Value'Class);
 
+   overriding
    function Length (Object : JSON_Array_Value) return Natural;
 
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_String_Value'Class;
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Integer_Value'Class;
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Float_Value'Class;
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Boolean_Value'Class;
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Null_Value'Class;
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Array_Value'Class;
+   overriding
+   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Value'Class
+     with Inline;
 
    -----------------------------------------------------------------------------
    --                               JSON Object                               --
@@ -79,19 +97,15 @@ package JSON.Types is
                      Key    : JSON_String_Value'Class;
                      Value  : JSON_Value'Class);
 
+   overriding
    function Length (Object : JSON_Object_Value) return Natural;
 
+   overriding
    function Contains (Object : JSON_Object_Value; Key : String) return Boolean;
 
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_String_Value'Class;
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Integer_Value'Class;
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Float_Value'Class;
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Boolean_Value'Class;
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Null_Value'Class;
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Array_Value'Class;
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Object_Value'Class;
-
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Object_Value'Class;
+   overriding
+   function Get (Object : JSON_Object_Value; Key : String) return JSON_Value'Class
+     with Inline;
 
    -----------------------------------------------------------------------------
    --                              Constructors                               --
@@ -112,6 +126,8 @@ package JSON.Types is
    function Create_Object return JSON_Object_Value;
 
 private
+
+   type JSON_Value is abstract tagged null record;
 
    package JSON_Vectors is new Ada.Containers.Indefinite_Vectors (Positive, JSON_Value'Class);
 

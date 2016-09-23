@@ -127,7 +127,7 @@ package body JSON.Parsers is
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
-      return Value : Types.JSON_Value'Class := Parse_Token (Stream, Token) do
+      return Value : constant Types.JSON_Value'Class := Parse_Token (Stream, Token) do
          Tokenizers.Read_Token (Stream, Token, Expect_EOF => True);
       end return;
    end Parse;

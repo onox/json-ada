@@ -14,6 +14,56 @@
 
 package body JSON.Types is
 
+   function Value (Object : JSON_Value) return String is
+   begin
+      raise Invalid_Type_Error with "Value not a string";
+      return "";
+   end Value;
+
+   function Value (Object : JSON_Value) return Long_Integer is
+   begin
+      raise Invalid_Type_Error with "Value not a integer";
+      return 0;
+   end Value;
+
+   function Value (Object : JSON_Value) return Long_Float is
+   begin
+      raise Invalid_Type_Error with "Value not a float";
+      return 0.0;
+   end Value;
+
+   function Value (Object : JSON_Value) return Boolean is
+   begin
+      raise Invalid_Type_Error with "Value not a boolean";
+      return False;
+   end Value;
+
+   function Length (Object : JSON_Value) return Natural is
+   begin
+      raise Invalid_Type_Error with "Value not an object or array";
+      return 0;
+   end Length;
+
+   function Contains (Object : JSON_Value; Key : String) return Boolean is
+   begin
+      raise Invalid_Type_Error with "Value not an object";
+      return False;
+   end Contains;
+
+   function Get (Object : JSON_Value; Index : Positive) return JSON_Value'Class is
+      Result : JSON_Null_Value;
+   begin
+      raise Invalid_Type_Error with "Value not an array";
+      return Result;
+   end Get;
+
+   function Get (Object : JSON_Value; Key : String) return JSON_Value'Class is
+      Result : JSON_Null_Value;
+   begin
+      raise Invalid_Type_Error with "Value not an object";
+      return Result;
+   end Get;
+
    function Create_String (Value : SU.Unbounded_String) return JSON_String_Value'Class is
    begin
       return JSON_String_Value'(String_Value => Value);
@@ -52,15 +102,19 @@ package body JSON.Types is
       return Value; 
    end Create_Object;
 
+   overriding
    function Value (Object : JSON_String_Value) return String
      is (SU.To_String (Object.String_Value));
 
+   overriding
    function Value (Object : JSON_Boolean_Value) return Boolean
      is (Object.Boolean_Value);
 
+   overriding
    function Value (Object : JSON_Integer_Value) return Long_Integer
      is (Object.Integer_Value);
 
+   overriding
    function Value (Object : JSON_Float_Value) return Long_Float
      is (Object.Float_Value);
 
@@ -69,45 +123,15 @@ package body JSON.Types is
       Object.Vector.Append (Value);
    end Append;
 
+   overriding
    function Length (Object : JSON_Array_Value) return Natural is
    begin
       return Natural (Object.Vector.Length);
    end Length;
 
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_String_Value'Class is
-   begin
-      return JSON_String_Value (Object.Vector.Element (Index));
-   end Get;
-
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Integer_Value'Class is
-   begin
-      return JSON_Integer_Value (Object.Vector.Element (Index));
-   end Get;
-
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Float_Value'Class is
-   begin
-      return JSON_Float_Value (Object.Vector.Element (Index));
-   end Get;
-
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Boolean_Value'Class is
-   begin
-      return JSON_Boolean_Value (Object.Vector.Element (Index));
-   end Get;
-
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Null_Value'Class is
-   begin
-      return JSON_Null_Value (Object.Vector.Element (Index));
-   end Get;
-
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Array_Value'Class is
-   begin
-      return JSON_Array_Value (Object.Vector.Element (Index));
-   end Get;
-
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Object_Value'Class is
-   begin
-      return JSON_Object_Value (Object.Vector.Element (Index));
-   end Get;
+   overriding
+   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Value'Class is
+     (Object.Vector.Element (Index));
 
    function Constant_Reference (Object : JSON_Array_Value; Position : JSON_Vectors.Cursor)
      return JSON_Vectors.Constant_Reference_Type
@@ -126,50 +150,21 @@ package body JSON.Types is
       Object.Map.Insert (Key.Value, Value);
    end Insert;
 
+   overriding
    function Length (Object : JSON_Object_Value) return Natural is
    begin
       return Natural (Object.Map.Length);
    end Length;
 
+   overriding
    function Contains (Object : JSON_Object_Value; Key : String) return Boolean is
    begin
       return Object.Map.Contains (Key);
    end Contains;
 
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_String_Value'Class is
-   begin
-      return JSON_String_Value (Object.Map.Element (Key));
-   end Get;
-
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Integer_Value'Class is
-   begin
-      return JSON_Integer_Value (Object.Map.Element (Key));
-   end Get;
-
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Float_Value'Class is
-   begin
-      return JSON_Float_Value (Object.Map.Element (Key));
-   end Get;
-
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Boolean_Value'Class is
-   begin
-      return JSON_Boolean_Value (Object.Map.Element (Key));
-   end Get;
-
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Null_Value'Class is
-   begin
-      return JSON_Null_Value (Object.Map.Element (Key));
-   end Get;
-
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Array_Value'Class is
-   begin
-      return JSON_Array_Value (Object.Map.Element (Key));
-   end Get;
-
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Object_Value'Class is
-   begin
-      return JSON_Object_Value (Object.Map.Element (Key));
-   end Get;
+   overriding
+   function Get (Object : JSON_Object_Value; Key : String) return JSON_Value'Class is
+     (Object.Map.Element (Key));
 
    function Constant_Key (Object : JSON_Object_Value; Position : JSON_Maps.Cursor)
      return String is
