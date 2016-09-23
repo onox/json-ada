@@ -72,7 +72,7 @@ package body Test_Parsers is
       Text : aliased String := "true";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Boolean_Value, "Not JSON_Boolean_Value");
       Assert (JSON_Boolean_Value (Value).Value, "Expected boolean value to be True");
@@ -82,7 +82,7 @@ package body Test_Parsers is
       Text : aliased String := "false";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Boolean_Value, "Not JSON_Boolean_Value");
       Assert (not JSON_Boolean_Value (Value).Value, "Expected boolean value to be False");
@@ -92,7 +92,7 @@ package body Test_Parsers is
       Text : aliased String := "null";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Null_Value, "Not JSON_Null_Value");
    end Test_Null_Text;
@@ -101,7 +101,7 @@ package body Test_Parsers is
       Text : aliased String := """""";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_String_Value, "Not JSON_String_Value");
       Assert (JSON_String_Value (Value).Value = "", "String value not empty");
@@ -111,7 +111,7 @@ package body Test_Parsers is
       Text : aliased String := """test""";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_String_Value, "Not JSON_String_Value");
       Assert (JSON_String_Value (Value).Value = "test", "String value not equal to 'test'");
@@ -121,7 +121,7 @@ package body Test_Parsers is
       Text : aliased String := """12.34""";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_String_Value, "Not JSON_String_Value");
       Assert (JSON_String_Value (Value).Value = "12.34", "String value not equal to 12.34''");
@@ -131,7 +131,7 @@ package body Test_Parsers is
       Text : aliased String := "42";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Integer_Value, "Not JSON_Integer_Value");
       Assert (JSON_Integer_Value (Value).Value = 42, "Integer value not equal to 42");
@@ -141,7 +141,7 @@ package body Test_Parsers is
       Text : aliased String := "3.14";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Float_Value, "Not JSON_Float_Value");
       Assert (JSON_Float_Value (Value).Value = 3.14, "Float value not equal to 3.14");
@@ -151,10 +151,10 @@ package body Test_Parsers is
       Text : aliased String := "[]";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Array_Value, "Not JSON_Array_Value");
-      Assert (JSON_Array_Value (Value).Length = 0, "Expected array to be empty");
+      Assert (Value.Length = 0, "Expected array to be empty");
    end Test_Empty_Array_Text;
 
    procedure Test_One_Element_Array_Text is
@@ -162,10 +162,10 @@ package body Test_Parsers is
       String_Value_Message : constant String := "Expected string at index 1 to be equal to 'test'";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Array_Value, "Not JSON_Array_Value");
-      Assert (JSON_Array_Value (Value).Length = 1, "Expected length of array to be 1");
+      Assert (Value.Length = 1, "Expected length of array to be 1");
 
       begin
          Assert (JSON_Array_Value (Value).Get (1).Value = "test", String_Value_Message);
@@ -181,10 +181,10 @@ package body Test_Parsers is
       Boolean_Value_Message : constant String := "Expected boolean at index 2 to be True";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Array_Value, "Not JSON_Array_Value");
-      Assert (JSON_Array_Value (Value).Length = 2, "Expected length of array to be 2");
+      Assert (Value.Length = 2, "Expected length of array to be 2");
 
       begin
          Assert (JSON_Array_Value (Value).Get (1).Value = 3.14, Float_Value_Message);
@@ -205,10 +205,10 @@ package body Test_Parsers is
       Iterations_Message : constant String := "Unexpected number of iterations";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Array_Value, "Not JSON_Array_Value");
-      Assert (JSON_Array_Value (Value).Length = 3, "Expected length of array to be 3");
+      Assert (Value.Length = 3, "Expected length of array to be 3");
 
       declare
          Array_Value : constant JSON_Array_Value'Class := JSON_Array_Value (Value);
@@ -235,20 +235,20 @@ package body Test_Parsers is
       Text : aliased String := "{}";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Object_Value, "Not JSON_Object_Value");
-      Assert (JSON_Object_Value (Value).Length = 0, "Expected object to be empty");
+      Assert (Value.Length = 0, "Expected object to be empty");
    end Test_Empty_Object_Text;
 
    procedure Test_One_Member_Object_Text is
       Text : aliased String := "{""foo"":""bar""}";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Object_Value, "Not JSON_Object_Value");
-      Assert (JSON_Object_Value (Value).Length = 1, "Expected length of object to be 1");
+      Assert (Value.Length = 1, "Expected length of object to be 1");
 
       Assert (JSON_Object_Value (Value).Get ("foo").Value = "bar", "Expected string value of 'foo' to be 'bar'");
    end Test_One_Member_Object_Text;
@@ -257,10 +257,10 @@ package body Test_Parsers is
       Text : aliased String := "{""foo"":1,""bar"":2}";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Object_Value, "Not JSON_Object_Value");
-      Assert (JSON_Object_Value (Value).Length = 2, "Expected length of object to be 2");
+      Assert (Value.Length = 2, "Expected length of object to be 2");
 
       Assert (JSON_Object_Value (Value).Get ("foo").Value = 1, "Expected integer value of 'foo' to be 1");
       Assert (JSON_Object_Value (Value).Get ("bar").Value = 2, "Expected integer value of 'bar' to be 2");
@@ -272,10 +272,10 @@ package body Test_Parsers is
       All_Keys_Message   : constant String := "Did not iterate over all expected keys";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Object_Value, "Not JSON_Object_Value");
-      Assert (JSON_Object_Value (Value).Length = 2, "Expected length of object to be 2");
+      Assert (Value.Length = 2, "Expected length of object to be 2");
 
       declare
          Object_Value : constant JSON_Object_Value'Class := JSON_Object_Value (Value);
@@ -302,18 +302,18 @@ package body Test_Parsers is
       Text : aliased String := "[{""foo"":[true, 42]}]";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Array_Value, "Not JSON_Array_Value");
-      Assert (JSON_Array_Value (Value).Length = 1, "Expected length of array to be 1");
+      Assert (Value.Length = 1, "Expected length of array to be 1");
 
       begin
          declare
-            Object : constant JSON_Object_Value'Class := JSON_Array_Value (Value).Get (1);
+            Object : constant JSON_Value'Class := JSON_Array_Value (Value).Get (1);
          begin
             Assert (Object.Length = 1, "Expected length of object to be 1");
             declare
-               Array_Value : constant JSON_Array_Value'Class := Object.Get ("foo");
+               Array_Value : constant JSON_Value'Class := Object.Get ("foo");
             begin
                Assert (Array_Value.Length = 2, "Expected length of array 'foo' to be 2");
                Assert (Array_Value.Get (2).Value = 42, "Expected integer value at index 2 to be 42");
@@ -332,24 +332,24 @@ package body Test_Parsers is
       Text : aliased String := "{""foo"":[null, {""bar"": 42}]}";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
    begin
       Assert (Value in JSON_Object_Value, "Not JSON_Object_Value");
-      Assert (JSON_Object_Value (Value).Length = 1, "Expected length of object to be 1");
+      Assert (Value.Length = 1, "Expected length of object to be 1");
 
       begin
          declare
-            Array_Value : constant JSON_Array_Value'Class := JSON_Object_Value (Value).Get ("foo");
+            Array_Value : constant JSON_Value'Class := JSON_Object_Value (Value).Get ("foo");
          begin
             Assert (Array_Value.Length = 2, "Expected length of array 'foo' to be 2");
             declare
-               Object : constant JSON_Object_Value'Class := Array_Value.Get (2);
+               Object : constant JSON_Value'Class := Array_Value.Get (2);
             begin
                Assert (Object.Length = 1, "Expected length of object to be 1");
                declare
-                  Integer_Value : constant JSON_Integer_Value'Class := Object.Get ("bar");
+                  Integer_Value : constant JSON_Value'Class := Object.Get ("bar");
                begin
-                  Assert (JSON_Integer_Value (Integer_Value).Value = 42, "Expected integer value of 'bar' to be 42");
+                  Assert (Integer_Value.Value = 42, "Expected integer value of 'bar' to be 42");
                end;
             exception
                when Constraint_Error =>

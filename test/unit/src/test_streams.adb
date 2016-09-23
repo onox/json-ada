@@ -42,7 +42,7 @@ package body Test_Streams is
 
       declare
          Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (File_Stream);
-         Value  : JSON_Value'Class := JSON.Parsers.Parse (Stream);
+         Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
       begin
          Assert (Value in JSON_Float_Value, "Not JSON_Float_Value");
          Assert (JSON_Float_Value (Value).Value = 3.14, "Expected float value to be equal to 3.14");
