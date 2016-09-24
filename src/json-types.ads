@@ -108,6 +108,26 @@ package JSON.Types is
      with Inline;
 
    -----------------------------------------------------------------------------
+   --                                 Helpers                                 --
+   -----------------------------------------------------------------------------
+
+   function Get_Array (Object : JSON_Value'Class; Index : Positive) return JSON_Array_Value is
+     (JSON_Array_Value (Object.Get (Index)))
+     with Inline;
+
+   function Get_Object (Object : JSON_Value'Class; Index : Positive) return JSON_Object_Value is
+     (JSON_Object_Value (Object.Get (Index)))
+     with Inline;
+
+   function Get_Array (Object : JSON_Value'Class; Key : String) return JSON_Array_Value is
+     (JSON_Array_Value (Object.Get (Key)))
+     with Inline;
+
+   function Get_Object (Object : JSON_Value'Class; Key : String) return JSON_Object_Value is
+     (JSON_Object_Value (Object.Get (Key)))
+     with Inline;
+
+   -----------------------------------------------------------------------------
    --                              Constructors                               --
    -----------------------------------------------------------------------------
 
