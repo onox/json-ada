@@ -46,20 +46,16 @@ abstract project Config is
    end Ide;
 
    package Builder is
-      case Mode is
-         when "debug" =>
-            for Default_Switches ("ada") use ("-s", "-g");
-         when "release" =>
-            for Default_Switches ("ada") use ("-s");
-      end case;
+      for Switches (others) use ("-j0", "-m");
    end Builder;
 
    package Compiler is
       case Mode is
          when "debug" =>
-            for Default_Switches ("ada") use Compiler_Switches & Dev_Switches & ("-g");
+            for Switches ("ada") use Compiler_Switches & Dev_Switches & ("-g");
          when "release" =>
-            for Default_Switches ("ada") use Compiler_Switches & Dev_Switches & ("-gnatn2", "-fomit-frame-pointer", "-flto");
+            for Switches ("ada") use Compiler_Switches & Dev_Switches &
+              ("-gnatn2", "-fomit-frame-pointer", "-flto");
       end case;
 
       for Local_Configuration_Pragmas use "gnat.adc";
@@ -69,7 +65,7 @@ abstract project Config is
       case Mode is
          when "debug" =>
             --  Store tracebacks in exception occurrences
-            for Default_Switches ("ada") use ("-E");
+            for Switches ("ada") use ("-E");
          when "release" =>
             null;
       end case;

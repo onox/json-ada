@@ -1,6 +1,6 @@
 MODE ?= release
 
-GNAT_FLAGS ?=
+GNAT_FLAGS ?= -dm
 CFLAGS  ?= -O2 -march=native
 LDFLAGS ?= -Wl,-z,relro -Wl,-z,now
 
