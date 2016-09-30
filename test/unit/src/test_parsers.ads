@@ -52,6 +52,9 @@ private
    procedure Test_Array_Object_Array;
    procedure Test_Object_Array_Object;
 
+   procedure Test_Object_No_Array;
+   procedure Test_Object_No_Object;
+
    --  Exceptions
    procedure Test_Empty_Text_Exception;
 

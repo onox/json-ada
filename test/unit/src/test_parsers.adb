@@ -50,6 +50,9 @@ package body Test_Parsers is
       T.Add_Test_Routine (Test_Array_Object_Array'Access, "Parse text '[{""foo"":[true, 42]}]'");
       T.Add_Test_Routine (Test_Object_Array_Object'Access, "Parse text '{""foo"":[null, {""bar"": 42}]}'");
 
+      T.Add_Test_Routine (Test_Object_No_Array'Access, "Test getting array from text '{}'");
+      T.Add_Test_Routine (Test_Object_No_Object'Access, "Test getting object from text '{}'");
+
       --  Exceptions
       T.Add_Test_Routine (Test_Array_No_Value_Separator_Exception'Access, "Reject text '[3.14""test""]'");
       T.Add_Test_Routine (Test_Array_No_End_Array_Exception'Access, "Reject text '[true'");
@@ -364,6 +367,66 @@ package body Test_Parsers is
             Fail ("Element 'foo' in object not an array");
       end;
    end Test_Object_Array_Object;
+
+   procedure Test_Object_No_Array is
+      Text : aliased String := "{}";
+
+      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
+   begin
+      begin
+         declare
+            Object : JSON_Array_Value := Value.Get_Array ("foo");
+            pragma Unreferenced (Object);
+         begin
+            Fail ("Expected Constraint_Error");
+         end;
+      exception
+         when Constraint_Error =>
+            null;
+      end;
+
+      begin
+         declare
+            Object : constant JSON_Array_Value := Value.Get_Array_Or_Empty ("foo");
+         begin
+            Assert (Object.Length = 0, "Expected empty JSON_Array_Value");
+         end;
+      exception
+         when Constraint_Error =>
+            Fail ("Unexpected Constraint_Error");
+      end;
+   end Test_Object_No_Array;
+
+   procedure Test_Object_No_Object is
+      Text : aliased String := "{}";
+
+      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
+   begin
+      begin
+         declare
+            Object : JSON_Object_Value := Value.Get_Object ("foo");
+            pragma Unreferenced (Object);
+         begin
+            Fail ("Expected Constraint_Error");
+         end;
+      exception
+         when Constraint_Error =>
+            null;
+      end;
+
+      begin
+         declare
+            Object : constant JSON_Object_Value := Value.Get_Object_Or_Empty ("foo");
+         begin
+            Assert (Object.Length = 0, "Expected empty JSON_Object_Value");
+         end;
+      exception
+         when Constraint_Error =>
+            Fail ("Unexpected Constraint_Error");
+      end;
+   end Test_Object_No_Object;
 
    procedure Test_Empty_Text_Exception is
       Text : aliased String := "";

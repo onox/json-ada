@@ -178,4 +178,24 @@ package body JSON.Types is
       return Object.Map.Iterate;
    end Iterate;
 
+   function Get_Array_Or_Empty (Object : JSON_Value'Class; Key : String) return JSON_Array_Value is
+      Empty_Value : JSON_Array_Value;
+   begin
+      if Object.Contains (Key) then
+         return JSON_Array_Value (Object.Get (Key));
+      else
+         return Empty_Value;
+      end if;
+   end Get_Array_Or_Empty;
+
+   function Get_Object_Or_Empty (Object : JSON_Value'Class; Key : String) return JSON_Object_Value is
+      Empty_Value : JSON_Object_Value;
+   begin
+      if Object.Contains (Key) then
+         return JSON_Object_Value (Object.Get (Key));
+      else
+         return Empty_Value;
+      end if;
+   end Get_Object_Or_Empty;
+
 end JSON.Types;

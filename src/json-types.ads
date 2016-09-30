@@ -127,6 +127,12 @@ package JSON.Types is
      (JSON_Object_Value (Object.Get (Key)))
      with Inline;
 
+   function Get_Array_Or_Empty (Object : JSON_Value'Class; Key : String) return JSON_Array_Value
+     with Inline;
+
+   function Get_Object_Or_Empty (Object : JSON_Value'Class; Key : String) return JSON_Object_Value
+     with Inline;
+
    -----------------------------------------------------------------------------
    --                              Constructors                               --
    -----------------------------------------------------------------------------
