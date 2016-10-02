@@ -15,6 +15,8 @@
 with JSON.Types;
 with JSON.Streams;
 
+generic
+   with package Types is new JSON.Types (<>);
 package JSON.Parsers is
    pragma Preelaborate;
 

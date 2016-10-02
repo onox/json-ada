@@ -12,9 +12,13 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
+with Ada.Exceptions;
+
 with JSON.Tokenizers;
 
 package body JSON.Parsers is
+
+   package Tokenizers is new JSON.Tokenizers (Types);
 
    use type Tokenizers.Token_Kind;
 
@@ -130,6 +134,9 @@ package body JSON.Parsers is
       return Value : constant Types.JSON_Value'Class := Parse_Token (Stream, Token) do
          Tokenizers.Read_Token (Stream, Token, Expect_EOF => True);
       end return;
+   exception
+      when E : Tokenizers.Tokenizer_Error =>
+         raise Parse_Error with Ada.Exceptions.Exception_Message (E);
    end Parse;
 
 end JSON.Parsers;

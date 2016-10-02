@@ -17,6 +17,9 @@ with Ada.Containers.Indefinite_Vectors;
 with Ada.Strings.Hash;
 with Ada.Strings.Unbounded;
 
+generic
+   type Integer_Type is range <>;
+   type Float_Type is digits <>;
 package JSON.Types is
    pragma Preelaborate;
 
@@ -27,8 +30,8 @@ package JSON.Types is
    --  Value will raise an Invalid_Type_Error exception if
    --  the JSON value is of the wrong kind
    function Value (Object : JSON_Value) return String;
-   function Value (Object : JSON_Value) return Long_Integer;
-   function Value (Object : JSON_Value) return Long_Float;
+   function Value (Object : JSON_Value) return Integer_Type;
+   function Value (Object : JSON_Value) return Float_Type;
    function Value (Object : JSON_Value) return Boolean;
 
    function Length (Object : JSON_Value) return Natural;
@@ -49,17 +52,17 @@ package JSON.Types is
    type JSON_Integer_Value is new JSON_Value with private;
 
    overriding
-   function Value (Object : JSON_Integer_Value) return Long_Integer
+   function Value (Object : JSON_Integer_Value) return Integer_Type
      with Inline;
 
    type JSON_Float_Value is new JSON_Value with private;
 
    overriding
-   function Value (Object : JSON_Integer_Value) return Long_Float
+   function Value (Object : JSON_Integer_Value) return Float_Type
      with Inline;
 
    overriding
-   function Value (Object : JSON_Float_Value) return Long_Float
+   function Value (Object : JSON_Float_Value) return Float_Type
      with Inline;
 
    type JSON_Boolean_Value is new JSON_Value with private;
@@ -143,9 +146,9 @@ package JSON.Types is
 
    function Create_String (Value : SU.Unbounded_String) return JSON_String_Value'Class;
 
-   function Create_Integer (Value : Long_Integer) return JSON_Integer_Value'Class;
+   function Create_Integer (Value : Integer_Type) return JSON_Integer_Value'Class;
 
-   function Create_Float (Value : Long_Float) return JSON_Float_Value'Class;
+   function Create_Float (Value : Float_Type) return JSON_Float_Value'Class;
 
    function Create_Boolean (Value : Boolean) return JSON_Boolean_Value'Class;
 
@@ -184,11 +187,11 @@ private
    end record;
 
    type JSON_Integer_Value is new JSON_Value with record
-      Integer_Value : Long_Integer;
+      Integer_Value : Integer_Type;
    end record;
 
    type JSON_Float_Value is new JSON_Value with record
-      Float_Value : Long_Float;
+      Float_Value : Float_Type;
    end record;
 
    type JSON_Boolean_Value is new JSON_Value with record

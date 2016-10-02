@@ -19,8 +19,12 @@ with Ahven; use Ahven;
 
 with JSON.Streams;
 with JSON.Tokenizers;
+with JSON.Types;
 
 package body Test_Tokenizers is
+
+   package Types is new JSON.Types (Long_Integer, Long_Float);
+   package Tokenizers is new JSON.Tokenizers (Types);
 
    overriding
    procedure Initialize (T : in out Test) is
@@ -72,18 +76,18 @@ package body Test_Tokenizers is
 
    end Initialize;
 
-   use type JSON.Tokenizers.Token_Kind;
+   use type Tokenizers.Token_Kind;
    use type Ada.Strings.Unbounded.Unbounded_String;
 
    procedure Assert_Kind is new Assert_Equal
-     (JSON.Tokenizers.Token_Kind, JSON.Tokenizers.Token_Kind'Image);
+     (Tokenizers.Token_Kind, Tokenizers.Token_Kind'Image);
 
    procedure Expect_EOF (Stream : in out JSON.Streams.Stream'Class) is
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token, Expect_EOF => True);
+      Tokenizers.Read_Token (Stream, Token, Expect_EOF => True);
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          Fail ("Expected EOF");
    end Expect_EOF;
 
@@ -91,20 +95,20 @@ package body Test_Tokenizers is
    procedure Test_Null_Token is
       Text : aliased String := "null";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Null_Token, "Not Null_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Null_Token, "Not Null_Token");
       Expect_EOF (Stream);
    end Test_Null_Token;
 
    procedure Test_True_Token is
       Text : aliased String := "true";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Boolean_Token, "Not Boolean_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Boolean_Token, "Not Boolean_Token");
       Assert (Token.Boolean_Value, "Boolean value not True");
       Expect_EOF (Stream);
    end Test_True_Token;
@@ -112,10 +116,10 @@ package body Test_Tokenizers is
    procedure Test_False_Token is
       Text : aliased String := "false";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Boolean_Token, "Not Boolean_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Boolean_Token, "Not Boolean_Token");
       Assert (not Token.Boolean_Value, "Boolean value not False");
       Expect_EOF (Stream);
    end Test_False_Token;
@@ -124,10 +128,10 @@ package body Test_Tokenizers is
    procedure Test_Empty_String_Token is
       Text : aliased String := """""";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.String_Token, "Not String_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
       Assert (Token.String_Value = "", "String value not empty");
       Expect_EOF (Stream);
    end Test_Empty_String_Token;
@@ -135,10 +139,10 @@ package body Test_Tokenizers is
    procedure Test_Non_Empty_String_Token is
       Text : aliased String := """test""";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.String_Token, "Not String_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
       Assert (Token.String_Value = "test", "String value not equal to 'test'");
       Expect_EOF (Stream);
    end Test_Non_Empty_String_Token;
@@ -146,10 +150,10 @@ package body Test_Tokenizers is
    procedure Test_Number_String_Token is
       Text : aliased String := """12.34""";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.String_Token, "Not String_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
       Assert (Token.String_Value = "12.34", "String value not equal to '12.34'");
       Expect_EOF (Stream);
    end Test_Number_String_Token;
@@ -157,11 +161,11 @@ package body Test_Tokenizers is
    procedure Test_Escaped_Character_String_Token is
       Text : aliased String := """horizontal\ttab""";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
       HT : Character renames Ada.Characters.Latin_1.HT;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.String_Token, "Not String_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
       Assert (Token.String_Value = "horizontal" & HT & "tab", "String value not equal to 'horizontal\ttab'");
       Expect_EOF (Stream);
    end Test_Escaped_Character_String_Token;
@@ -169,10 +173,10 @@ package body Test_Tokenizers is
    procedure Test_Escaped_Quotation_Solidus_String_Token is
       Text : aliased String := """foo\""\\bar""";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.String_Token, "Not String_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
       Assert (Token.String_Value = "foo""\bar", "String value not equal to 'foo""\bar'");
       Expect_EOF (Stream);
    end Test_Escaped_Quotation_Solidus_String_Token;
@@ -181,10 +185,10 @@ package body Test_Tokenizers is
    procedure Test_Zero_Number_Token is
       Text : aliased String := "0";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Integer_Token, "Not Integer_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Integer_Token, "Not Integer_Token");
       Assert (Token.Integer_Value = 0, "Integer value not equal to 0");
       Expect_EOF (Stream);
    end Test_Zero_Number_Token;
@@ -192,10 +196,10 @@ package body Test_Tokenizers is
    procedure Test_Integer_Number_Token is
       Text : aliased String := "42";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Integer_Token, "Not Integer_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Integer_Token, "Not Integer_Token");
       Assert (Token.Integer_Value = 42, "Integer value not equal to 42");
       Expect_EOF (Stream);
    end Test_Integer_Number_Token;
@@ -203,10 +207,10 @@ package body Test_Tokenizers is
    procedure Test_Float_Number_Token is
       Text : aliased String := "3.14";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Float_Token, "Not Float_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Float_Token, "Not Float_Token");
       Assert (Token.Float_Value = 3.14, "Float value not equal to 3.14");
       Expect_EOF (Stream);
    end Test_Float_Number_Token;
@@ -214,10 +218,10 @@ package body Test_Tokenizers is
    procedure Test_Negative_Float_Number_Token is
       Text : aliased String := "-2.71";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Float_Token, "Not Float_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Float_Token, "Not Float_Token");
       Assert (Token.Float_Value = -2.71, "Float value not equal to -2.71");
       Expect_EOF (Stream);
    end Test_Negative_Float_Number_Token;
@@ -225,10 +229,10 @@ package body Test_Tokenizers is
    procedure Test_Integer_Exponent_Number_Token is
       Text : aliased String := "4e2";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Integer_Token, "Not Integer_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Integer_Token, "Not Integer_Token");
       Assert (Token.Integer_Value = 400, "Integer value not equal to 400");
       Expect_EOF (Stream);
    end Test_Integer_Exponent_Number_Token;
@@ -236,10 +240,10 @@ package body Test_Tokenizers is
    procedure Test_Float_Exponent_Number_Token is
       Text : aliased String := "0.314e1";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Float_Token, "Not Float_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Float_Token, "Not Float_Token");
       Assert (Token.Float_Value = 3.14, "Float value not equal to 3.14");
       Expect_EOF (Stream);
    end Test_Float_Exponent_Number_Token;
@@ -247,10 +251,10 @@ package body Test_Tokenizers is
    procedure Test_Float_Negative_Exponent_Number_Token is
       Text : aliased String := "4e-1";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Float_Token, "Not Float_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Float_Token, "Not Float_Token");
       Assert (Token.Float_Value = 0.4, "Float value not equal to 0.4");
       Expect_EOF (Stream);
    end Test_Float_Negative_Exponent_Number_Token;
@@ -259,56 +263,56 @@ package body Test_Tokenizers is
    procedure Test_Empty_Array_Tokens is
       Text : aliased String := "[]";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Begin_Array_Token, "Not Begin_Array_Token");
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.End_Array_Token, "Not End_Array_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Begin_Array_Token, "Not Begin_Array_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.End_Array_Token, "Not End_Array_Token");
       Expect_EOF (Stream);
    end Test_Empty_Array_Tokens;
 
    procedure Test_One_Element_Array_Tokens is
       Text : aliased String := "[null]";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Begin_Array_Token, "Not Begin_Array_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Begin_Array_Token, "Not Begin_Array_Token");
 
       --  null
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Null_Token, "Not Null_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Null_Token, "Not Null_Token");
 
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.End_Array_Token, "Not End_Array_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.End_Array_Token, "Not End_Array_Token");
       Expect_EOF (Stream);
    end Test_One_Element_Array_Tokens;
 
    procedure Test_Two_Elements_Array_Tokens is
       Text : aliased String := "[1,2]";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Begin_Array_Token, "Not Begin_Array_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Begin_Array_Token, "Not Begin_Array_Token");
 
       --  1
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Integer_Token, "Not Integer_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Integer_Token, "Not Integer_Token");
       Assert (Token.Integer_Value = 1, "Integer value not equal to 1");
 
       --  ,
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Value_Separator_Token, "Not Value_Separator_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Value_Separator_Token, "Not Value_Separator_Token");
 
       --  2
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Integer_Token, "Not Integer_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Integer_Token, "Not Integer_Token");
       Assert (Token.Integer_Value = 2, "Integer value not equal to 2");
 
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.End_Array_Token, "Not End_Array_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.End_Array_Token, "Not End_Array_Token");
       Expect_EOF (Stream);
    end Test_Two_Elements_Array_Tokens;
 
@@ -316,84 +320,84 @@ package body Test_Tokenizers is
    procedure Test_Empty_Object_Tokens is
       Text : aliased String := "{}";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Begin_Object_Token, "Not Begin_Object_Token");
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.End_Object_Token, "Not End_Object_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Begin_Object_Token, "Not Begin_Object_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.End_Object_Token, "Not End_Object_Token");
       Expect_EOF (Stream);
    end Test_Empty_Object_Tokens;
 
    procedure Test_One_Pair_Object_Tokens is
       Text : aliased String := "{""foo"":""bar""}";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Begin_Object_Token, "Not Begin_Object_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Begin_Object_Token, "Not Begin_Object_Token");
 
       --  "foo"
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.String_Token, "Not String_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
       Assert (Token.String_Value = "foo", "String value not equal to 'foo'");
 
       --  :
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Name_Separator_Token, "Not Name_Separator_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Name_Separator_Token, "Not Name_Separator_Token");
 
       --  "bar"
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.String_Token, "Not String_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
       Assert (Token.String_Value = "bar", "String value not equal to 'foo'");
 
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.End_Object_Token, "Not End_Object_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.End_Object_Token, "Not End_Object_Token");
       Expect_EOF (Stream);
    end Test_One_Pair_Object_Tokens;
 
    procedure Test_Two_Pairs_Object_Tokens is
       Text : aliased String := "{""foo"":true,""bar"":false}";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Begin_Object_Token, "Not Begin_Object_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Begin_Object_Token, "Not Begin_Object_Token");
 
       --  "foo"
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.String_Token, "Not String_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
       Assert (Token.String_Value = "foo", "String value not equal to 'foo'");
 
       --  :
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Name_Separator_Token, "Not Name_Separator_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Name_Separator_Token, "Not Name_Separator_Token");
 
       --  true
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Boolean_Token, "Not Boolean_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Boolean_Token, "Not Boolean_Token");
       Assert (Token.Boolean_Value, "Boolean value not True");
 
       --  ,
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Value_Separator_Token, "Not Value_Separator_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Value_Separator_Token, "Not Value_Separator_Token");
 
       --  "bar"
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.String_Token, "Not String_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
       Assert (Token.String_Value = "bar", "String value not equal to 'foo'");
 
       --  :
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Name_Separator_Token, "Not Name_Separator_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Name_Separator_Token, "Not Name_Separator_Token");
 
       --  false
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.Boolean_Token, "Not Boolean_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.Boolean_Token, "Not Boolean_Token");
       Assert (not Token.Boolean_Value, "Boolean value not False");
 
-      JSON.Tokenizers.Read_Token (Stream, Token);
-      Assert_Kind (Token.Kind, JSON.Tokenizers.End_Object_Token, "Not End_Object_Token");
+      Tokenizers.Read_Token (Stream, Token);
+      Assert_Kind (Token.Kind, Tokenizers.End_Object_Token, "Not End_Object_Token");
       Expect_EOF (Stream);
    end Test_Two_Pairs_Object_Tokens;
 
@@ -402,180 +406,180 @@ package body Test_Tokenizers is
       LF : Character renames Ada.Characters.Latin_1.LF;
       Text : aliased String := """no" & LF & "newline""";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Control_Character_String_Exception;
 
    procedure Test_Unexpected_Escaped_Character_String_Exception is
       Text : aliased String := """unexpected\xcharacter""";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Unexpected_Escaped_Character_String_Exception;
 
    procedure Test_Minus_Number_EOF_Exception is
       Text : aliased String := "-";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Minus_Number_EOF_Exception;
 
    procedure Test_Minus_Number_Exception is
       Text : aliased String := "-,";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Minus_Number_Exception;
 
    procedure Test_End_Dot_Number_Exception is
       Text : aliased String := "3.";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_End_Dot_Number_Exception;
 
    procedure Test_End_Exponent_Number_Exception is
       Text : aliased String := "1E";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_End_Exponent_Number_Exception;
 
    procedure Test_End_Dot_Exponent_Number_Exception is
       Text : aliased String := "1.E";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_End_Dot_Exponent_Number_Exception;
 
    procedure Test_End_Exponent_Minus_Number_Exception is
       Text : aliased String := "1E-";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_End_Exponent_Minus_Number_Exception;
 
    procedure Test_Prefixed_Plus_Number_Exception is
       Text : aliased String := "+42";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Prefixed_Plus_Number_Exception;
 
    procedure Test_Leading_Zeroes_Integer_Number_Exception is
       Text : aliased String := "-02";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Leading_Zeroes_Integer_Number_Exception;
 
    procedure Test_Leading_Zeroes_Float_Number_Exception is
       Text : aliased String := "-003.14";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Leading_Zeroes_Float_Number_Exception;
 
    procedure Test_Incomplete_True_Text_Exception is
       Text : aliased String := "tr";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Incomplete_True_Text_Exception;
 
    procedure Test_Incomplete_False_Text_Exception is
       Text : aliased String := "f";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Incomplete_False_Text_Exception;
 
    procedure Test_Incomplete_Null_Text_Exception is
       Text : aliased String := "nul";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Incomplete_Null_Text_Exception;
 
    procedure Test_Unknown_Keyword_Text_Exception is
       Text : aliased String := "unexpected";
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Token : JSON.Tokenizers.Token;
+      Token : Tokenizers.Token;
    begin
-      JSON.Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream, Token);
       Fail ("Expected Tokenizer_Error");
    exception
-      when JSON.Tokenizers.Tokenizer_Error =>
+      when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Unknown_Keyword_Text_Exception;
 

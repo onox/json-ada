@@ -20,13 +20,13 @@ package body JSON.Types is
       return "";
    end Value;
 
-   function Value (Object : JSON_Value) return Long_Integer is
+   function Value (Object : JSON_Value) return Integer_Type is
    begin
       raise Invalid_Type_Error with "Value not a integer";
       return 0;
    end Value;
 
-   function Value (Object : JSON_Value) return Long_Float is
+   function Value (Object : JSON_Value) return Float_Type is
    begin
       raise Invalid_Type_Error with "Value not a float";
       return 0.0;
@@ -69,12 +69,12 @@ package body JSON.Types is
       return JSON_String_Value'(String_Value => Value);
    end Create_String;
 
-   function Create_Integer (Value : Long_Integer) return JSON_Integer_Value'Class is
+   function Create_Integer (Value : Integer_Type) return JSON_Integer_Value'Class is
    begin
       return JSON_Integer_Value'(Integer_Value => Value);
    end Create_Integer;
 
-   function Create_Float (Value : Long_Float) return JSON_Float_Value'Class is
+   function Create_Float (Value : Float_Type) return JSON_Float_Value'Class is
    begin
       return JSON_Float_Value'(Float_Value => Value);
    end Create_Float;
@@ -111,15 +111,15 @@ package body JSON.Types is
      is (Object.Boolean_Value);
 
    overriding
-   function Value (Object : JSON_Integer_Value) return Long_Integer
+   function Value (Object : JSON_Integer_Value) return Integer_Type
      is (Object.Integer_Value);
 
    overriding
-   function Value (Object : JSON_Integer_Value) return Long_Float
-     is (Long_Float (Object.Integer_Value));
+   function Value (Object : JSON_Integer_Value) return Float_Type
+     is (Float_Type (Object.Integer_Value));
 
    overriding
-   function Value (Object : JSON_Float_Value) return Long_Float
+   function Value (Object : JSON_Float_Value) return Float_Type
      is (Object.Float_Value);
 
    procedure Append (Object : in out JSON_Array_Value; Value : JSON_Value'Class) is

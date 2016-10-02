@@ -22,6 +22,9 @@ with JSON.Types;
 
 package body Test_Streams is
 
+   package Types is new JSON.Types (Long_Integer, Long_Float);
+   package Parsers is new JSON.Parsers (Types);
+
    overriding
    procedure Initialize (T : in out Test) is
    begin
@@ -30,7 +33,7 @@ package body Test_Streams is
       T.Add_Test_Routine (Test_Stream_IO'Access, "Parse float_number.txt");
    end Initialize;
 
-   use JSON.Types;
+   use Types;
 
    procedure Test_Stream_IO is
       File   : Ada.Streams.Stream_IO.File_Type;
@@ -42,7 +45,7 @@ package body Test_Streams is
 
       declare
          Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (File_Stream);
-         Value  : constant JSON_Value'Class := JSON.Parsers.Parse (Stream);
+         Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
       begin
          Assert (Value in JSON_Float_Value, "Not JSON_Float_Value");
          Assert (JSON_Float_Value (Value).Value = 3.14, "Expected float value to be equal to 3.14");

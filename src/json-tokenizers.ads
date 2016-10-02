@@ -14,8 +14,11 @@
 
 with Ada.Strings.Unbounded;
 
+with JSON.Types;
 with JSON.Streams;
 
+generic
+   with package Types is new JSON.Types (<>);
 package JSON.Tokenizers is
    pragma Preelaborate;
 
@@ -41,9 +44,9 @@ package JSON.Tokenizers is
          when String_Token =>
             String_Value  : SU.Unbounded_String;
          when Integer_Token =>
-            Integer_Value : Long_Integer;
+            Integer_Value : Types.Integer_Type;
          when Float_Token =>
-            Float_Value   : Long_Float;
+            Float_Value   : Types.Float_Type;
          when Boolean_Token =>
             Boolean_Value : Boolean;
          when others =>

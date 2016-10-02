@@ -173,10 +173,10 @@ package body JSON.Tokenizers is
 
       if Is_Float then
          Next_Token := Token'(Kind => Float_Token,
-           Float_Value => Long_Float'Value (SU.To_String (Value)));
+           Float_Value => Types.Float_Type'Value (SU.To_String (Value)));
       else
          Next_Token := Token'(Kind => Integer_Token,
-           Integer_Value => Long_Integer'Value (SU.To_String (Value)));
+           Integer_Value => Types.Integer_Type'Value (SU.To_String (Value)));
       end if;
 
       Stream.Write_Character (C);
@@ -190,10 +190,10 @@ package body JSON.Tokenizers is
 
          if Is_Float then
             Next_Token := Token'(Kind => Float_Token,
-              Float_Value => Long_Float'Value (SU.To_String (Value)));
+              Float_Value => Types.Float_Type'Value (SU.To_String (Value)));
          else
             Next_Token := Token'(Kind => Integer_Token,
-              Integer_Value => Long_Integer'Value (SU.To_String (Value)));
+              Integer_Value => Types.Integer_Type'Value (SU.To_String (Value)));
          end if;
    end Read_Number;
 
