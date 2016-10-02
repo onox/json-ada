@@ -55,6 +55,10 @@ package JSON.Types is
    type JSON_Float_Value is new JSON_Value with private;
 
    overriding
+   function Value (Object : JSON_Integer_Value) return Long_Float
+     with Inline;
+
+   overriding
    function Value (Object : JSON_Float_Value) return Long_Float
      with Inline;
 

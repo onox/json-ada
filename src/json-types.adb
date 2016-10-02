@@ -115,6 +115,10 @@ package body JSON.Types is
      is (Object.Integer_Value);
 
    overriding
+   function Value (Object : JSON_Integer_Value) return Long_Float
+     is (Long_Float (Object.Integer_Value));
+
+   overriding
    function Value (Object : JSON_Float_Value) return Long_Float
      is (Object.Float_Value);
 
