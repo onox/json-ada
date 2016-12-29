@@ -25,10 +25,10 @@ package JSON.Streams is
      with Inline;
 
    function Read_Character (Object : in out Stream) return Character
-     with Post'Class => not Object.Has_Buffered_Character;
+     with Post'Class => not Stream'Class (Object).Has_Buffered_Character;
 
    procedure Write_Character (Object : in out Stream; Next : Character)
-     with Pre'Class => not Object.Has_Buffered_Character;
+     with Pre'Class => not Stream'Class (Object).Has_Buffered_Character;
 
    function Create_Stream (Stream_Access : Ada.Streams.Stream_IO.Stream_Access) return Stream'Class;
 

@@ -77,10 +77,7 @@ package JSON.Types is
    --                               JSON Array                                --
    -----------------------------------------------------------------------------
 
-   type JSON_Array_Value is new JSON_Value with private
-     with Default_Iterator  => Iterate,
-          Iterator_Element  => JSON_Value'Class,
-          Constant_Indexing => Constant_Reference;
+   type JSON_Array_Value is new JSON_Value with private;
 
    procedure Append (Object : in out JSON_Array_Value; Value : JSON_Value'Class);
 
@@ -95,10 +92,7 @@ package JSON.Types is
    --                               JSON Object                               --
    -----------------------------------------------------------------------------
 
-   type JSON_Object_Value is new JSON_Value with private
-     with Default_Iterator  => Iterate,
-          Iterator_Element  => String,
-          Constant_Indexing => Constant_Key;
+   type JSON_Object_Value is new JSON_Value with private;
 
    procedure Insert (Object : in out JSON_Object_Value;
                      Key    : JSON_String_Value'Class;
@@ -202,10 +196,16 @@ private
 
    type JSON_Array_Value is new JSON_Value with record
       Vector : JSON_Vectors.Vector;
-   end record;
+   end record
+     with Default_Iterator  => Iterate,
+          Iterator_Element  => JSON_Value'Class,
+          Constant_Indexing => Constant_Reference;
 
    type JSON_Object_Value is new JSON_Value with record
       Map : JSON_Maps.Map;
-   end record;
+   end record
+     with Default_Iterator  => Iterate,
+          Iterator_Element  => String,
+          Constant_Indexing => Constant_Key;
 
 end JSON.Types;
