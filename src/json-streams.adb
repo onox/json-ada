@@ -26,13 +26,12 @@ package body JSON.Streams is
    overriding
    procedure Read_Character (Object : in out Stream_String; Item : out Character) is
    begin
-      if Object.Index in Object.Text'Range then
-         Item := Object.Text (Object.Index);
-         Object.Index := Object.Index + 1;
-      elsif Object.Index > Object.Text'Last then
-         pragma Warnings (Off, Item);
+      if Object.Index not in Object.Text'Range then
          raise Ada.IO_Exceptions.End_Error;
       end if;
+
+      Item := Object.Text (Object.Index);
+      Object.Index := Object.Index + 1;
    end Read_Character;
 
    function Has_Buffered_Character (Object : Stream) return Boolean
