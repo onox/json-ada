@@ -20,6 +20,12 @@ package body JSON.Types is
       return "";
    end Value;
 
+   function Value (Object : JSON_Value) return SU.String_Access is
+   begin
+      raise Invalid_Type_Error with "Value not a string";
+      return null;
+   end Value;
+
    function Value (Object : JSON_Value) return Integer_Type is
    begin
       raise Invalid_Type_Error with "Value not a integer";
@@ -105,6 +111,10 @@ package body JSON.Types is
    overriding
    function Value (Object : JSON_String_Value) return String
      is (SU.To_String (Object.String_Value));
+
+   overriding
+   function Value (Object : JSON_String_Value) return SU.String_Access
+     is (new String'(Object.Value));
 
    overriding
    function Value (Object : JSON_Boolean_Value) return Boolean
