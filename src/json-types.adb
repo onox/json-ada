@@ -212,4 +212,52 @@ package body JSON.Types is
       end if;
    end Get_Object_Or_Empty;
 
+   function Get_Value_Or_Default
+     (Object  : JSON_Value'Class;
+      Key     : String;
+      Default : String) return JSON_Value'Class is
+   begin
+      if Object.Contains (Key) then
+         return Object.Get (Key);
+      else
+         return Create_String (SU.To_Unbounded_String (Default));
+      end if;
+   end Get_Value_Or_Default;
+
+   function Get_Value_Or_Default
+     (Object  : JSON_Value'Class;
+      Key     : String;
+      Default : Integer_Type) return JSON_Value'Class is
+   begin
+      if Object.Contains (Key) then
+         return Object.Get (Key);
+      else
+         return Create_Integer (Default);
+      end if;
+   end Get_Value_Or_Default;
+
+   function Get_Value_Or_Default
+     (Object  : JSON_Value'Class;
+      Key     : String;
+      Default : Float_Type) return JSON_Value'Class is
+   begin
+      if Object.Contains (Key) then
+         return Object.Get (Key);
+      else
+         return Create_Float (Default);
+      end if;
+   end Get_Value_Or_Default;
+
+   function Get_Value_Or_Default
+     (Object  : JSON_Value'Class;
+      Key     : String;
+      Default : Boolean) return JSON_Value'Class is
+   begin
+      if Object.Contains (Key) then
+         return Object.Get (Key);
+      else
+         return Create_Boolean (Default);
+      end if;
+   end Get_Value_Or_Default;
+
 end JSON.Types;

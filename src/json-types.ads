@@ -139,6 +139,30 @@ package JSON.Types is
    function Get_Object_Or_Empty (Object : JSON_Value'Class; Key : String) return JSON_Object_Value
      with Inline;
 
+   function Get_Value_Or_Default
+     (Object  : JSON_Value'Class;
+      Key     : String;
+      Default : String) return JSON_Value'Class
+   with Inline;
+
+   function Get_Value_Or_Default
+     (Object  : JSON_Value'Class;
+      Key     : String;
+      Default : Integer_Type) return JSON_Value'Class
+   with Inline;
+
+   function Get_Value_Or_Default
+     (Object  : JSON_Value'Class;
+      Key     : String;
+      Default : Float_Type) return JSON_Value'Class
+   with Inline;
+
+   function Get_Value_Or_Default
+     (Object  : JSON_Value'Class;
+      Key     : String;
+      Default : Boolean) return JSON_Value'Class
+   with Inline;
+
    -----------------------------------------------------------------------------
    --                              Constructors                               --
    -----------------------------------------------------------------------------
