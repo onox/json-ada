@@ -6,25 +6,17 @@ LDFLAGS ?= -Wl,-z,relro -Wl,-z,now
 
 GNATMAKE  = gprbuild $(GNAT_FLAGS) -p -XCompiler_Flags="$(CFLAGS)" -XMode=$(MODE)
 GNATCLEAN = gprclean -q
-
-INSTALL         = install
-INSTALL_DATA    = $(INSTALL) --mode=644 --preserve-timestamps
-INSTALL_ALI     = $(INSTALL) --mode=444
+GNATINSTALL = gprinstall
 
 SRC_DIR = src
 LIB_DIR = lib
 
-MAJOR      = 1
-MINOR      = 0
-SO_FILE    = libjson-ada.so
-SO_LIBRARY = $(SO_FILE).$(MAJOR).$(MINOR)
-
 PREFIX ?= /usr
 
-includedir = $(PREFIX)/include/json-ada
-gprdir     = $(PREFIX)/lib/gnat
+includedir = $(PREFIX)/include
+gprdir     = $(PREFIX)/share/gpr
 libdir     = $(PREFIX)/lib
-alidir     = $(libdir)/json-ada
+alidir     = $(libdir)
 
 build_src:
 	$(GNATMAKE) -P json_ada.gpr -largs $(LDFLAGS)
@@ -50,15 +42,9 @@ test: build_unit_tests
 clean: clean_src clean_unit_tests
 
 install:
-	$(INSTALL) -d $(includedir)
-	$(INSTALL) -d $(libdir)
-	$(INSTALL) -d $(alidir)
-	$(INSTALL) -d $(gprdir)
-
-	$(INSTALL_DATA) $(SRC_DIR)/*.ad[bs] $(includedir)
-	$(INSTALL_ALI) $(LIB_DIR)/json-ada/*.ali $(alidir)
-	$(INSTALL_DATA) gnat/json_ada.gpr $(gprdir)
-
-	$(INSTALL) $(LIB_DIR)/$(SO_LIBRARY) $(libdir)
-	cd $(libdir) && ln -sf $(SO_LIBRARY) $(SO_FILE).$(MAJOR)
-	cd $(libdir) && ln -sf $(SO_FILE).$(MAJOR) $(SO_FILE)
+	$(GNATINSTALL) --relocate-build-tree -p -q -f --install-name='json-ada' \
+		--sources-subdir=$(includedir) \
+		--project-subdir=$(gprdir) \
+		--lib-subdir=$(libdir) \
+		--ali-subdir=$(alidir) \
+		--prefix=$(PREFIX) -P json_ada.gpr
