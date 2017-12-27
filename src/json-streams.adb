@@ -14,6 +14,7 @@
 
 with Ada.Characters.Latin_1;
 with Ada.IO_Exceptions;
+with Ada.Unchecked_Conversion;
 
 package body JSON.Streams is
 
@@ -31,6 +32,21 @@ package body JSON.Streams is
       end if;
 
       Item := Object.Text (Object.Index);
+      Object.Index := Object.Index + 1;
+   end Read_Character;
+
+   overriding
+   procedure Read_Character (Object : in out Stream_Bytes; Item : out Character) is
+      use type AS.Stream_Element_Offset;
+
+      function Convert is new Ada.Unchecked_Conversion
+        (Source => AS.Stream_Element, Target => Character);
+   begin
+      if Object.Index not in Object.Bytes'Range then
+         raise Ada.IO_Exceptions.End_Error;
+      end if;
+
+      Item := Convert (Object.Bytes (Object.Index));
       Object.Index := Object.Index + 1;
    end Read_Character;
 
@@ -54,15 +70,26 @@ package body JSON.Streams is
       Object.Next_Character := Next;
    end Write_Character;
 
-   function Create_Stream (Stream_Access : Ada.Streams.Stream_IO.Stream_Access)
-     return Stream'Class is
+   function Create_Stream
+     (Stream_Access : AS.Stream_IO.Stream_Access) return Stream'Class is
    begin
-      return Stream_Object'(Stream => Stream_Access, Next_Character => Ada.Characters.Latin_1.NUL);
+      return Stream_Object'(Stream => Stream_Access,
+                            Next_Character => Ada.Characters.Latin_1.NUL);
    end Create_Stream;
 
    function Create_Stream (Text : access String) return Stream'Class is
    begin
-      return Stream_String'(Text => Text, Next_Character => Ada.Characters.Latin_1.NUL, Index => 1);
+      return Stream_String'(Text => Text,
+                            Next_Character => Ada.Characters.Latin_1.NUL,
+                            Index => 1);
+   end Create_Stream;
+
+   function Create_Stream
+     (Bytes : access AS.Stream_Element_Array) return Stream'Class is
+   begin
+      return Stream_Bytes'(Bytes => Bytes,
+                           Next_Character => Ada.Characters.Latin_1.NUL,
+                           Index => Bytes'First);
    end Create_Stream;
 
 end JSON.Streams;

@@ -17,6 +17,8 @@ with Ada.Streams.Stream_IO;
 package JSON.Streams is
    pragma Preelaborate;
 
+   package AS renames Ada.Streams;
+
    type Stream is abstract tagged private;
 
    procedure Read_Character (Object : in out Stream; Item : out Character) is abstract;
@@ -30,9 +32,13 @@ package JSON.Streams is
    procedure Write_Character (Object : in out Stream; Next : Character)
      with Pre'Class => not Stream'Class (Object).Has_Buffered_Character;
 
-   function Create_Stream (Stream_Access : Ada.Streams.Stream_IO.Stream_Access) return Stream'Class;
+   function Create_Stream
+     (Stream_Access : AS.Stream_IO.Stream_Access) return Stream'Class;
 
    function Create_Stream (Text : access String) return Stream'Class;
+
+   function Create_Stream
+     (Bytes : access AS.Stream_Element_Array) return Stream'Class;
 
 private
 
@@ -40,7 +46,8 @@ private
       Next_Character : Character;
    end record;
 
-   type Stream_Object (Stream : Ada.Streams.Stream_IO.Stream_Access) is new Stream with null record;
+   type Stream_Object
+     (Stream : AS.Stream_IO.Stream_Access) is new Stream with null record;
 
    overriding
    procedure Read_Character (Object : in out Stream_Object; Item : out Character);
@@ -51,5 +58,12 @@ private
 
    overriding
    procedure Read_Character (Object : in out Stream_String; Item : out Character);
+
+   type Stream_Bytes (Bytes : access AS.Stream_Element_Array) is new Stream with record
+      Index : AS.Stream_Element_Offset := Bytes'First;
+   end record;
+
+   overriding
+   procedure Read_Character (Object : in out Stream_Bytes; Item : out Character);
 
 end JSON.Streams;
