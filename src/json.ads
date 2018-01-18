@@ -13,5 +13,5 @@
 --  limitations under the License.
 
 package JSON is
-   pragma Preelaborate;
+   pragma Pure;
 end JSON;

@@ -12,7 +12,15 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
+with Ada.Characters.Latin_1;
+
 package body JSON.Types is
+
+   function "+" (Text : String) return SU.Unbounded_String
+     renames SU.To_Unbounded_String;
+
+   function "+" (Text : SU.Unbounded_String) return String
+     renames SU.To_String;
 
    function Value (Object : JSON_Value) return String is
    begin
@@ -105,12 +113,12 @@ package body JSON.Types is
    function Create_Object return JSON_Object_Value is
       Value : JSON_Object_Value;
    begin
-      return Value; 
+      return Value;
    end Create_Object;
 
    overriding
    function Value (Object : JSON_String_Value) return String
-     is (SU.To_String (Object.String_Value));
+     is (+Object.String_Value);
 
    overriding
    function Value (Object : JSON_String_Value) return SU.String_Access
@@ -192,7 +200,9 @@ package body JSON.Types is
       return Object.Map.Iterate;
    end Iterate;
 
-   function Get_Array_Or_Empty (Object : JSON_Value'Class; Key : String) return JSON_Array_Value is
+   function Get_Array_Or_Empty
+     (Object : JSON_Value'Class; Key : String) return JSON_Array_Value
+   is
       Empty_Value : JSON_Array_Value;
    begin
       if Object.Contains (Key) then
@@ -202,7 +212,9 @@ package body JSON.Types is
       end if;
    end Get_Array_Or_Empty;
 
-   function Get_Object_Or_Empty (Object : JSON_Value'Class; Key : String) return JSON_Object_Value is
+   function Get_Object_Or_Empty
+     (Object : JSON_Value'Class; Key : String) return JSON_Object_Value
+   is
       Empty_Value : JSON_Object_Value;
    begin
       if Object.Contains (Key) then
@@ -220,7 +232,7 @@ package body JSON.Types is
       if Object.Contains (Key) then
          return Object.Get (Key);
       else
-         return Create_String (SU.To_Unbounded_String (Default));
+         return Create_String (+Default);
       end if;
    end Get_Value_Or_Default;
 
@@ -259,5 +271,97 @@ package body JSON.Types is
          return Create_Boolean (Default);
       end if;
    end Get_Value_Or_Default;
+
+   overriding
+   function Image (Object : JSON_String_Value) return String is
+      use Ada.Characters.Latin_1;
+      Text : SU.Unbounded_String renames Object.String_Value;
+      Esc  : SU.Unbounded_String;
+      C    : Character;
+   begin
+      for Index in 1 .. SU.Length (Text) loop
+         C := SU.Element (Text, Index);
+         case C is
+            when '"' | '\' | '/' =>
+               SU.Append (Esc, '\' & C);
+            when BS =>
+               SU.Append (Esc, "\b");
+            when FF =>
+               SU.Append (Esc, "\f");
+            when CR =>
+               SU.Append (Esc, "\r");
+            when LF =>
+               SU.Append (Esc, "\n");
+            when HT =>
+               SU.Append (Esc, "\t");
+            when others =>
+               SU.Append (Esc, C);
+         end case;
+      end loop;
+      return '"' & (+Esc) & '"';
+   end Image;
+
+   overriding
+   function Image (Object : JSON_Integer_Value) return String is
+      Result : constant String := Integer_Type'Image (Object.Integer_Value);
+   begin
+      if Object.Integer_Value < 0 then
+         return Result;
+      else
+         return Result (2 .. Result'Last);
+      end if;
+   end Image;
+
+   overriding
+   function Image (Object : JSON_Float_Value) return String is
+      Result : constant String := Float_Type'Image (Object.Float_Value);
+   begin
+      if Object.Float_Value < 0.0 then
+         return Result;
+      else
+         return Result (2 .. Result'Last);
+      end if;
+   end Image;
+
+   overriding
+   function Image (Object : JSON_Boolean_Value) return String is
+     (if Object.Boolean_Value then "true" else "false");
+
+   overriding
+   function Image (Object : JSON_Null_Value) return String is ("null");
+
+   overriding
+   function Image (Object : JSON_Array_Value) return String is
+      Index  : Natural             := 0;
+      Result : SU.Unbounded_String := +"[";
+   begin
+      for Element of Object loop
+         Index := Index + 1;
+         if Index > 1 then
+            SU.Append (Result, ",");
+         end if;
+         SU.Append (Result, Element.Image);
+      end loop;
+      SU.Append (Result, "]");
+      return +Result;
+   end Image;
+
+   overriding
+   function Image (Object : JSON_Object_Value) return String is
+      Index  : Natural             := 0;
+      Result : SU.Unbounded_String := +"{";
+   begin
+      for Key of Object loop
+         Index := Index + 1;
+         if Index > 1 then
+            SU.Append (Result, ',');
+         end if;
+         SU.Append (Result, '"' & Key & '"');
+         SU.Append (Result, ':');
+         SU.Append (Result, Object.Get (Key).Image);
+      end loop;
+      SU.Append (Result, '}');
+      return +Result;
+   end Image;
 
 end JSON.Types;

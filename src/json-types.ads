@@ -27,6 +27,8 @@ package JSON.Types is
 
    type JSON_Value is abstract tagged private;
 
+   function Image (Object : JSON_Value) return String is abstract;
+
    --  Value will raise an Invalid_Type_Error exception if
    --  the JSON value is of the wrong kind
    function Value (Object : JSON_Value) return String;
@@ -47,6 +49,9 @@ package JSON.Types is
    type JSON_String_Value is new JSON_Value with private;
 
    overriding
+   function Image (Object : JSON_String_Value) return String;
+
+   overriding
    function Value (Object : JSON_String_Value) return String
      with Inline;
 
@@ -57,10 +62,16 @@ package JSON.Types is
    type JSON_Integer_Value is new JSON_Value with private;
 
    overriding
+   function Image (Object : JSON_Integer_Value) return String;
+
+   overriding
    function Value (Object : JSON_Integer_Value) return Integer_Type
      with Inline;
 
    type JSON_Float_Value is new JSON_Value with private;
+
+   overriding
+   function Image (Object : JSON_Float_Value) return String;
 
    overriding
    function Value (Object : JSON_Integer_Value) return Float_Type
@@ -73,16 +84,25 @@ package JSON.Types is
    type JSON_Boolean_Value is new JSON_Value with private;
 
    overriding
+   function Image (Object : JSON_Boolean_Value) return String;
+
+   overriding
    function Value (Object : JSON_Boolean_Value) return Boolean
      with Inline;
 
    type JSON_Null_Value is new JSON_Value with private;
+
+   overriding
+   function Image (Object : JSON_Null_Value) return String;
 
    -----------------------------------------------------------------------------
    --                               JSON Array                                --
    -----------------------------------------------------------------------------
 
    type JSON_Array_Value is new JSON_Value with private;
+
+   overriding
+   function Image (Object : JSON_Array_Value) return String;
 
    procedure Append (Object : in out JSON_Array_Value; Value : JSON_Value'Class);
 
@@ -102,6 +122,9 @@ package JSON.Types is
    procedure Insert (Object : in out JSON_Object_Value;
                      Key    : JSON_String_Value'Class;
                      Value  : JSON_Value'Class);
+
+   overriding
+   function Image (Object : JSON_Object_Value) return String;
 
    overriding
    function Length (Object : JSON_Object_Value) return Natural;

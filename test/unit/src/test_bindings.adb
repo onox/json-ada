@@ -18,6 +18,7 @@ with Ahven.Text_Runner;
 with Test_Tokenizers;
 with Test_Parsers;
 with Test_Streams;
+with Test_Images;
 
 procedure Test_Bindings is
    Suite : Test_Suite := Create_Suite ("all");
@@ -25,6 +26,7 @@ begin
    Suite.Add_Test (new Test_Tokenizers.Test);
    Suite.Add_Test (new Test_Parsers.Test);
    Suite.Add_Test (new Test_Streams.Test);
+   Suite.Add_Test (new Test_Images.Test);
 
    Ahven.Text_Runner.Run (Suite);
 end Test_Bindings;
