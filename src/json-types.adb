@@ -28,10 +28,10 @@ package body JSON.Types is
       return "";
    end Value;
 
-   function Value (Object : JSON_Value) return SU.String_Access is
+   function Value (Object : JSON_Value) return SU.Unbounded_String is
    begin
       raise Invalid_Type_Error with "Value not a string";
-      return null;
+      return SU.To_Unbounded_String ("");
    end Value;
 
    function Value (Object : JSON_Value) return Integer_Type is
@@ -121,8 +121,8 @@ package body JSON.Types is
      is (+Object.String_Value);
 
    overriding
-   function Value (Object : JSON_String_Value) return SU.String_Access
-     is (new String'(Object.Value));
+   function Value (Object : JSON_String_Value) return SU.Unbounded_String
+     is (Object.String_Value);
 
    overriding
    function Value (Object : JSON_Boolean_Value) return Boolean

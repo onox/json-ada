@@ -32,7 +32,7 @@ package JSON.Types is
    --  Value will raise an Invalid_Type_Error exception if
    --  the JSON value is of the wrong kind
    function Value (Object : JSON_Value) return String;
-   function Value (Object : JSON_Value) return SU.String_Access;
+   function Value (Object : JSON_Value) return SU.Unbounded_String;
    function Value (Object : JSON_Value) return Integer_Type;
    function Value (Object : JSON_Value) return Float_Type;
    function Value (Object : JSON_Value) return Boolean;
@@ -56,7 +56,7 @@ package JSON.Types is
      with Inline;
 
    overriding
-   function Value (Object : JSON_String_Value) return SU.String_Access
+   function Value (Object : JSON_String_Value) return SU.Unbounded_String
      with Inline;
 
    type JSON_Integer_Value is new JSON_Value with private;
