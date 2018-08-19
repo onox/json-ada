@@ -28,7 +28,10 @@ project Unit_Tests is
 
    package Ide renames Config.Ide;
    package Builder renames Config.Builder;
-   package Compiler renames Config.Compiler;
    package Binder renames Config.Binder;
+
+   package Compiler extends Config.Compiler is
+      for Local_Configuration_Pragmas use "gnat.adc";
+   end Compiler;
 
 end Unit_Tests;

@@ -39,7 +39,7 @@ build: build_src
 
 test: build_unit_tests
 
-clean: clean_src clean_unit_tests
+clean: clean_unit_tests clean_src
 
 install:
 	$(GNATINSTALL) --relocate-build-tree -p -q -f --install-name='json-ada' \

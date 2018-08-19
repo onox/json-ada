@@ -46,7 +46,12 @@ abstract project Config is
    end Ide;
 
    package Builder is
-      for Switches (others) use ("-j0", "-m");
+      case Mode is
+         when "debug" =>
+            for Switches (others) use ("-j0", "-m", "-s", "-g");
+         when others =>
+            for Switches (others) use ("-j0", "-m", "-s");
+      end case;
    end Builder;
 
    package Compiler is

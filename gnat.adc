@@ -2,19 +2,17 @@ pragma Assertion_Policy (Pre => Check);
 pragma Overflow_Mode (General => Strict, Assertions => Eliminated);
 
 pragma Restrictions (No_Obsolescent_Features);
---  pragma Restrictions (No_Recursion);
---  pragma Restrictions (No_Access_Subprograms);
---  pragma Restrictions (No_Unchecked_Access);
-pragma Restrictions (No_Anonymous_Allocators);
+pragma Restrictions (No_Recursion);
+pragma Restrictions (No_Dependence => Ada.Finalization);
+pragma Restrictions (No_Dependence => Ada.Unchecked_Deallocation);
 
---  pragma Restrictions (No_Abort_Statements);
+pragma Restrictions (No_Access_Parameter_Allocators);
+pragma Restrictions (No_Anonymous_Allocators);
 pragma Restrictions (No_Implicit_Heap_Allocations);
---  pragma Restrictions (No_Protected_Type_Allocators);
+
+pragma Restrictions (No_Abort_Statements);
 pragma Restrictions (No_Dependence => Ada.Asynchronous_Task_Control);
 pragma Restrictions (No_Reentrancy);
 pragma Restrictions (No_Relative_Delay);
 
-pragma Restrictions (No_Implementation_Aspect_Specifications);
-pragma Restrictions (No_Implementation_Attributes);
-pragma Restrictions (No_Implementation_Identifiers);
---  pragma Restrictions (No_Implementation_Pragmas);
+pragma Profile (No_Implementation_Extensions);
