@@ -71,13 +71,13 @@ package body JSON.Streams is
    end Write_Character;
 
    function Create_Stream
-     (Stream_Access : AS.Stream_IO.Stream_Access) return Stream'Class is
+     (Stream_Access : not null AS.Stream_IO.Stream_Access) return Stream'Class is
    begin
       return Stream_Object'(Stream => Stream_Access,
                             Next_Character => Ada.Characters.Latin_1.NUL);
    end Create_Stream;
 
-   function Create_Stream (Text : access String) return Stream'Class is
+   function Create_Stream (Text : not null access String) return Stream'Class is
    begin
       return Stream_String'(Text => Text,
                             Next_Character => Ada.Characters.Latin_1.NUL,
@@ -85,7 +85,7 @@ package body JSON.Streams is
    end Create_Stream;
 
    function Create_Stream
-     (Bytes : access AS.Stream_Element_Array) return Stream'Class is
+     (Bytes : not null access AS.Stream_Element_Array) return Stream'Class is
    begin
       return Stream_Bytes'(Bytes => Bytes,
                            Next_Character => Ada.Characters.Latin_1.NUL,

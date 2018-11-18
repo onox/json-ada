@@ -33,12 +33,12 @@ package JSON.Streams is
      with Pre'Class => not Stream'Class (Object).Has_Buffered_Character;
 
    function Create_Stream
-     (Stream_Access : AS.Stream_IO.Stream_Access) return Stream'Class;
+     (Stream_Access : not null AS.Stream_IO.Stream_Access) return Stream'Class;
 
-   function Create_Stream (Text : access String) return Stream'Class;
+   function Create_Stream (Text : not null access String) return Stream'Class;
 
    function Create_Stream
-     (Bytes : access AS.Stream_Element_Array) return Stream'Class;
+     (Bytes : not null access AS.Stream_Element_Array) return Stream'Class;
 
 private
 
@@ -47,19 +47,19 @@ private
    end record;
 
    type Stream_Object
-     (Stream : AS.Stream_IO.Stream_Access) is new Stream with null record;
+     (Stream : not null AS.Stream_IO.Stream_Access) is new Stream with null record;
 
    overriding
    procedure Read_Character (Object : in out Stream_Object; Item : out Character);
 
-   type Stream_String (Text : access String) is new Stream with record
+   type Stream_String (Text : not null access String) is new Stream with record
       Index : Natural := 1;
    end record;
 
    overriding
    procedure Read_Character (Object : in out Stream_String; Item : out Character);
 
-   type Stream_Bytes (Bytes : access AS.Stream_Element_Array) is new Stream with record
+   type Stream_Bytes (Bytes : not null access AS.Stream_Element_Array) is new Stream with record
       Index : AS.Stream_Element_Offset := Bytes'First;
    end record;
 
