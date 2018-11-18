@@ -59,7 +59,7 @@ abstract project Config is
          when "debug" =>
             for Switches ("ada") use Compiler_Switches & Dev_Switches & ("-g");
          when "release" =>
-            for Switches ("ada") use Compiler_Switches & Dev_Switches &
+            for Switches ("ada") use Compiler_Switches &
               ("-gnatn2", "-fomit-frame-pointer", "-flto");
       end case;
 
