@@ -8,9 +8,6 @@ GNATMAKE  = gprbuild $(GNAT_FLAGS) -p -XCompiler_Flags="$(CFLAGS)" -XMode=$(MODE
 GNATCLEAN = gprclean -q
 GNATINSTALL = gprinstall
 
-SRC_DIR = src
-LIB_DIR = lib
-
 PREFIX ?= /usr
 
 includedir = $(PREFIX)/include
@@ -18,28 +15,21 @@ gprdir     = $(PREFIX)/share/gpr
 libdir     = $(PREFIX)/lib
 alidir     = $(libdir)
 
-build_src:
+.PHONY: build test clean run_unit_tests install
+
+build:
 	$(GNATMAKE) -P json_ada.gpr -largs $(LDFLAGS)
 
-clean_src:
-	$(GNATCLEAN) -P json_ada.gpr
-	rmdir lib/json-ada lib obj
-
-build_unit_tests:
+test:
 	$(GNATMAKE) -P test/unit/unit_tests.gpr -largs $(LDFLAGS)
 
-clean_unit_tests:
+clean:
+	$(GNATCLEAN) -P json_ada.gpr
 	$(GNATCLEAN) -P test/unit/unit_tests.gpr
-	rmdir test/unit/obj
+	rmdir lib/json-ada lib obj test/unit/obj
 
 run_unit_tests:
 	./test/unit/test_bindings
-
-build: build_src
-
-test: build_unit_tests
-
-clean: clean_unit_tests clean_src
 
 install:
 	$(GNATINSTALL) --relocate-build-tree -p -q -f --install-name='json-ada' \
