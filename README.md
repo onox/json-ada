@@ -8,7 +8,68 @@ not support comments, thus this library does not support it either. If
 your JSON data contains comments, you should minify the data so that
 comments are removed.
 
-The library currently does not support Unicode yet.
+The library supports Ada 2012's iterator and indexing syntax. Unicode
+may not be supported yet.
+
+Usage
+-----
+
+To parse a JSON text, first instantiate `JSON.Parsers`:
+
+```ada
+package Types is new JSON.Types (Long_Integer, Long_Float);
+package Parsers is new JSON.Parsers (Types);
+```
+
+You can replace the actual generic parameters of `JSON.Types` with your
+own types if you want.
+
+Then create a stream and parse it:
+
+```ada
+Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+```
+
+The actual parameter of `Create_Stream` can be an access to a `String`, a
+`Ada.Streams.Stream_IO.Stream_Access`, or an access to a
+`Ada.Streams.Stream_Element_Array`.
+
+The actual type of `Value` can be one of:
+
+ * `JSON_Null_Value`
+ * `JSON_Boolean_Value`
+ * `JSON_Integer_Value`
+ * `JSON_Float_Value`
+ * `JSON_String_Value`
+ * `JSON_Array_Value`
+ * `JSON_Object_Value`
+
+To check if `Value` is of a certain type (for example an array), you can write
+`if Value in JSON_Array_Value then`.
+
+To print the image of `Value` (to serialize it), write `Value.Image`.
+
+To get the value (`String`, `Unbounded_String`, generic `Integer_Type`
+or `Float_Type`, or `Boolean`) of a `Value`, call `Value.Value`. An
+`Invalid_Type_Error` exception will be raised if `Value` has a different
+type than the type of the variable in which you try to store the result.
+
+To get an element of a JSON array or object write `Value.Get (My_Positive_Index)`
+or `Value.Get (My_String_Key)`, or use Ada 2012's indexing syntax
+`Value (Index_Or_Key)` (if `Value` is a `JSON_Array_Value` or `JSON_Object_Value`).
+You can also use `Get_Array` or `Get_Object`, which will return a
+`JSON_Array_Value` or `JSON_Object_Value`.
+
+If `Value` is a JSON object, you can call `Get_Array_Or_Empty`,
+`Get_Object_Or_Empty`, or `Get_Value_Or_Default`.
+
+A JSON array or object provides the function `Length`. A JSON object provides
+the function `Contains`.
+
+To iterate over a `JSON_Array_Value` or `JSON_Object_Value`, use the
+Ada 2012 iterator syntax `for Element_Or_Key of Value`. The type is either
+a `JSON_Value'Class` or a `String`.
 
 Dependencies
 ------------
@@ -16,6 +77,8 @@ Dependencies
 In order to build the library, you need to have:
 
  * An Ada 2012 compiler
+
+Optional dependencies:
 
  * [Ahven 2.x][url-ahven] if you want to build and run the unit tests
 
