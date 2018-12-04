@@ -212,6 +212,11 @@ private
 
    function Constant_Reference (Object : JSON_Array_Value; Position : JSON_Vectors.Cursor)
      return JSON_Vectors.Constant_Reference_Type;
+   --  For Ada 2012 iterator syntax
+
+   function Constant_Reference (Object : JSON_Array_Value; Index : Positive)
+     return JSON_Value'Class renames Get;
+   --  For Ada 2012 indexing syntax
 
    function Iterate (Object : JSON_Array_Value)
      return JSON_Vectors.Vector_Iterator_Interfaces.Reversible_Iterator'Class;
@@ -224,6 +229,11 @@ private
 
    function Constant_Key (Object : JSON_Object_Value; Position : JSON_Maps.Cursor)
      return String;
+   --  For Ada 2012 iterator syntax
+
+   function Constant_Key (Object : JSON_Object_Value; Key : String)
+     return JSON_Value'Class renames Get;
+   --  For Ada 2012 indexing syntax
 
    function Iterate (Object : JSON_Object_Value)
      return JSON_Maps.Map_Iterator_Interfaces.Forward_Iterator'Class;
