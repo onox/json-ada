@@ -19,7 +19,7 @@ with JSON.Streams;
 
 generic
    with package Types is new JSON.Types (<>);
-package JSON.Tokenizers is
+package JSON.Tokenizers with SPARK_Mode => On is
    pragma Preelaborate;
 
    type Token_Kind is

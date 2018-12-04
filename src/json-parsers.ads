@@ -17,7 +17,7 @@ with JSON.Streams;
 
 generic
    with package Types is new JSON.Types (<>);
-package JSON.Parsers is
+package JSON.Parsers with SPARK_Mode => On is
    pragma Preelaborate;
 
    function Parse (Stream : in out Streams.Stream'Class) return Types.JSON_Value'Class;
