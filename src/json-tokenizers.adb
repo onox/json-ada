@@ -197,63 +197,44 @@ package body JSON.Tokenizers is
          end if;
    end Read_Number;
 
-   procedure Read_Literal_True (Stream     : in out Streams.Stream'Class;
-                                Next_Token : out Token) is
-      C1, C2, C3 : Character;
-      Error_Message : constant String := "Expected literal 'true'";
+   procedure Read_Literal
+     (Stream     : in out Streams.Stream'Class;
+      First      : Character;
+      Next_Token : out Token)
+   is
+      Value : SU.Unbounded_String;
+      C     : Character;
+
+      Error_Message : constant String := "Expected literal 'true', 'false', or 'null'";
+
+      procedure Create_Token_From_Literal is
+         Literal : constant String := SU.To_String (Value);
+      begin
+         if Literal = "true" then
+            Next_Token := Token'(Kind => Boolean_Token, Boolean_Value => True);
+         elsif Literal = "false" then
+            Next_Token := Token'(Kind => Boolean_Token, Boolean_Value => False);
+         elsif Literal = "null" then
+            Next_Token := Token'(Kind => Null_Token);
+         else
+            raise Tokenizer_Error with Error_Message & ", got '" & Literal & "'";
+         end if;
+      end Create_Token_From_Literal;
    begin
-      C1 := Stream.Read_Character;
-      C2 := Stream.Read_Character;
-      C3 := Stream.Read_Character;
+      SU.Append (Value, First);
+      loop
+         C := Stream.Read_Character;
+         exit when C not in 'a' .. 'z';
+         SU.Append (Value, C);
+      end loop;
 
-      if C1 = 'r' and C2 = 'u' and C3 = 'e' then
-         Next_Token := Token'(Kind => Boolean_Token, Boolean_Value => True);
-      else
-         raise Tokenizer_Error with Error_Message;
-      end if;
+      Create_Token_From_Literal;
+      Stream.Write_Character (C);
    exception
+      --  End_Error is raised if the literal if followed by an EOF
       when Ada.IO_Exceptions.End_Error =>
-         raise Tokenizer_Error with Error_Message;
-   end Read_Literal_True;
-
-   procedure Read_Literal_False (Stream     : in out Streams.Stream'Class;
-                                 Next_Token : out Token) is
-      C1, C2, C3, C4 : Character;
-      Error_Message : constant String := "Expected literal 'false'";
-   begin
-      C1 := Stream.Read_Character;
-      C2 := Stream.Read_Character;
-      C3 := Stream.Read_Character;
-      C4 := Stream.Read_Character;
-
-      if C1 = 'a' and C2 = 'l' and C3 = 's' and C4 = 'e' then
-         Next_Token := Token'(Kind => Boolean_Token, Boolean_Value => False);
-      else
-         raise Tokenizer_Error with Error_Message;
-      end if;
-   exception
-      when Ada.IO_Exceptions.End_Error =>
-         raise Tokenizer_Error with Error_Message;
-   end Read_Literal_False;
-
-   procedure Read_Literal_Null (Stream     : in out Streams.Stream'Class;
-                                Next_Token : out Token) is
-      C1, C2, C3 : Character;
-      Error_Message : constant String := "Expected literal 'null'";
-   begin
-      C1 := Stream.Read_Character;
-      C2 := Stream.Read_Character;
-      C3 := Stream.Read_Character;
-
-      if C1 = 'u' and C2 = 'l' and C3 = 'l' then
-         Next_Token := Token'(Kind => Null_Token);
-      else
-         raise Tokenizer_Error with Error_Message;
-      end if;
-   exception
-      when Ada.IO_Exceptions.End_Error =>
-         raise Tokenizer_Error with Error_Message;
-   end Read_Literal_Null;
+         Create_Token_From_Literal;
+   end Read_Literal;
 
    procedure Read_Token (Stream     : in out Streams.Stream'Class;
                          Next_Token : out Token;
@@ -291,12 +272,8 @@ package body JSON.Tokenizers is
             Read_String (Stream, Next_Token);
          when '0' .. '9' | '+' | '-' =>
             Read_Number (Stream, C, Next_Token);
-         when 't' =>
-            Read_Literal_True (Stream, Next_Token);
-         when 'f' =>
-            Read_Literal_False (Stream, Next_Token);
-         when 'n' =>
-            Read_Literal_Null (Stream, Next_Token);
+         when 'a' .. 'z' =>
+            Read_Literal (Stream, C, Next_Token);
          when others =>
             raise Tokenizer_Error with "Unexpected character";
       end case;
