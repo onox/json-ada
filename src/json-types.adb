@@ -271,7 +271,7 @@ package body JSON.Types is
       end if;
    end Get_Object_Or_Empty;
 
-   function Get_Value_Or_Default
+   function Get
      (Object  : JSON_Value;
       Key     : String;
       Default : String) return JSON_Value is
@@ -281,9 +281,9 @@ package body JSON.Types is
       else
          return Create_String (+Default);
       end if;
-   end Get_Value_Or_Default;
+   end Get;
 
-   function Get_Value_Or_Default
+   function Get
      (Object  : JSON_Value;
       Key     : String;
       Default : Integer_Type) return JSON_Value is
@@ -293,9 +293,9 @@ package body JSON.Types is
       else
          return Create_Integer (Default);
       end if;
-   end Get_Value_Or_Default;
+   end Get;
 
-   function Get_Value_Or_Default
+   function Get
      (Object  : JSON_Value;
       Key     : String;
       Default : Float_Type) return JSON_Value is
@@ -305,9 +305,9 @@ package body JSON.Types is
       else
          return Create_Float (Default);
       end if;
-   end Get_Value_Or_Default;
+   end Get;
 
-   function Get_Value_Or_Default
+   function Get
      (Object  : JSON_Value;
       Key     : String;
       Default : Boolean) return JSON_Value is
@@ -317,7 +317,7 @@ package body JSON.Types is
       else
          return Create_Boolean (Default);
       end if;
-   end Get_Value_Or_Default;
+   end Get;
 
    -----------------------------------------------------------------------------
    --                                  Image                                   -

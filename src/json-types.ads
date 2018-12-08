@@ -83,25 +83,25 @@ package JSON.Types is
      (Object : JSON_Value; Key : String) return JSON_Value
    with Inline;
 
-   function Get_Value_Or_Default
+   function Get
      (Object  : JSON_Value;
       Key     : String;
       Default : String) return JSON_Value
    with Inline;
 
-   function Get_Value_Or_Default
+   function Get
      (Object  : JSON_Value;
       Key     : String;
       Default : Integer_Type) return JSON_Value
    with Inline;
 
-   function Get_Value_Or_Default
+   function Get
      (Object  : JSON_Value;
       Key     : String;
       Default : Float_Type) return JSON_Value
    with Inline;
 
-   function Get_Value_Or_Default
+   function Get
      (Object  : JSON_Value;
       Key     : String;
       Default : Boolean) return JSON_Value
