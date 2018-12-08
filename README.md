@@ -28,25 +28,25 @@ Then create a stream and parse it:
 
 ```ada
 Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+Value  : constant JSON_Value := Parsers.Parse (Stream);
 ```
 
 The actual parameter of `Create_Stream` can be an access to a `String`, a
 `Ada.Streams.Stream_IO.Stream_Access`, or an access to a
 `Ada.Streams.Stream_Element_Array`.
 
-The actual type of `Value` can be one of:
+`Value.Kind` can be one of:
 
- * `JSON_Null_Value`
- * `JSON_Boolean_Value`
- * `JSON_Integer_Value`
- * `JSON_Float_Value`
- * `JSON_String_Value`
- * `JSON_Array_Value`
- * `JSON_Object_Value`
+ * `Null_Kind`
+ * `Boolean_Kind`
+ * `Integer_Kind`
+ * `Float_Kind`
+ * `String_Kind`
+ * `Array_Kind`
+ * `Object_Kind`
 
 To check if `Value` is of a certain type (for example an array), you can write
-`if Value in JSON_Array_Value then`.
+`if Value.Kind = Array_Kind then`.
 
 To print the image of `Value` (to serialize it), write `Value.Image`.
 
@@ -57,9 +57,7 @@ type than the type of the variable in which you try to store the result.
 
 To get an element of a JSON array or object write `Value.Get (My_Positive_Index)`
 or `Value.Get (My_String_Key)`, or use Ada 2012's indexing syntax
-`Value (Index_Or_Key)` (if `Value` is a `JSON_Array_Value` or `JSON_Object_Value`).
-You can also use `Get_Array` or `Get_Object`, which will return a
-`JSON_Array_Value` or `JSON_Object_Value`.
+`Value (Index_Or_Key)`.
 
 If `Value` is a JSON object, you can call `Get_Array_Or_Empty`,
 `Get_Object_Or_Empty`, or `Get_Value_Or_Default`.
@@ -67,9 +65,9 @@ If `Value` is a JSON object, you can call `Get_Array_Or_Empty`,
 A JSON array or object provides the function `Length`. A JSON object provides
 the function `Contains`.
 
-To iterate over a `JSON_Array_Value` or `JSON_Object_Value`, use the
-Ada 2012 iterator syntax `for Element_Or_Key of Value`. The type is either
-a `JSON_Value'Class` or a `String`.
+To iterate over a JSON array or object, use the
+Ada 2012 iterator syntax `for Element_Or_Key of Value`. The type is a
+`JSON_Value` and represents an element of the array or the key of an object.
 
 Dependencies
 ------------

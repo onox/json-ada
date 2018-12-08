@@ -57,7 +57,7 @@ package body Test_Images is
       Text : aliased String := "true";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -67,7 +67,7 @@ package body Test_Images is
       Text : aliased String := "false";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -77,7 +77,7 @@ package body Test_Images is
       Text : aliased String := "null";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -87,7 +87,7 @@ package body Test_Images is
       Text : aliased String := """BS:\b LF:\n CR:\r \\ \/ HT:\t""";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -97,7 +97,7 @@ package body Test_Images is
       Text : aliased String := """""";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -107,7 +107,7 @@ package body Test_Images is
       Text : aliased String := """test""";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -117,7 +117,7 @@ package body Test_Images is
       Text : aliased String := """12.34""";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -127,7 +127,7 @@ package body Test_Images is
       Text : aliased String := "42";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -137,7 +137,7 @@ package body Test_Images is
       Text : aliased String := "[]";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -147,7 +147,7 @@ package body Test_Images is
       Text : aliased String := "[""test""]";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -157,7 +157,7 @@ package body Test_Images is
       Text : aliased String := "[42,true]";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -167,7 +167,7 @@ package body Test_Images is
       Text : aliased String := "{}";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -177,7 +177,7 @@ package body Test_Images is
       Text : aliased String := "{""foo"":""bar""}";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -188,7 +188,7 @@ package body Test_Images is
       Text2 : constant String := "{""bar"":2,""foo"":1}";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert ((Text = Image) or else (Text2 = Image), "Image '" & Image & "' is not '" & Text & "'");
@@ -198,7 +198,7 @@ package body Test_Images is
       Text : aliased String := "[{""foo"":[true,42]}]";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -208,7 +208,7 @@ package body Test_Images is
       Text : aliased String := "{""foo"":[null,{""bar"":42}]}";
 
       Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value'Class := Parsers.Parse (Stream);
+      Value  : constant JSON_Value := Parsers.Parse (Stream);
       Image  : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");

@@ -12,10 +12,12 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ada.Containers.Indefinite_Hashed_Maps;
-with Ada.Containers.Indefinite_Vectors;
-with Ada.Strings.Hash;
+private with Ada.Containers.Indefinite_Hashed_Maps;
+private with Ada.Containers.Indefinite_Vectors;
+private with Ada.Strings.Hash;
+
 with Ada.Strings.Unbounded;
+with Ada.Iterator_Interfaces;
 
 generic
    type Integer_Type is range <>;
@@ -25,9 +27,21 @@ package JSON.Types is
 
    package SU renames Ada.Strings.Unbounded;
 
-   type JSON_Value is abstract tagged private;
+   type Value_Kind is
+     (Array_Kind,
+      Object_Kind,
+      String_Kind,
+      Integer_Kind,
+      Float_Kind,
+      Boolean_Kind,
+      Null_Kind);
 
-   function Image (Object : JSON_Value) return String is abstract;
+   type JSON_Value (Kind : Value_Kind) is tagged private
+     with Constant_Indexing => Constant_Reference,
+          Default_Iterator  => Iterate,
+          Iterator_Element  => JSON_Value;
+
+   function Image (Object : JSON_Value) return String;
 
    --  Value will raise an Invalid_Type_Error exception if
    --  the JSON value is of the wrong kind
@@ -38,236 +52,168 @@ package JSON.Types is
    function Value (Object : JSON_Value) return Boolean;
 
    function Length (Object : JSON_Value) return Natural;
+   --  For arrays and objects
 
    function Contains (Object : JSON_Value; Key : String) return Boolean;
+   --  For objects
 
-   function Get (Object : JSON_Value; Index : Positive) return JSON_Value'Class;
-   function Get (Object : JSON_Value; Key : String) return JSON_Value'Class;
+   function Get (Object : JSON_Value; Index : Positive) return JSON_Value;
+   function Get (Object : JSON_Value; Key : String) return JSON_Value;
+
+   procedure Append (Object : in out JSON_Value; Value : JSON_Value);
+   --  For arrays
+
+   procedure Insert
+     (Object : in out JSON_Value;
+      Key    : JSON_Value;
+      Value  : JSON_Value);
+   --  For objects
 
    Invalid_Type_Error : exception;
-
-   type JSON_String_Value is new JSON_Value with private;
-
-   overriding
-   function Image (Object : JSON_String_Value) return String;
-
-   overriding
-   function Value (Object : JSON_String_Value) return String
-     with Inline;
-
-   overriding
-   function Value (Object : JSON_String_Value) return SU.Unbounded_String
-     with Inline;
-
-   type JSON_Integer_Value is new JSON_Value with private;
-
-   overriding
-   function Image (Object : JSON_Integer_Value) return String;
-
-   overriding
-   function Value (Object : JSON_Integer_Value) return Integer_Type
-     with Inline;
-
-   type JSON_Float_Value is new JSON_Value with private;
-
-   overriding
-   function Image (Object : JSON_Float_Value) return String;
-
-   overriding
-   function Value (Object : JSON_Integer_Value) return Float_Type
-     with Inline;
-
-   overriding
-   function Value (Object : JSON_Float_Value) return Float_Type
-     with Inline;
-
-   type JSON_Boolean_Value is new JSON_Value with private;
-
-   overriding
-   function Image (Object : JSON_Boolean_Value) return String;
-
-   overriding
-   function Value (Object : JSON_Boolean_Value) return Boolean
-     with Inline;
-
-   type JSON_Null_Value is new JSON_Value with private;
-
-   overriding
-   function Image (Object : JSON_Null_Value) return String;
-
-   -----------------------------------------------------------------------------
-   --                               JSON Array                                --
-   -----------------------------------------------------------------------------
-
-   type JSON_Array_Value is new JSON_Value with private;
-
-   overriding
-   function Image (Object : JSON_Array_Value) return String;
-
-   procedure Append (Object : in out JSON_Array_Value; Value : JSON_Value'Class);
-
-   overriding
-   function Length (Object : JSON_Array_Value) return Natural;
-
-   overriding
-   function Get (Object : JSON_Array_Value; Index : Positive) return JSON_Value'Class
-     with Inline;
-
-   -----------------------------------------------------------------------------
-   --                               JSON Object                               --
-   -----------------------------------------------------------------------------
-
-   type JSON_Object_Value is new JSON_Value with private;
-
-   procedure Insert (Object : in out JSON_Object_Value;
-                     Key    : JSON_String_Value'Class;
-                     Value  : JSON_Value'Class);
-
-   overriding
-   function Image (Object : JSON_Object_Value) return String;
-
-   overriding
-   function Length (Object : JSON_Object_Value) return Natural;
-
-   overriding
-   function Contains (Object : JSON_Object_Value; Key : String) return Boolean;
-
-   overriding
-   function Get (Object : JSON_Object_Value; Key : String) return JSON_Value'Class
-     with Inline;
 
    -----------------------------------------------------------------------------
    --                                 Helpers                                 --
    -----------------------------------------------------------------------------
 
-   function Get_Array (Object : JSON_Value'Class; Index : Positive) return JSON_Array_Value is
-     (JSON_Array_Value (Object.Get (Index)))
-     with Inline;
+   function Get_Array_Or_Empty
+     (Object : JSON_Value; Key : String) return JSON_Value
+   with Inline;
 
-   function Get_Object (Object : JSON_Value'Class; Index : Positive) return JSON_Object_Value is
-     (JSON_Object_Value (Object.Get (Index)))
-     with Inline;
-
-   function Get_Array (Object : JSON_Value'Class; Key : String) return JSON_Array_Value is
-     (JSON_Array_Value (Object.Get (Key)))
-     with Inline;
-
-   function Get_Object (Object : JSON_Value'Class; Key : String) return JSON_Object_Value is
-     (JSON_Object_Value (Object.Get (Key)))
-     with Inline;
-
-   function Get_Array_Or_Empty (Object : JSON_Value'Class; Key : String) return JSON_Array_Value
-     with Inline;
-
-   function Get_Object_Or_Empty (Object : JSON_Value'Class; Key : String) return JSON_Object_Value
-     with Inline;
-
-   function Get_Value_Or_Default
-     (Object  : JSON_Value'Class;
-      Key     : String;
-      Default : String) return JSON_Value'Class
+   function Get_Object_Or_Empty
+     (Object : JSON_Value; Key : String) return JSON_Value
    with Inline;
 
    function Get_Value_Or_Default
-     (Object  : JSON_Value'Class;
+     (Object  : JSON_Value;
       Key     : String;
-      Default : Integer_Type) return JSON_Value'Class
+      Default : String) return JSON_Value
    with Inline;
 
    function Get_Value_Or_Default
-     (Object  : JSON_Value'Class;
+     (Object  : JSON_Value;
       Key     : String;
-      Default : Float_Type) return JSON_Value'Class
+      Default : Integer_Type) return JSON_Value
    with Inline;
 
    function Get_Value_Or_Default
-     (Object  : JSON_Value'Class;
+     (Object  : JSON_Value;
       Key     : String;
-      Default : Boolean) return JSON_Value'Class
+      Default : Float_Type) return JSON_Value
+   with Inline;
+
+   function Get_Value_Or_Default
+     (Object  : JSON_Value;
+      Key     : String;
+      Default : Boolean) return JSON_Value
    with Inline;
 
    -----------------------------------------------------------------------------
    --                              Constructors                               --
    -----------------------------------------------------------------------------
 
-   function Create_String (Value : SU.Unbounded_String) return JSON_String_Value'Class;
+   function Create_String (Value : SU.Unbounded_String) return JSON_Value;
 
-   function Create_Integer (Value : Integer_Type) return JSON_Integer_Value'Class;
+   function Create_Integer (Value : Integer_Type) return JSON_Value;
 
-   function Create_Float (Value : Float_Type) return JSON_Float_Value'Class;
+   function Create_Float (Value : Float_Type) return JSON_Value;
 
-   function Create_Boolean (Value : Boolean) return JSON_Boolean_Value'Class;
+   function Create_Boolean (Value : Boolean) return JSON_Value;
 
-   function Create_Null return JSON_Null_Value'Class;
+   function Create_Null return JSON_Value;
 
-   function Create_Array return JSON_Array_Value;
+   function Create_Array return JSON_Value;
 
-   function Create_Object return JSON_Object_Value;
+   function Create_Object return JSON_Value;
+
+   -----------------------------------------------------------------------------
+   --                                Iterating                                --
+   -----------------------------------------------------------------------------
+
+   function Constant_Reference (Object : JSON_Value; Index : Positive)
+     return JSON_Value;
+   --  For Ada 2012 indexing syntax
+
+   function Constant_Reference (Object : JSON_Value; Key : String)
+     return JSON_Value;
+   --  For Ada 2012 indexing syntax
+
+   type Cursor (<>) is private;
+
+   function Constant_Reference (Object : aliased JSON_Value; Position : Cursor)
+     return JSON_Value;
+
+   function Has_Element (Position : Cursor) return Boolean;
+
+   package Value_Iterator_Interfaces is
+     new Ada.Iterator_Interfaces (Cursor, Has_Element);
+
+   function Iterate (Object : JSON_Value)
+     return Value_Iterator_Interfaces.Forward_Iterator'Class;
 
 private
 
-   type JSON_Value is abstract tagged null record;
+   type Vector_Type;
+   type Map_Type;
 
-   package JSON_Vectors is new Ada.Containers.Indefinite_Vectors (Positive, JSON_Value'Class);
+   type Vector_Ptr is not null access Vector_Type;
+   type Map_Ptr is not null access Map_Type;
 
-   function Constant_Reference (Object : JSON_Array_Value; Position : JSON_Vectors.Cursor)
-     return JSON_Vectors.Constant_Reference_Type;
-   --  For Ada 2012 iterator syntax
+   type JSON_Value (Kind : Value_Kind) is tagged record
+      case Kind is
+         when Array_Kind =>
+            Vector : Vector_Ptr;
+         when Object_Kind =>
+            Map : Map_Ptr;
+         when String_Kind =>
+            String_Value : SU.Unbounded_String;
+         when Integer_Kind =>
+            Integer_Value : Integer_Type;
+         when Float_Kind =>
+            Float_Value : Float_Type;
+         when Boolean_Kind =>
+            Boolean_Value : Boolean;
+         when others =>
+            null;
+      end case;
+   end record;
 
-   function Constant_Reference (Object : JSON_Array_Value; Index : Positive)
-     return JSON_Value'Class renames Get;
-   --  For Ada 2012 indexing syntax
-
-   function Iterate (Object : JSON_Array_Value)
-     return JSON_Vectors.Vector_Iterator_Interfaces.Reversible_Iterator'Class;
+   package JSON_Vectors is new Ada.Containers.Indefinite_Vectors (Positive, JSON_Value);
 
    package JSON_Maps is new Ada.Containers.Indefinite_Hashed_Maps
      (Key_Type        => String,
-      Element_Type    => JSON_Value'Class,
+      Element_Type    => JSON_Value,
       Hash            => Ada.Strings.Hash,
       Equivalent_Keys => "=");
 
-   function Constant_Key (Object : JSON_Object_Value; Position : JSON_Maps.Cursor)
-     return String;
-   --  For Ada 2012 iterator syntax
+   type Vector_Type is new JSON_Vectors.Vector with null record;
+   type Map_Type    is new JSON_Maps.Map with null record;
 
-   function Constant_Key (Object : JSON_Object_Value; Key : String)
-     return JSON_Value'Class renames Get;
-   --  For Ada 2012 indexing syntax
+   subtype Iterator_Kind is Value_Kind range Array_Kind .. Object_Kind;
 
-   function Iterate (Object : JSON_Object_Value)
-     return JSON_Maps.Map_Iterator_Interfaces.Forward_Iterator'Class;
-
-   type JSON_String_Value is new JSON_Value with record
-      String_Value : SU.Unbounded_String;
+   type Cursor (Kind : Iterator_Kind) is record
+      case Kind is
+         when Array_Kind =>
+            Vector_Cursor : JSON_Vectors.Cursor;
+         when Object_Kind =>
+            Map_Cursor : JSON_Maps.Cursor;
+      end case;
    end record;
 
-   type JSON_Integer_Value is new JSON_Value with record
-      Integer_Value : Integer_Type;
+   type Iterator (Kind : Iterator_Kind) is limited
+     new Value_Iterator_Interfaces.Forward_Iterator with
+   record
+      case Kind is
+         when Array_Kind =>
+            Vector_Cursor : JSON_Vectors.Cursor;
+         when Object_Kind =>
+            Map_Cursor : JSON_Maps.Cursor;
+      end case;
    end record;
 
-   type JSON_Float_Value is new JSON_Value with record
-      Float_Value : Float_Type;
-   end record;
+   overriding function First (Object : Iterator) return Cursor;
 
-   type JSON_Boolean_Value is new JSON_Value with record
-      Boolean_Value : Boolean;
-   end record;
-
-   type JSON_Null_Value is new JSON_Value with null record;
-
-   type JSON_Array_Value is new JSON_Value with record
-      Vector : JSON_Vectors.Vector;
-   end record
-     with Default_Iterator  => Iterate,
-          Iterator_Element  => JSON_Value'Class,
-          Constant_Indexing => Constant_Reference;
-
-   type JSON_Object_Value is new JSON_Value with record
-      Map : JSON_Maps.Map;
-   end record
-     with Default_Iterator  => Iterate,
-          Iterator_Element  => String,
-          Constant_Indexing => Constant_Key;
+   overriding function Next
+     (Object   : Iterator;
+      Position : Cursor) return Cursor;
 
 end JSON.Types;

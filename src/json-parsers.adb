@@ -24,13 +24,13 @@ package body JSON.Parsers is
 
    function Parse_Token (Stream : in out Streams.Stream'Class;
                          Token  : Tokenizers.Token)
-     return Types.JSON_Value'Class;
+     return Types.JSON_Value;
 
    function Parse_Array (Stream : in out Streams.Stream'Class)
-     return Types.JSON_Array_Value'Class is
+     return Types.JSON_Value is
       Token : Tokenizers.Token;
 
-      JSON_Array : Types.JSON_Array_Value'Class := Types.Create_Array;
+      JSON_Array : Types.JSON_Value := Types.Create_Array;
       Repeat : Boolean := False;
    begin
       loop
@@ -57,10 +57,10 @@ package body JSON.Parsers is
    end Parse_Array;
 
    function Parse_Object (Stream : in out Streams.Stream'Class)
-     return Types.JSON_Object_Value'Class is
+     return Types.JSON_Value is
       Token : Tokenizers.Token;
 
-      JSON_Object : Types.JSON_Object_Value'Class := Types.Create_Object;
+      JSON_Object : Types.JSON_Value := Types.Create_Object;
       Repeat : Boolean := False;
    begin
       loop
@@ -83,7 +83,7 @@ package body JSON.Parsers is
          end if;
 
          declare
-            Key : constant Types.JSON_String_Value'Class := Types.Create_String (Token.String_Value);
+            Key : constant Types.JSON_Value := Types.Create_String (Token.String_Value);
          begin
             --  Expect name separator (':' character) between key and value
             Tokenizers.Read_Token (Stream, Token);
@@ -104,7 +104,7 @@ package body JSON.Parsers is
 
    function Parse_Token (Stream : in out Streams.Stream'Class;
                          Token  : Tokenizers.Token)
-     return Types.JSON_Value'Class is
+     return Types.JSON_Value is
    begin
       case Token.Kind is
          when Tokenizers.Begin_Array_Token =>
@@ -127,11 +127,11 @@ package body JSON.Parsers is
    end Parse_Token;
 
    function Parse (Stream : in out Streams.Stream'Class)
-     return Types.JSON_Value'Class is
+     return Types.JSON_Value is
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
-      return Value : constant Types.JSON_Value'Class := Parse_Token (Stream, Token) do
+      return Value : constant Types.JSON_Value := Parse_Token (Stream, Token) do
          Tokenizers.Read_Token (Stream, Token, Expect_EOF => True);
       end return;
    exception

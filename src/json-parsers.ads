@@ -20,7 +20,7 @@ generic
 package JSON.Parsers with SPARK_Mode => On is
    pragma Preelaborate;
 
-   function Parse (Stream : in out Streams.Stream'Class) return Types.JSON_Value'Class;
+   function Parse (Stream : in out Streams.Stream'Class) return Types.JSON_Value;
 
    Parse_Error : exception;
 
