@@ -60,7 +60,8 @@ or `Value.Get (My_String_Key)`, or use Ada 2012's indexing syntax
 `Value (Index_Or_Key)`.
 
 If `Value` is a JSON object, you can call `Get_Array_Or_Empty`,
-`Get_Object_Or_Empty`, or `Get_Value_Or_Default`.
+`Get_Object_Or_Empty`, or `Get` (with an additional parameter containing
+the default value).
 
 A JSON array or object provides the function `Length`. A JSON object provides
 the function `Contains`.
