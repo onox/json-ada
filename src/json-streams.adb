@@ -18,21 +18,21 @@ with Ada.Unchecked_Conversion;
 
 package body JSON.Streams is
 
+   use type AS.Stream_Element_Offset;
+
    overriding
    procedure Read_Character (Object : in out Stream_String; Item : out Character) is
    begin
-      if Object.Index not in Object.Text'Range then
+      if Integer (Object.Index) not in Object.Text'Range then
          raise Ada.IO_Exceptions.End_Error;
       end if;
 
-      Item := Object.Text (Object.Index);
+      Item := Object.Text (Integer (Object.Index));
       Object.Index := Object.Index + 1;
    end Read_Character;
 
    overriding
    procedure Read_Character (Object : in out Stream_Bytes; Item : out Character) is
-      use type AS.Stream_Element_Offset;
-
       function Convert is new Ada.Unchecked_Conversion
         (Source => AS.Stream_Element, Target => Character);
    begin
@@ -48,8 +48,18 @@ package body JSON.Streams is
      is (Object.Next_Character /= Ada.Characters.Latin_1.NUL);
 
    function Read_Character (Object : in out Stream) return Character is
+      Index : AS.Stream_Element_Offset;
+   begin
+      return Object.Read_Character (Index);
+   end Read_Character;
+
+   function Read_Character
+     (Object : in out Stream;
+      Index  : out AS.Stream_Element_Offset) return Character
+   is
       C : Character;
    begin
+      Index := Object.Index;
       if Object.Next_Character = Ada.Characters.Latin_1.NUL then
          Stream'Class (Object).Read_Character (C);
       else
@@ -68,7 +78,7 @@ package body JSON.Streams is
    begin
       return Stream_String'(Text => Text,
                             Next_Character => Ada.Characters.Latin_1.NUL,
-                            Index => 1);
+                            Index => AS.Stream_Element_Offset (Text'First));
    end Create_Stream;
 
    function Create_Stream

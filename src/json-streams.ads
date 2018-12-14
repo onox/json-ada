@@ -29,6 +29,13 @@ package JSON.Streams is
    function Read_Character (Object : in out Stream) return Character
      with Post'Class => not Stream'Class (Object).Has_Buffered_Character;
 
+   function Read_Character
+     (Object : in out Stream;
+      Index  : out AS.Stream_Element_Offset) return Character
+   with Post'Class => not Stream'Class (Object).Has_Buffered_Character;
+   --  Writes the offset of the read character to Index. This is needed
+   --  for string tokens.
+
    procedure Write_Character (Object : in out Stream; Next : Character)
      with Pre'Class => not Stream'Class (Object).Has_Buffered_Character;
 
@@ -41,18 +48,16 @@ private
 
    type Stream is abstract tagged limited record
       Next_Character : Character;
+      Index : AS.Stream_Element_Offset;
    end record;
 
-   type Stream_String (Text : not null access String) is new Stream with record
-      Index : Natural := 1;
-   end record;
+   type Stream_String (Text : not null access String) is new Stream with null record;
 
    overriding
    procedure Read_Character (Object : in out Stream_String; Item : out Character);
 
-   type Stream_Bytes (Bytes : not null access AS.Stream_Element_Array) is new Stream with record
-      Index : AS.Stream_Element_Offset := Bytes'First;
-   end record;
+   type Stream_Bytes
+     (Bytes : not null access AS.Stream_Element_Array) is new Stream with null record;
 
    overriding
    procedure Read_Character (Object : in out Stream_Bytes; Item : out Character);
