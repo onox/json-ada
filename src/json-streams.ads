@@ -12,14 +12,14 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ada.Streams.Stream_IO;
+with Ada.Streams;
 
 package JSON.Streams is
    pragma Preelaborate;
 
    package AS renames Ada.Streams;
 
-   type Stream is abstract tagged private;
+   type Stream is abstract tagged limited private;
 
    procedure Read_Character (Object : in out Stream; Item : out Character) is abstract;
 
@@ -32,9 +32,6 @@ package JSON.Streams is
    procedure Write_Character (Object : in out Stream; Next : Character)
      with Pre'Class => not Stream'Class (Object).Has_Buffered_Character;
 
-   function Create_Stream
-     (Stream_Access : not null AS.Stream_IO.Stream_Access) return Stream'Class;
-
    function Create_Stream (Text : not null access String) return Stream'Class;
 
    function Create_Stream
@@ -42,15 +39,9 @@ package JSON.Streams is
 
 private
 
-   type Stream is abstract tagged record
+   type Stream is abstract tagged limited record
       Next_Character : Character;
    end record;
-
-   type Stream_Object
-     (Stream : not null AS.Stream_IO.Stream_Access) is new Stream with null record;
-
-   overriding
-   procedure Read_Character (Object : in out Stream_Object; Item : out Character);
 
    type Stream_String (Text : not null access String) is new Stream with record
       Index : Natural := 1;

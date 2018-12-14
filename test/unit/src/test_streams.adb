@@ -13,6 +13,7 @@
 --  limitations under the License.
 
 with Ada.Streams.Stream_IO;
+with Ada.Unchecked_Deallocation;
 
 with Ahven; use Ahven;
 
@@ -34,28 +35,46 @@ package body Test_Streams is
    end Initialize;
 
    use Types;
+   use Ada.Streams;
+
+   type Stream_Element_Array_Access is access Stream_Element_Array;
+
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Object => Stream_Element_Array, Name => Stream_Element_Array_Access);
 
    procedure Test_Stream_IO is
-      File   : Ada.Streams.Stream_IO.File_Type;
-      File_Stream : Ada.Streams.Stream_IO.Stream_Access;
+      File      : Stream_IO.File_Type;
       File_Name : constant String := "float_number.txt";
+
+      Bytes : Stream_Element_Array_Access;
    begin
-      Ada.Streams.Stream_IO.Open (File, Ada.Streams.Stream_IO.In_File, File_Name);
-      File_Stream := Ada.Streams.Stream_IO.Stream (File);
+      Stream_IO.Open (File, Stream_IO.In_File, File_Name);
 
       declare
-         Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (File_Stream);
-         Value  : constant JSON_Value := Parsers.Parse (Stream);
-      begin
-         Assert (Value.Kind = Float_Kind, "Not a float");
-         Assert (Value.Value = 3.14, "Expected float value to be equal to 3.14");
+         File_Size : constant Stream_Element_Offset
+           := Stream_Element_Offset (Stream_IO.Size (File));
 
-         Ada.Streams.Stream_IO.Close (File);
-      exception
-         when others =>
-            Ada.Streams.Stream_IO.Close (File);
-            raise;
+         subtype Byte_Array is Stream_Element_Array (1 .. File_Size);
+      begin
+         Bytes := new Byte_Array;
+         Byte_Array'Read (Stream_IO.Stream (File), Bytes.all);
+
+         declare
+            Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Bytes);
+            Value  : constant JSON_Value := Parsers.Parse (Stream);
+         begin
+            Assert (Value.Kind = Float_Kind, "Not a float");
+            Assert (Value.Value = 3.14, "Expected float value to be equal to 3.14");
+         end;
       end;
+
+      Stream_IO.Close (File);
+      Free (Bytes);
+   exception
+      when others =>
+         Stream_IO.Close (File);
+         Free (Bytes);
+         raise;
    end Test_Stream_IO;
 
 end Test_Streams;

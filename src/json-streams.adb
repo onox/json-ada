@@ -19,12 +19,6 @@ with Ada.Unchecked_Conversion;
 package body JSON.Streams is
 
    overriding
-   procedure Read_Character (Object : in out Stream_Object; Item : out Character) is
-   begin
-      Character'Read (Object.Stream, Item);
-   end Read_Character;
-
-   overriding
    procedure Read_Character (Object : in out Stream_String; Item : out Character) is
    begin
       if Object.Index not in Object.Text'Range then
@@ -69,13 +63,6 @@ package body JSON.Streams is
    begin
       Object.Next_Character := Next;
    end Write_Character;
-
-   function Create_Stream
-     (Stream_Access : not null AS.Stream_IO.Stream_Access) return Stream'Class is
-   begin
-      return Stream_Object'(Stream => Stream_Access,
-                            Next_Character => Ada.Characters.Latin_1.NUL);
-   end Create_Stream;
 
    function Create_Stream (Text : not null access String) return Stream'Class is
    begin
