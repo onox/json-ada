@@ -42,7 +42,7 @@ package JSON.Tokenizers with SPARK_Mode => On is
    type Token (Kind : Token_Kind := Invalid_Token) is record
       case Kind is
          when String_Token =>
-            String_Value  : SU.Unbounded_String;
+            String_Offset, String_Length : Streams.AS.Stream_Element_Offset;
          when Integer_Token =>
             Integer_Value : Types.Integer_Type;
          when Float_Token =>

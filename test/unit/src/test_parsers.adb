@@ -289,7 +289,7 @@ package body Test_Parsers is
          for Key of Value loop
             Iterations := Iterations + 1;
             if Iterations in 1 .. 2 then
-               Assert (Key.Kind = String_Kind, "Not String");
+               Assert (Key.Kind = Unbounded_String_Kind, "Not String");
                Assert (Key.Value in "foo" | "bar",
                  "Expected string value to be equal to 'foo' or 'bar'");
 

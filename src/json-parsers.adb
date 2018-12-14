@@ -22,11 +22,11 @@ package body JSON.Parsers is
 
    use type Tokenizers.Token_Kind;
 
-   function Parse_Token (Stream : in out Streams.Stream'Class;
+   function Parse_Token (Stream : Streams.Stream_Ptr;
                          Token  : Tokenizers.Token)
      return Types.JSON_Value;
 
-   function Parse_Array (Stream : in out Streams.Stream'Class)
+   function Parse_Array (Stream : Streams.Stream_Ptr)
      return Types.JSON_Value is
       Token : Tokenizers.Token;
 
@@ -34,7 +34,7 @@ package body JSON.Parsers is
       Repeat : Boolean := False;
    begin
       loop
-         Tokenizers.Read_Token (Stream, Token);
+         Tokenizers.Read_Token (Stream.all, Token);
 
          --  Either expect ']' character or (if not the first element)
          --  a value separator (',' character)
@@ -44,7 +44,7 @@ package body JSON.Parsers is
             raise Parse_Error with "Expected value separator (',' character)";
          elsif Repeat then
             --  Value separator has been read, now read the next value
-            Tokenizers.Read_Token (Stream, Token);
+            Tokenizers.Read_Token (Stream.all, Token);
          end if;
 
          --  Parse value and append it to the array
@@ -56,7 +56,7 @@ package body JSON.Parsers is
       return JSON_Array;
    end Parse_Array;
 
-   function Parse_Object (Stream : in out Streams.Stream'Class)
+   function Parse_Object (Stream : Streams.Stream_Ptr)
      return Types.JSON_Value is
       Token : Tokenizers.Token;
 
@@ -64,7 +64,7 @@ package body JSON.Parsers is
       Repeat : Boolean := False;
    begin
       loop
-         Tokenizers.Read_Token (Stream, Token);
+         Tokenizers.Read_Token (Stream.all, Token);
 
          --  Either expect '}' character or (if not the first member)
          --  a value separator (',' character)
@@ -74,7 +74,7 @@ package body JSON.Parsers is
             raise Parse_Error with "Expected value separator (',' character)";
          elsif Repeat then
             --  Value separator has been read, now read the next value
-            Tokenizers.Read_Token (Stream, Token);
+            Tokenizers.Read_Token (Stream.all, Token);
          end if;
 
          --  Parse member key
@@ -83,16 +83,17 @@ package body JSON.Parsers is
          end if;
 
          declare
-            Key : constant Types.JSON_Value := Types.Create_String (Token.String_Value);
+            Key : constant Types.JSON_Value
+              := Types.Create_String (Stream, Token.String_Offset, Token.String_Length);
          begin
             --  Expect name separator (':' character) between key and value
-            Tokenizers.Read_Token (Stream, Token);
+            Tokenizers.Read_Token (Stream.all, Token);
             if Token.Kind /= Tokenizers.Name_Separator_Token then
                raise Parse_Error with "Expected name separator (':' character)";
             end if;
 
             --  Parse member value and insert key-value pair in the object
-            Tokenizers.Read_Token (Stream, Token);
+            Tokenizers.Read_Token (Stream.all, Token);
             JSON_Object.Insert (Key, Parse_Token (Stream, Token));
          end;
 
@@ -102,7 +103,7 @@ package body JSON.Parsers is
       return JSON_Object;
    end Parse_Object;
 
-   function Parse_Token (Stream : in out Streams.Stream'Class;
+   function Parse_Token (Stream : Streams.Stream_Ptr;
                          Token  : Tokenizers.Token)
      return Types.JSON_Value is
    begin
@@ -112,7 +113,7 @@ package body JSON.Parsers is
          when Tokenizers.Begin_Object_Token =>
             return Parse_Object (Stream);
          when Tokenizers.String_Token =>
-            return Types.Create_String (Token.String_Value);
+            return Types.Create_String (Stream, Token.String_Offset, Token.String_Length);
          when Tokenizers.Integer_Token =>
             return Types.Create_Integer (Token.Integer_Value);
          when Tokenizers.Float_Token =>
@@ -126,17 +127,20 @@ package body JSON.Parsers is
       end case;
    end Parse_Token;
 
-   function Parse (Stream : in out Streams.Stream'Class)
+   function Parse (Stream : Streams.Stream_Ptr)
      return Types.JSON_Value is
       Token : Tokenizers.Token;
    begin
-      Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream.all, Token);
       return Value : constant Types.JSON_Value := Parse_Token (Stream, Token) do
-         Tokenizers.Read_Token (Stream, Token, Expect_EOF => True);
+         Tokenizers.Read_Token (Stream.all, Token, Expect_EOF => True);
       end return;
    exception
       when E : Tokenizers.Tokenizer_Error =>
          raise Parse_Error with Ada.Exceptions.Exception_Message (E);
    end Parse;
+
+   function Parse (Stream : aliased in out Streams.Stream'Class)
+     return Types.JSON_Value is (Parse (Stream'Access));
 
 end JSON.Parsers;

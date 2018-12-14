@@ -21,6 +21,8 @@ package JSON.Streams is
 
    type Stream is abstract tagged limited private;
 
+   type Stream_Ptr is not null access all Streams.Stream'Class;
+
    procedure Read_Character (Object : in out Stream; Item : out Character) is abstract;
 
    function Has_Buffered_Character (Object : Stream) return Boolean
@@ -39,6 +41,10 @@ package JSON.Streams is
    procedure Write_Character (Object : in out Stream; Next : Character)
      with Pre'Class => not Stream'Class (Object).Has_Buffered_Character;
 
+   function Get_String
+     (Object : Stream;
+      Offset, Length : AS.Stream_Element_Offset) return String is abstract;
+
    function Create_Stream (Text : not null access String) return Stream'Class;
 
    function Create_Stream
@@ -56,10 +62,20 @@ private
    overriding
    procedure Read_Character (Object : in out Stream_String; Item : out Character);
 
+   overriding
+   function Get_String
+     (Object : Stream_String;
+      Offset, Length : AS.Stream_Element_Offset) return String;
+
    type Stream_Bytes
      (Bytes : not null access AS.Stream_Element_Array) is new Stream with null record;
 
    overriding
    procedure Read_Character (Object : in out Stream_Bytes; Item : out Character);
+
+   overriding
+   function Get_String
+     (Object : Stream_Bytes;
+      Offset, Length : AS.Stream_Element_Offset) return String;
 
 end JSON.Streams;

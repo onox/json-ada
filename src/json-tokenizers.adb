@@ -21,31 +21,23 @@ package body JSON.Tokenizers is
    procedure Read_String (Stream     : in out Streams.Stream'Class;
                           Next_Token : out Token) is
       C : Character;
-      Value   : SU.Unbounded_String;
+      Index, Length : Streams.AS.Stream_Element_Offset := 0;
       Escaped : Boolean := False;
 
-      use Ada.Characters.Latin_1;
+      use type Streams.AS.Stream_Element_Offset;
    begin
       loop
-         C := Stream.Read_Character;
+         C := Stream.Read_Character (Index);
 
          --  An unescaped '"' character denotes the end of the string
          exit when not Escaped and C = '"';
 
+         Length := Length + 1;
+
          if Escaped then
             case C is
-               when '"' | '\' | '/' =>
-                  SU.Append (Value, C);
-               when 'b' =>
-                  SU.Append (Value, BS);
-               when 'f' =>
-                  SU.Append (Value, FF);
-               when 'n' =>
-                  SU.Append (Value, LF);
-               when 'r' =>
-                  SU.Append (Value, CR);
-               when 't' =>
-                  SU.Append (Value, HT);
+               when '"' | '\' | '/' | 'b' | 'f' | 'n' | 'r' | 't' =>
+                  null;
                when 'u' =>
                   --  TODO Support escaped unicode
                   raise Program_Error with "Escaped unicode not supported yet";
@@ -57,11 +49,11 @@ package body JSON.Tokenizers is
             if Ada.Characters.Handling.Is_Control (C) then
                raise Tokenizer_Error with "Unexpected control character in string";
             end if;
-            SU.Append (Value, C);
          end if;
          Escaped := not Escaped and C = '\';
       end loop;
-      Next_Token := Token'(Kind => String_Token, String_Value => Value);
+      Next_Token := Token'
+        (Kind => String_Token, String_Offset => Index - Length, String_Length => Length);
    end Read_String;
 
    procedure Test_Leading_Zeroes (First : Character; Value : SU.Unbounded_String) is

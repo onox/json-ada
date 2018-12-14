@@ -19,6 +19,8 @@ private with Ada.Strings.Hash;
 with Ada.Strings.Unbounded;
 with Ada.Iterator_Interfaces;
 
+with JSON.Streams;
+
 generic
    type Integer_Type is range <>;
    type Float_Type is digits <>;
@@ -30,6 +32,7 @@ package JSON.Types is
    type Value_Kind is
      (Array_Kind,
       Object_Kind,
+      Unbounded_String_Kind,
       String_Kind,
       Integer_Kind,
       Float_Kind,
@@ -46,7 +49,6 @@ package JSON.Types is
    --  Value will raise an Invalid_Type_Error exception if
    --  the JSON value is of the wrong kind
    function Value (Object : JSON_Value) return String;
-   function Value (Object : JSON_Value) return SU.Unbounded_String;
    function Value (Object : JSON_Value) return Integer_Type;
    function Value (Object : JSON_Value) return Float_Type;
    function Value (Object : JSON_Value) return Boolean;
@@ -66,7 +68,8 @@ package JSON.Types is
    procedure Insert
      (Object : in out JSON_Value;
       Key    : JSON_Value;
-      Value  : JSON_Value);
+      Value  : JSON_Value)
+   with Pre => Key.Kind = String_Kind;
    --  For objects
 
    Invalid_Type_Error : exception;
@@ -110,6 +113,10 @@ package JSON.Types is
    -----------------------------------------------------------------------------
    --                              Constructors                               --
    -----------------------------------------------------------------------------
+
+   function Create_String
+     (Stream : Streams.Stream_Ptr;
+      Offset, Length : Streams.AS.Stream_Element_Offset) return JSON_Value;
 
    function Create_String (Value : SU.Unbounded_String) return JSON_Value;
 
@@ -164,8 +171,11 @@ private
             Vector : Vector_Ptr;
          when Object_Kind =>
             Map : Map_Ptr;
-         when String_Kind =>
+         when Unbounded_String_Kind =>
             String_Value : SU.Unbounded_String;
+         when String_Kind =>
+            Stream : Streams.Stream_Ptr;
+            String_Offset, String_Length : Streams.AS.Stream_Element_Offset;
          when Integer_Kind =>
             Integer_Value : Integer_Type;
          when Float_Kind =>

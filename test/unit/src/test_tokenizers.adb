@@ -12,7 +12,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ada.Strings.Unbounded;
 with Ada.Characters.Latin_1;
 
 with Ahven; use Ahven;
@@ -25,6 +24,11 @@ package body Test_Tokenizers is
 
    package Types is new JSON.Types (Long_Integer, Long_Float);
    package Tokenizers is new JSON.Tokenizers (Types);
+
+   use type JSON.Streams.AS.Stream_Element_Offset;
+
+   String_Offset_Message : constant String := "String value at wrong offset";
+   String_Length_Message : constant String := "String value has incorrect length";
 
    overriding
    procedure Initialize (T : in out Test) is
@@ -77,12 +81,12 @@ package body Test_Tokenizers is
    end Initialize;
 
    use type Tokenizers.Token_Kind;
-   use type Ada.Strings.Unbounded.Unbounded_String;
+   use type Types.SU.Unbounded_String;
 
    procedure Assert_Kind is new Assert_Equal
      (Tokenizers.Token_Kind, Tokenizers.Token_Kind'Image);
 
-   procedure Expect_EOF (Stream : in out JSON.Streams.Stream'Class) is
+   procedure Expect_EOF (Stream : aliased in out JSON.Streams.Stream'Class) is
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token, Expect_EOF => True);
@@ -94,7 +98,7 @@ package body Test_Tokenizers is
    --  Keyword
    procedure Test_Null_Token is
       Text : aliased String := "null";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -104,7 +108,7 @@ package body Test_Tokenizers is
 
    procedure Test_True_Token is
       Text : aliased String := "true";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -115,7 +119,7 @@ package body Test_Tokenizers is
 
    procedure Test_False_Token is
       Text : aliased String := "false";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -127,64 +131,68 @@ package body Test_Tokenizers is
    --  String
    procedure Test_Empty_String_Token is
       Text : aliased String := """""";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
       Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
-      Assert (Token.String_Value = "", "String value not empty");
+      Assert (Token.String_Offset = 2, String_Offset_Message);
+      Assert (Token.String_Length = 0, String_Length_Message);
       Expect_EOF (Stream);
    end Test_Empty_String_Token;
 
    procedure Test_Non_Empty_String_Token is
       Text : aliased String := """test""";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
       Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
-      Assert (Token.String_Value = "test", "String value not equal to 'test'");
+      Assert (Token.String_Offset = 2, String_Offset_Message);
+      Assert (Token.String_Length = 4, String_Length_Message);
       Expect_EOF (Stream);
    end Test_Non_Empty_String_Token;
 
    procedure Test_Number_String_Token is
       Text : aliased String := """12.34""";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
       Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
-      Assert (Token.String_Value = "12.34", "String value not equal to '12.34'");
+      Assert (Token.String_Offset = 2, String_Offset_Message);
+      Assert (Token.String_Length = 5, String_Length_Message);
       Expect_EOF (Stream);
    end Test_Number_String_Token;
 
    procedure Test_Escaped_Character_String_Token is
       Text : aliased String := """horizontal\ttab""";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
-      HT : Character renames Ada.Characters.Latin_1.HT;
    begin
       Tokenizers.Read_Token (Stream, Token);
       Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
-      Assert (Token.String_Value = "horizontal" & HT & "tab", "String value not equal to 'horizontal\ttab'");
+      Assert (Token.String_Offset = 2, String_Offset_Message);
+      Assert (Token.String_Length = 15, String_Length_Message);
       Expect_EOF (Stream);
    end Test_Escaped_Character_String_Token;
 
    procedure Test_Escaped_Quotation_Solidus_String_Token is
       Text : aliased String := """foo\""\\bar""";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
       Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
-      Assert (Token.String_Value = "foo""\bar", "String value not equal to 'foo""\bar'");
+      Assert (Token.String_Offset = 2, String_Offset_Message);
+      Assert (Token.String_Length = 10, String_Length_Message);
       Expect_EOF (Stream);
    end Test_Escaped_Quotation_Solidus_String_Token;
 
    --  Integer/Float number
    procedure Test_Zero_Number_Token is
       Text : aliased String := "0";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -195,7 +203,7 @@ package body Test_Tokenizers is
 
    procedure Test_Integer_Number_Token is
       Text : aliased String := "42";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -206,7 +214,7 @@ package body Test_Tokenizers is
 
    procedure Test_Float_Number_Token is
       Text : aliased String := "3.14";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -217,7 +225,7 @@ package body Test_Tokenizers is
 
    procedure Test_Negative_Float_Number_Token is
       Text : aliased String := "-2.71";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -228,7 +236,7 @@ package body Test_Tokenizers is
 
    procedure Test_Integer_Exponent_Number_Token is
       Text : aliased String := "4e2";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -239,7 +247,7 @@ package body Test_Tokenizers is
 
    procedure Test_Float_Exponent_Number_Token is
       Text : aliased String := "0.314e1";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -250,7 +258,7 @@ package body Test_Tokenizers is
 
    procedure Test_Float_Negative_Exponent_Number_Token is
       Text : aliased String := "4e-1";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -262,7 +270,7 @@ package body Test_Tokenizers is
    --  Array
    procedure Test_Empty_Array_Tokens is
       Text : aliased String := "[]";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -274,7 +282,7 @@ package body Test_Tokenizers is
 
    procedure Test_One_Element_Array_Tokens is
       Text : aliased String := "[null]";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -291,7 +299,7 @@ package body Test_Tokenizers is
 
    procedure Test_Two_Elements_Array_Tokens is
       Text : aliased String := "[1,2]";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -319,7 +327,7 @@ package body Test_Tokenizers is
    --  Object
    procedure Test_Empty_Object_Tokens is
       Text : aliased String := "{}";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -331,7 +339,7 @@ package body Test_Tokenizers is
 
    procedure Test_One_Pair_Object_Tokens is
       Text : aliased String := "{""foo"":""bar""}";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -340,7 +348,8 @@ package body Test_Tokenizers is
       --  "foo"
       Tokenizers.Read_Token (Stream, Token);
       Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
-      Assert (Token.String_Value = "foo", "String value not equal to 'foo'");
+      Assert (Token.String_Offset = 3, String_Offset_Message);
+      Assert (Token.String_Length = 3, String_Length_Message);
 
       --  :
       Tokenizers.Read_Token (Stream, Token);
@@ -349,7 +358,8 @@ package body Test_Tokenizers is
       --  "bar"
       Tokenizers.Read_Token (Stream, Token);
       Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
-      Assert (Token.String_Value = "bar", "String value not equal to 'foo'");
+      Assert (Token.String_Offset = 9, String_Offset_Message);
+      Assert (Token.String_Length = 3, String_Length_Message);
 
       Tokenizers.Read_Token (Stream, Token);
       Assert_Kind (Token.Kind, Tokenizers.End_Object_Token, "Not End_Object_Token");
@@ -358,7 +368,7 @@ package body Test_Tokenizers is
 
    procedure Test_Two_Pairs_Object_Tokens is
       Text : aliased String := "{""foo"":true,""bar"":false}";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -367,7 +377,8 @@ package body Test_Tokenizers is
       --  "foo"
       Tokenizers.Read_Token (Stream, Token);
       Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
-      Assert (Token.String_Value = "foo", "String value not equal to 'foo'");
+      Assert (Token.String_Offset = 3, String_Offset_Message);
+      Assert (Token.String_Length = 3, String_Length_Message);
 
       --  :
       Tokenizers.Read_Token (Stream, Token);
@@ -385,7 +396,8 @@ package body Test_Tokenizers is
       --  "bar"
       Tokenizers.Read_Token (Stream, Token);
       Assert_Kind (Token.Kind, Tokenizers.String_Token, "Not String_Token");
-      Assert (Token.String_Value = "bar", "String value not equal to 'foo'");
+      Assert (Token.String_Offset = 14, String_Offset_Message);
+      Assert (Token.String_Length = 3, String_Length_Message);
 
       --  :
       Tokenizers.Read_Token (Stream, Token);
@@ -405,7 +417,7 @@ package body Test_Tokenizers is
    procedure Test_Control_Character_String_Exception is
       LF : Character renames Ada.Characters.Latin_1.LF;
       Text : aliased String := """no" & LF & "newline""";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -417,7 +429,7 @@ package body Test_Tokenizers is
 
    procedure Test_Unexpected_Escaped_Character_String_Exception is
       Text : aliased String := """unexpected\xcharacter""";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -429,7 +441,7 @@ package body Test_Tokenizers is
 
    procedure Test_Minus_Number_EOF_Exception is
       Text : aliased String := "-";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -441,7 +453,7 @@ package body Test_Tokenizers is
 
    procedure Test_Minus_Number_Exception is
       Text : aliased String := "-,";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -453,7 +465,7 @@ package body Test_Tokenizers is
 
    procedure Test_End_Dot_Number_Exception is
       Text : aliased String := "3.";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -465,7 +477,7 @@ package body Test_Tokenizers is
 
    procedure Test_End_Exponent_Number_Exception is
       Text : aliased String := "1E";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -477,7 +489,7 @@ package body Test_Tokenizers is
 
    procedure Test_End_Dot_Exponent_Number_Exception is
       Text : aliased String := "1.E";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -489,7 +501,7 @@ package body Test_Tokenizers is
 
    procedure Test_End_Exponent_Minus_Number_Exception is
       Text : aliased String := "1E-";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -501,7 +513,7 @@ package body Test_Tokenizers is
 
    procedure Test_Prefixed_Plus_Number_Exception is
       Text : aliased String := "+42";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -513,7 +525,7 @@ package body Test_Tokenizers is
 
    procedure Test_Leading_Zeroes_Integer_Number_Exception is
       Text : aliased String := "-02";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -525,7 +537,7 @@ package body Test_Tokenizers is
 
    procedure Test_Leading_Zeroes_Float_Number_Exception is
       Text : aliased String := "-003.14";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -537,7 +549,7 @@ package body Test_Tokenizers is
 
    procedure Test_Incomplete_True_Text_Exception is
       Text : aliased String := "tr";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -549,7 +561,7 @@ package body Test_Tokenizers is
 
    procedure Test_Incomplete_False_Text_Exception is
       Text : aliased String := "f";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -561,7 +573,7 @@ package body Test_Tokenizers is
 
    procedure Test_Incomplete_Null_Text_Exception is
       Text : aliased String := "nul";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);
@@ -573,7 +585,7 @@ package body Test_Tokenizers is
 
    procedure Test_Unknown_Keyword_Text_Exception is
       Text : aliased String := "unexpected";
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
    begin
       Tokenizers.Read_Token (Stream, Token);

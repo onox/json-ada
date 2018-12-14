@@ -13,6 +13,7 @@
 --  limitations under the License.
 
 with Ada.Characters.Latin_1;
+with Ada.Characters.Handling;
 
 package body JSON.Types is
 
@@ -22,13 +23,84 @@ package body JSON.Types is
    function "+" (Text : SU.Unbounded_String) return String
      renames SU.To_String;
 
+   function Unescape (Text : String) return String is
+      Value   : SU.Unbounded_String;
+      Escaped : Boolean := False;
+
+      use Ada.Characters.Latin_1;
+   begin
+      for C of Text loop
+         if Escaped then
+            case C is
+               when '"' | '\' | '/' =>
+                  SU.Append (Value, C);
+               when 'b' =>
+                  SU.Append (Value, BS);
+               when 'f' =>
+                  SU.Append (Value, FF);
+               when 'n' =>
+                  SU.Append (Value, LF);
+               when 'r' =>
+                  SU.Append (Value, CR);
+               when 't' =>
+                  SU.Append (Value, HT);
+               when others =>
+                  raise Program_Error;
+            end case;
+         elsif C = '"' then
+            raise Program_Error;
+         elsif C /= '\' then
+            if Ada.Characters.Handling.Is_Control (C) then
+               raise Program_Error;
+            end if;
+            SU.Append (Value, C);
+         end if;
+         Escaped := not Escaped and C = '\';
+      end loop;
+      return +Value;
+   end Unescape;
+
+   function Escape (Text : String) return String is
+      Value : SU.Unbounded_String;
+
+      use Ada.Characters.Latin_1;
+   begin
+      for C of Text loop
+         case C is
+            when '"' | '\' | '/' =>
+               SU.Append (Value, '\' & C);
+            when BS =>
+               SU.Append (Value, "\b");
+            when FF =>
+               SU.Append (Value, "\f");
+            when CR =>
+               SU.Append (Value, "\r");
+            when LF =>
+               SU.Append (Value, "\n");
+            when HT =>
+               SU.Append (Value, "\t");
+            when others =>
+               SU.Append (Value, C);
+         end case;
+      end loop;
+      return +Value;
+   end Escape;
+
    -----------------------------------------------------------------------------
    --                              Constructors                               --
    -----------------------------------------------------------------------------
 
+   function Create_String
+     (Stream : Streams.Stream_Ptr;
+      Offset, Length : Streams.AS.Stream_Element_Offset) return JSON_Value is
+   begin
+      return (Kind => String_Kind, Stream => Stream,
+        String_Offset => Offset, String_Length => Length);
+   end Create_String;
+
    function Create_String (Value : SU.Unbounded_String) return JSON_Value is
    begin
-      return (Kind => String_Kind, String_Value => Value);
+      return (Kind => Unbounded_String_Kind, String_Value => Value);
    end Create_String;
 
    function Create_Integer (Value : Integer_Type) return JSON_Value is
@@ -68,16 +140,9 @@ package body JSON.Types is
    function Value (Object : JSON_Value) return String is
    begin
       if Object.Kind = String_Kind then
-         return +Object.String_Value;
-      else
-         raise Invalid_Type_Error with "Value not a string";
-      end if;
-   end Value;
-
-   function Value (Object : JSON_Value) return SU.Unbounded_String is
-   begin
-      if Object.Kind = String_Kind then
-         return Object.String_Value;
+         return Unescape (Object.Stream.Get_String (Object.String_Offset, Object.String_Length));
+      elsif Object.Kind = Unbounded_String_Kind then
+         return Unescape (+Object.String_Value);
       else
          raise Invalid_Type_Error with "Value not a string";
       end if;
@@ -324,32 +389,16 @@ package body JSON.Types is
    -----------------------------------------------------------------------------
 
    function Image_String (Object : JSON_Value) return String is
-      use Ada.Characters.Latin_1;
-      Text : SU.Unbounded_String renames Object.String_Value;
-      Esc  : SU.Unbounded_String;
-      C    : Character;
+      Text : String renames Object.Stream.Get_String
+        (Object.String_Offset, Object.String_Length);
    begin
-      for Index in 1 .. SU.Length (Text) loop
-         C := SU.Element (Text, Index);
-         case C is
-            when '"' | '\' | '/' =>
-               SU.Append (Esc, '\' & C);
-            when BS =>
-               SU.Append (Esc, "\b");
-            when FF =>
-               SU.Append (Esc, "\f");
-            when CR =>
-               SU.Append (Esc, "\r");
-            when LF =>
-               SU.Append (Esc, "\n");
-            when HT =>
-               SU.Append (Esc, "\t");
-            when others =>
-               SU.Append (Esc, C);
-         end case;
-      end loop;
-      return '"' & (+Esc) & '"';
+      --  A string backed by a stream is always escaped. The tokenizer
+      --  will verify that the string does not contain unexpected characters
+      return '"' & Text & '"';
    end Image_String;
+
+   function Image_Unbounded_String (Object : JSON_Value) return String is
+     ('"' & Escape (+Object.String_Value) & '"');
 
    function Image_Integer (Object : JSON_Value) return String is
       Result : constant String := Integer_Type'Image (Object.Integer_Value);
@@ -417,6 +466,8 @@ package body JSON.Types is
             return Image_Object (Object);
          when String_Kind =>
             return Image_String (Object);
+         when Unbounded_String_Kind =>
+            return Image_Unbounded_String (Object);
          when Integer_Kind =>
             return Image_Integer (Object);
          when Float_Kind =>
