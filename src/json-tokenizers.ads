@@ -12,8 +12,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ada.Strings.Unbounded;
-
 with JSON.Types;
 with JSON.Streams;
 
@@ -37,8 +35,6 @@ package JSON.Tokenizers with SPARK_Mode => On is
       EOF_Token,
       Invalid_Token);
 
-   package SU renames Ada.Strings.Unbounded;
-
    type Token (Kind : Token_Kind := Invalid_Token) is record
       case Kind is
          when String_Token =>
@@ -54,10 +50,11 @@ package JSON.Tokenizers with SPARK_Mode => On is
       end case;
    end record;
 
-   procedure Read_Token (Stream     : in out Streams.Stream'Class;
-                         Next_Token : out Token;
-                         Expect_EOF : Boolean := False)
-     with Post => Next_Token.Kind /= Invalid_Token and (Expect_EOF = (Next_Token.Kind = EOF_Token));
+   procedure Read_Token
+     (Stream     : in out Streams.Stream'Class;
+      Next_Token : out Token;
+      Expect_EOF : Boolean := False)
+   with Post => Next_Token.Kind /= Invalid_Token and Expect_EOF = (Next_Token.Kind = EOF_Token);
 
    Tokenizer_Error : exception;
 

@@ -12,11 +12,9 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-private with Ada.Containers.Indefinite_Hashed_Maps;
+private with Ada.Containers.Vectors;
 private with Ada.Containers.Indefinite_Vectors;
-private with Ada.Strings.Hash;
 
-with Ada.Strings.Unbounded;
 with Ada.Iterator_Interfaces;
 
 with JSON.Streams;
@@ -24,15 +22,40 @@ with JSON.Streams;
 generic
    type Integer_Type is range <>;
    type Float_Type is digits <>;
+
+   Maximum_Number_Length : Positive := 20;
+   Default_Maximum_Depth : Positive := 10;
 package JSON.Types is
    pragma Preelaborate;
 
-   package SU renames Ada.Strings.Unbounded;
+   Maximum_String_Length_Numbers : constant Positive := Maximum_Number_Length;
+
+   -----------------------------------------------------------------------------
+   --                             Memory allocator                            --
+   -----------------------------------------------------------------------------
+
+   subtype Array_Offset is Natural;
+
+   type Memory_Allocator
+     (Maximum_Depth : Positive := Default_Maximum_Depth) is tagged limited private;
+
+   function Create_Array
+     (Object : Memory_Allocator;
+      Depth  : Positive) return Array_Offset;
+   --  Internal function
+
+   function Create_Object
+     (Object : Memory_Allocator;
+      Depth  : Positive) return Array_Offset;
+   --  Internal function
+
+   type Memory_Allocator_Ptr is not null access all Memory_Allocator;
+
+   -----------------------------------------------------------------------------
 
    type Value_Kind is
      (Array_Kind,
       Object_Kind,
-      Unbounded_String_Kind,
       String_Kind,
       Integer_Kind,
       Float_Kind,
@@ -54,25 +77,42 @@ package JSON.Types is
    function Value (Object : JSON_Value) return Boolean;
 
    function Length (Object : JSON_Value) return Natural;
-   --  For arrays and objects
+   --  Object must be a JSON array or object
 
    function Contains (Object : JSON_Value; Key : String) return Boolean;
-   --  For objects
+   --  Return True if the JSON object contains a key-value pair for
+   --  the given key
+   --
+   --  This function has a time complexity of O(n).
+   --
+   --  Object must be a JSON object.
 
    function Get (Object : JSON_Value; Index : Positive) return JSON_Value;
+   --  Return the JSON value at the given index in the JSON array
+   --
+   --  Object must be a JSON array.
+
    function Get (Object : JSON_Value; Key : String) return JSON_Value;
+   --  Return the JSON value for the given key in the JSON object
+   --
+   --  This function has a time complexity of O(n).
+   --
+   --  Object must be a JSON object.
+
+   Invalid_Type_Error : exception;
+
+   -----------------------------------------------------------------------------
 
    procedure Append (Object : in out JSON_Value; Value : JSON_Value);
-   --  For arrays
+   --  Internal procedure
 
    procedure Insert
      (Object : in out JSON_Value;
       Key    : JSON_Value;
-      Value  : JSON_Value)
+      Value  : JSON_Value;
+      Check_Duplicate_Keys : Boolean)
    with Pre => Key.Kind = String_Kind;
-   --  For objects
-
-   Invalid_Type_Error : exception;
+   --  Internal procedure
 
    -----------------------------------------------------------------------------
    --                                 Helpers                                 --
@@ -84,12 +124,6 @@ package JSON.Types is
 
    function Get_Object_Or_Empty
      (Object : JSON_Value; Key : String) return JSON_Value
-   with Inline;
-
-   function Get
-     (Object  : JSON_Value;
-      Key     : String;
-      Default : String) return JSON_Value
    with Inline;
 
    function Get
@@ -118,8 +152,6 @@ package JSON.Types is
      (Stream : Streams.Stream_Ptr;
       Offset, Length : Streams.AS.Stream_Element_Offset) return JSON_Value;
 
-   function Create_String (Value : SU.Unbounded_String) return JSON_Value;
-
    function Create_Integer (Value : Integer_Type) return JSON_Value;
 
    function Create_Float (Value : Float_Type) return JSON_Value;
@@ -128,9 +160,13 @@ package JSON.Types is
 
    function Create_Null return JSON_Value;
 
-   function Create_Array return JSON_Value;
+   function Create_Array
+     (Allocator : Memory_Allocator_Ptr;
+      Depth     : Positive) return JSON_Value;
 
-   function Create_Object return JSON_Value;
+   function Create_Object
+     (Allocator : Memory_Allocator_Ptr;
+      Depth     : Positive) return JSON_Value;
 
    -----------------------------------------------------------------------------
    --                                Iterating                                --
@@ -159,20 +195,13 @@ package JSON.Types is
 
 private
 
-   type Vector_Type;
-   type Map_Type;
-
-   type Vector_Ptr is not null access Vector_Type;
-   type Map_Ptr is not null access Map_Type;
-
    type JSON_Value (Kind : Value_Kind) is tagged record
       case Kind is
-         when Array_Kind =>
-            Vector : Vector_Ptr;
-         when Object_Kind =>
-            Map : Map_Ptr;
-         when Unbounded_String_Kind =>
-            String_Value : SU.Unbounded_String;
+         when Array_Kind | Object_Kind =>
+            Allocator : Memory_Allocator_Ptr;
+            Depth  : Positive;
+            Offset : Array_Offset;
+            Length : Natural;
          when String_Kind =>
             Stream : Streams.Stream_Ptr;
             String_Offset, String_Length : Streams.AS.Stream_Element_Offset;
@@ -182,42 +211,26 @@ private
             Float_Value : Float_Type;
          when Boolean_Kind =>
             Boolean_Value : Boolean;
-         when others =>
+         when Null_Kind =>
             null;
       end case;
    end record;
 
-   package JSON_Vectors is new Ada.Containers.Indefinite_Vectors (Positive, JSON_Value);
-
-   package JSON_Maps is new Ada.Containers.Indefinite_Hashed_Maps
-     (Key_Type        => String,
-      Element_Type    => JSON_Value,
-      Hash            => Ada.Strings.Hash,
-      Equivalent_Keys => "=");
-
-   type Vector_Type is new JSON_Vectors.Vector with null record;
-   type Map_Type    is new JSON_Maps.Map with null record;
+   -----------------------------------------------------------------------------
+   --                                Iterating                                --
+   -----------------------------------------------------------------------------
 
    subtype Iterator_Kind is Value_Kind range Array_Kind .. Object_Kind;
 
    type Cursor (Kind : Iterator_Kind) is record
-      case Kind is
-         when Array_Kind =>
-            Vector_Cursor : JSON_Vectors.Cursor;
-         when Object_Kind =>
-            Map_Cursor : JSON_Maps.Cursor;
-      end case;
+      Data  : JSON_Value (Kind => Kind);
+      Index : Natural;
    end record;
 
    type Iterator (Kind : Iterator_Kind) is limited
      new Value_Iterator_Interfaces.Forward_Iterator with
    record
-      case Kind is
-         when Array_Kind =>
-            Vector_Cursor : JSON_Vectors.Cursor;
-         when Object_Kind =>
-            Map_Cursor : JSON_Maps.Cursor;
-      end case;
+      Data : JSON_Value (Kind => Kind);
    end record;
 
    overriding function First (Object : Iterator) return Cursor;
@@ -225,5 +238,31 @@ private
    overriding function Next
      (Object   : Iterator;
       Position : Cursor) return Cursor;
+
+   -----------------------------------------------------------------------------
+   --                             Memory allocator                            --
+   -----------------------------------------------------------------------------
+
+   type Array_Value (Kind : Value_Kind := Null_Kind) is record
+      Value : JSON_Value (Kind => Kind);
+   end record;
+
+   type Key_Value_Pair (Kind : Value_Kind := Null_Kind) is record
+      Key     : JSON_Value (Kind => String_Kind);
+      Element : JSON_Value (Kind => Kind);
+   end record;
+
+   package Array_Vectors  is new Ada.Containers.Vectors (Positive, Array_Value);
+   package Object_Vectors is new Ada.Containers.Indefinite_Vectors (Positive, Key_Value_Pair);
+
+   type Array_Level_Array  is array (Positive range <>) of Array_Vectors.Vector;
+   type Object_Level_Array is array (Positive range <>) of Object_Vectors.Vector;
+
+   type Memory_Allocator
+     (Maximum_Depth : Positive := Default_Maximum_Depth) is tagged limited
+   record
+      Array_Levels  : Array_Level_Array  (1 .. Maximum_Depth);
+      Object_Levels : Object_Level_Array (1 .. Maximum_Depth);
+   end record;
 
 end JSON.Types;

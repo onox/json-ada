@@ -42,6 +42,7 @@ private
    procedure Test_One_Element_Array_Text;
    procedure Test_Multiple_Elements_Array_Text;
    procedure Test_Array_Iterable;
+   procedure Test_Multiple_Array_Iterable;
 
    --  Object
    procedure Test_Empty_Object_Text;

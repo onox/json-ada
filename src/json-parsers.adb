@@ -22,15 +22,20 @@ package body JSON.Parsers is
 
    use type Tokenizers.Token_Kind;
 
-   function Parse_Token (Stream : Streams.Stream_Ptr;
-                         Token  : Tokenizers.Token)
-     return Types.JSON_Value;
+   function Parse_Token
+     (Stream : Streams.Stream_Ptr;
+      Token  : Tokenizers.Token;
+      Allocator : Types.Memory_Allocator_Ptr;
+      Depth     : Positive) return Types.JSON_Value;
 
-   function Parse_Array (Stream : Streams.Stream_Ptr)
-     return Types.JSON_Value is
+   function Parse_Array
+     (Stream    : Streams.Stream_Ptr;
+      Allocator : Types.Memory_Allocator_Ptr;
+      Depth     : Positive) return Types.JSON_Value
+   is
       Token : Tokenizers.Token;
 
-      JSON_Array : Types.JSON_Value := Types.Create_Array;
+      JSON_Array : Types.JSON_Value := Types.Create_Array (Allocator, Depth + 1);
       Repeat : Boolean := False;
    begin
       loop
@@ -48,7 +53,7 @@ package body JSON.Parsers is
          end if;
 
          --  Parse value and append it to the array
-         JSON_Array.Append (Parse_Token (Stream, Token));
+         JSON_Array.Append (Parse_Token (Stream, Token, Allocator, Depth + 1));
 
          Repeat := True;
       end loop;
@@ -56,11 +61,14 @@ package body JSON.Parsers is
       return JSON_Array;
    end Parse_Array;
 
-   function Parse_Object (Stream : Streams.Stream_Ptr)
-     return Types.JSON_Value is
+   function Parse_Object
+     (Stream    : Streams.Stream_Ptr;
+      Allocator : Types.Memory_Allocator_Ptr;
+      Depth     : Positive) return Types.JSON_Value
+   is
       Token : Tokenizers.Token;
 
-      JSON_Object : Types.JSON_Value := Types.Create_Object;
+      JSON_Object : Types.JSON_Value := Types.Create_Object (Allocator, Depth + 1);
       Repeat : Boolean := False;
    begin
       loop
@@ -94,7 +102,9 @@ package body JSON.Parsers is
 
             --  Parse member value and insert key-value pair in the object
             Tokenizers.Read_Token (Stream.all, Token);
-            JSON_Object.Insert (Key, Parse_Token (Stream, Token));
+            JSON_Object.Insert
+              (Key, Parse_Token (Stream, Token, Allocator, Depth + 1),
+               Check_Duplicate_Keys);
          end;
 
          Repeat := True;
@@ -103,15 +113,17 @@ package body JSON.Parsers is
       return JSON_Object;
    end Parse_Object;
 
-   function Parse_Token (Stream : Streams.Stream_Ptr;
-                         Token  : Tokenizers.Token)
-     return Types.JSON_Value is
+   function Parse_Token
+     (Stream : Streams.Stream_Ptr;
+      Token  : Tokenizers.Token;
+      Allocator : Types.Memory_Allocator_Ptr;
+      Depth     : Positive) return Types.JSON_Value is
    begin
       case Token.Kind is
          when Tokenizers.Begin_Array_Token =>
-            return Parse_Array (Stream);
+            return Parse_Array (Stream, Allocator, Depth);
          when Tokenizers.Begin_Object_Token =>
-            return Parse_Object (Stream);
+            return Parse_Object (Stream, Allocator, Depth);
          when Tokenizers.String_Token =>
             return Types.Create_String (Stream, Token.String_Offset, Token.String_Length);
          when Tokenizers.Integer_Token =>
@@ -123,24 +135,25 @@ package body JSON.Parsers is
          when Tokenizers.Null_Token =>
             return Types.Create_Null;
          when others =>
-            raise Parse_Error with "Unexpected token " & Tokenizers.Token_Kind'Image (Token.Kind);
+            raise Parse_Error with "Unexpected token " & Token.Kind'Image;
       end case;
    end Parse_Token;
 
-   function Parse (Stream : Streams.Stream_Ptr)
-     return Types.JSON_Value is
+   function Parse
+     (Stream    : aliased in out Streams.Stream'Class;
+      Allocator : aliased in out Types.Memory_Allocator) return Types.JSON_Value
+   is
       Token : Tokenizers.Token;
    begin
-      Tokenizers.Read_Token (Stream.all, Token);
-      return Value : constant Types.JSON_Value := Parse_Token (Stream, Token) do
-         Tokenizers.Read_Token (Stream.all, Token, Expect_EOF => True);
+      Tokenizers.Read_Token (Stream, Token);
+      return Value : constant Types.JSON_Value
+        := Parse_Token (Stream'Access, Token, Allocator'Access, Positive'First)
+      do
+         Tokenizers.Read_Token (Stream, Token, Expect_EOF => True);
       end return;
    exception
       when E : Tokenizers.Tokenizer_Error =>
          raise Parse_Error with Ada.Exceptions.Exception_Message (E);
    end Parse;
-
-   function Parse (Stream : aliased in out Streams.Stream'Class)
-     return Types.JSON_Value is (Parse (Stream'Access));
 
 end JSON.Parsers;

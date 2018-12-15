@@ -15,11 +15,14 @@
 with Ada.Characters.Handling;
 with Ada.Characters.Latin_1;
 with Ada.IO_Exceptions;
+with Ada.Strings.Bounded;
 
 package body JSON.Tokenizers is
 
-   procedure Read_String (Stream     : in out Streams.Stream'Class;
-                          Next_Token : out Token) is
+   procedure Read_String
+     (Stream     : in out Streams.Stream'Class;
+      Next_Token : out Token)
+   is
       C : Character;
       Index, Length : Streams.AS.Stream_Element_Offset := 0;
       Escaped : Boolean := False;
@@ -56,44 +59,68 @@ package body JSON.Tokenizers is
         (Kind => String_Token, String_Offset => Index - Length, String_Length => Length);
    end Read_String;
 
-   procedure Test_Leading_Zeroes (First : Character; Value : SU.Unbounded_String) is
+   procedure Test_Leading_Zeroes (First : Character; Value : String) is
       Leading_Zero_Message : constant String := "Leading zeroes in number are not allowed";
       Minus_Digit_Message  : constant String := "Expected at least one digit after - sign";
    begin
       if First = '-' then
-         if SU.Length (Value) >= 3 and then SU.Slice (Value, 1, 2) = "-0" then
+         if Value'Length >= 3 and then Value (Value'First .. Value'First + 1) = "-0" then
             raise Tokenizer_Error with Leading_Zero_Message;
-         elsif SU.Length (Value) = 1 then
+         elsif Value'Length = 1 then
             raise Tokenizer_Error with Minus_Digit_Message;
          end if;
-      elsif First = '0' and SU.Length (Value) >= 2 then
+      elsif First = '0' and Value'Length >= 2 then
          raise Tokenizer_Error with Leading_Zero_Message;
       end if;
    end Test_Leading_Zeroes;
 
-   procedure Read_Number (Stream     : in out Streams.Stream'Class;
-                          First      : Character;
-                          Next_Token : out Token) is
-      C : Character;
-      Value : SU.Unbounded_String;
+   procedure Read_Number
+     (Stream     : in out Streams.Stream'Class;
+      First      : Character;
+      Next_Token : out Token)
+   is
+      package SB is new Ada.Strings.Bounded.Generic_Bounded_Length
+        (Max => Types.Maximum_String_Length_Numbers);
+
+      Value : SB.Bounded_String;
+      C     : Character;
       Is_Float, Checked_Leading_Zeroes : Boolean := False;
-      Error_Dot_Message : constant String := "Number must contain at least one digit after decimal point";
-      Error_Exp_Message : constant String := "Expected optional +/- sign after e/E and then at least one digit";
+
+      Error_Dot_Message : constant String
+        := "Number must contain at least one digit after decimal point";
+      Error_Exp_Message : constant String
+        := "Expected optional +/- sign after e/E and then at least one digit";
+      Error_Plus_Message : constant String
+        := "Prefixing number with '+' character is not allowed";
+      Error_One_Digit_Message : constant String
+        := "Expected at least one digit after +/- sign in number";
+
+      procedure Create_Token_From_Number is
+         Number : constant String := SB.To_String (Value);
+      begin
+         if Is_Float then
+            Next_Token := Token'(Kind => Float_Token,
+              Float_Value => Types.Float_Type'Value (Number));
+         else
+            Next_Token := Token'(Kind => Integer_Token,
+              Integer_Value => Types.Integer_Type'Value (Number));
+         end if;
+      end Create_Token_From_Number;
    begin
       if First = '+' then
-         raise Tokenizer_Error with "Prefixing number with '+' character is not allowed";
+         raise Tokenizer_Error with Error_Plus_Message;
       end if;
-      SU.Append (Value, First);
+      SB.Append (Value, First);
 
       --  Accept sequence of digits, including leading zeroes
       loop
          C := Stream.Read_Character;
          exit when C not in '0' .. '9';
-         SU.Append (Value, C);
+         SB.Append (Value, C);
       end loop;
 
       --  Test whether value contains leading zeroes
-      Test_Leading_Zeroes (First, Value);
+      Test_Leading_Zeroes (First, SB.To_String (Value));
       Checked_Leading_Zeroes := True;
 
       --  Tokenize fraction part
@@ -101,7 +128,7 @@ package body JSON.Tokenizers is
          Is_Float := True;
 
          --  Append the dot
-         SU.Append (Value, C);
+         SB.Append (Value, C);
 
          -- Require at least one digit after decimal point
          begin
@@ -109,7 +136,7 @@ package body JSON.Tokenizers is
             if C not in '0' .. '9' then
                raise Tokenizer_Error with Error_Dot_Message;
             end if;
-            SU.Append (Value, C);
+            SB.Append (Value, C);
          exception
             when Ada.IO_Exceptions.End_Error =>
                raise Tokenizer_Error with Error_Dot_Message;
@@ -119,14 +146,14 @@ package body JSON.Tokenizers is
          loop
             C := Stream.Read_Character;
             exit when C not in '0' .. '9';
-            SU.Append (Value, C);
+            SB.Append (Value, C);
          end loop;
       end if;
 
       --  Tokenize exponent part
       if C in 'e' | 'E' then
          --  Append the 'e' or 'E' character
-         SU.Append (Value, C);
+         SB.Append (Value, C);
 
          begin
             C := Stream.Read_Character;
@@ -137,16 +164,16 @@ package body JSON.Tokenizers is
                   Is_Float := True;
                end if;
 
-               SU.Append (Value, C);
+               SB.Append (Value, C);
 
                --  Require at least one digit after +/- sign
                C := Stream.Read_Character;
                if C not in '0' .. '9' then
-                  raise Tokenizer_Error with "Expected at least one digit after +/- sign in number";
+                  raise Tokenizer_Error with Error_One_Digit_Message;
                end if;
-               SU.Append (Value, C);
+               SB.Append (Value, C);
             elsif C in '0' .. '9' then
-               SU.Append (Value, C);
+               SB.Append (Value, C);
             else
                raise Tokenizer_Error with Error_Exp_Message;
             end if;
@@ -159,34 +186,21 @@ package body JSON.Tokenizers is
          loop
             C := Stream.Read_Character;
             exit when C not in '0' .. '9';
-            SU.Append (Value, C);
+            SB.Append (Value, C);
          end loop;
       end if;
 
-      if Is_Float then
-         Next_Token := Token'(Kind => Float_Token,
-           Float_Value => Types.Float_Type'Value (SU.To_String (Value)));
-      else
-         Next_Token := Token'(Kind => Integer_Token,
-           Integer_Value => Types.Integer_Type'Value (SU.To_String (Value)));
-      end if;
-
+      Create_Token_From_Number;
       Stream.Write_Character (C);
    exception
       --  End_Error is raised if the number if followed by an EOF
       when Ada.IO_Exceptions.End_Error =>
          --  Test whether value contains leading zeroes
          if not Checked_Leading_Zeroes then
-            Test_Leading_Zeroes (First, Value);
+            Test_Leading_Zeroes (First, SB.To_String (Value));
          end if;
 
-         if Is_Float then
-            Next_Token := Token'(Kind => Float_Token,
-              Float_Value => Types.Float_Type'Value (SU.To_String (Value)));
-         else
-            Next_Token := Token'(Kind => Integer_Token,
-              Integer_Value => Types.Integer_Type'Value (SU.To_String (Value)));
-         end if;
+         Create_Token_From_Number;
    end Read_Number;
 
    procedure Read_Literal
@@ -194,13 +208,16 @@ package body JSON.Tokenizers is
       First      : Character;
       Next_Token : out Token)
    is
-      Value : SU.Unbounded_String;
+      package SB is new Ada.Strings.Bounded.Generic_Bounded_Length (Max => 5);
+
+      Value : SB.Bounded_String;
       C     : Character;
 
-      Error_Message : constant String := "Expected literal 'true', 'false', or 'null'";
+      Unexpected_Literal_Message : constant String
+        := "Expected literal 'true', 'false', or 'null'";
 
       procedure Create_Token_From_Literal is
-         Literal : constant String := SU.To_String (Value);
+         Literal : constant String := SB.To_String (Value);
       begin
          if Literal = "true" then
             Next_Token := Token'(Kind => Boolean_Token, Boolean_Value => True);
@@ -209,15 +226,15 @@ package body JSON.Tokenizers is
          elsif Literal = "null" then
             Next_Token := Token'(Kind => Null_Token);
          else
-            raise Tokenizer_Error with Error_Message & ", got '" & Literal & "'";
+            raise Tokenizer_Error with Unexpected_Literal_Message;
          end if;
       end Create_Token_From_Literal;
    begin
-      SU.Append (Value, First);
+      SB.Append (Value, First);
       loop
          C := Stream.Read_Character;
          exit when C not in 'a' .. 'z';
-         SU.Append (Value, C);
+         SB.Append (Value, C);
       end loop;
 
       Create_Token_From_Literal;
@@ -226,11 +243,15 @@ package body JSON.Tokenizers is
       --  End_Error is raised if the literal if followed by an EOF
       when Ada.IO_Exceptions.End_Error =>
          Create_Token_From_Literal;
+      when Ada.Strings.Length_Error =>
+         raise Tokenizer_Error with Unexpected_Literal_Message;
    end Read_Literal;
 
-   procedure Read_Token (Stream     : in out Streams.Stream'Class;
-                         Next_Token : out Token;
-                         Expect_EOF : Boolean := False) is
+   procedure Read_Token
+     (Stream     : in out Streams.Stream'Class;
+      Next_Token : out Token;
+      Expect_EOF : Boolean := False)
+   is
       C : Character;
 
       use Ada.Characters.Latin_1;

@@ -21,7 +21,7 @@ with JSON.Types;
 package body Test_Parsers is
 
    package Types is new JSON.Types (Long_Integer, Long_Float);
-   package Parsers is new JSON.Parsers (Types);
+   package Parsers is new JSON.Parsers (Types, Check_Duplicate_Keys => True);
 
    overriding
    procedure Initialize (T : in out Test) is
@@ -43,6 +43,8 @@ package body Test_Parsers is
       T.Add_Test_Routine (Test_One_Element_Array_Text'Access, "Parse text '[""test""]'");
       T.Add_Test_Routine (Test_Multiple_Elements_Array_Text'Access, "Parse text '[3.14, true]'");
       T.Add_Test_Routine (Test_Array_Iterable'Access, "Iterate over '[false, ""test"", 0.271e1]'");
+      T.Add_Test_Routine (Test_Multiple_Array_Iterable'Access,
+        "Iterate over '{""foo"":[1, ""2""],""bar"":[0.271e1]}'");
 
       T.Add_Test_Routine (Test_Empty_Object_Text'Access, "Parse text '{}'");
       T.Add_Test_Routine (Test_One_Member_Object_Text'Access, "Parse text '{""foo"":""bar""}'");
@@ -76,8 +78,9 @@ package body Test_Parsers is
    procedure Test_True_Text is
       Text : aliased String := "true";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Boolean_Kind, "Not a boolean");
       Assert (Value.Value, "Expected boolean value to be True");
@@ -86,8 +89,9 @@ package body Test_Parsers is
    procedure Test_False_Text is
       Text : aliased String := "false";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Boolean_Kind, "Not a boolean");
       Assert (not Value.Value, "Expected boolean value to be False");
@@ -96,8 +100,9 @@ package body Test_Parsers is
    procedure Test_Null_Text is
       Text : aliased String := "null";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Null_Kind, "Not a null");
    end Test_Null_Text;
@@ -105,8 +110,9 @@ package body Test_Parsers is
    procedure Test_Empty_String_Text is
       Text : aliased String := """""";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = String_Kind, "Not a string");
       Assert (Value.Value = "", "String value not empty");
@@ -115,8 +121,9 @@ package body Test_Parsers is
    procedure Test_Non_Empty_String_Text is
       Text : aliased String := """test""";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = String_Kind, "Not a string");
       Assert (Value.Value = "test", "String value not equal to 'test'");
@@ -125,8 +132,9 @@ package body Test_Parsers is
    procedure Test_Number_String_Text is
       Text : aliased String := """12.34""";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = String_Kind, "Not a string");
       Assert (Value.Value = "12.34", "String value not equal to 12.34''");
@@ -135,8 +143,9 @@ package body Test_Parsers is
    procedure Test_Integer_Number_Text is
       Text : aliased String := "42";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Integer_Kind, "Not an integer");
       Assert (Value.Value = 42, "Integer value not equal to 42");
@@ -145,8 +154,9 @@ package body Test_Parsers is
    procedure Test_Float_Number_Text is
       Text : aliased String := "3.14";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Float_Kind, "Not a float");
       Assert (Value.Value = 3.14, "Float value not equal to 3.14");
@@ -155,8 +165,9 @@ package body Test_Parsers is
    procedure Test_Empty_Array_Text is
       Text : aliased String := "[]";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Array_Kind, "Not an array");
       Assert (Value.Length = 0, "Expected array to be empty");
@@ -166,11 +177,12 @@ package body Test_Parsers is
       Text : aliased String := "[""test""]";
       String_Value_Message : constant String := "Expected string at index 1 to be equal to 'test'";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Array_Kind, "Not an array");
-      Assert (Value.Length = 1, "Expected length of array to be 1");
+      Assert (Value.Length = 1, "Expected length of array to be 1, got " & Value.Length'Image);
 
       begin
          Assert (Value.Get (1).Value = "test", String_Value_Message);
@@ -185,8 +197,9 @@ package body Test_Parsers is
       Float_Value_Message   : constant String := "Expected float at index 1 to be equal to 3.14";
       Boolean_Value_Message : constant String := "Expected boolean at index 2 to be True";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Array_Kind, "Not an array");
       Assert (Value.Length = 2, "Expected length of array to be 2");
@@ -209,8 +222,9 @@ package body Test_Parsers is
       Text : aliased String := "[false, ""test"", 0.271e1]";
       Iterations_Message : constant String := "Unexpected number of iterations";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Array_Kind, "Not an array");
       Assert (Value.Length = 3, "Expected length of array to be 3");
@@ -235,11 +249,53 @@ package body Test_Parsers is
       end;
    end Test_Array_Iterable;
 
+   procedure Test_Multiple_Array_Iterable is
+      Text : aliased String := "{""foo"":[1, ""2""],""bar"":[0.271e1]}";
+      Iterations_Message : constant String := "Unexpected number of iterations";
+
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+   begin
+      Assert (Value.Kind = Object_Kind, "Not an object");
+      Assert (Value.Length = 2, "Expected length of object to be 2");
+
+      declare
+         Iterations  : Natural := 0;
+      begin
+         for Element of Value.Get ("foo") loop
+            Iterations := Iterations + 1;
+            if Iterations = 1 then
+               Assert (Element.Kind = Integer_Kind, "Not an integer");
+               Assert (Element.Value = 1, "Expected integer value to be 1");
+            elsif Iterations = 2 then
+               Assert (Element.Kind = String_Kind, "Not a string");
+               Assert (Element.Value = "2", "Expected string value to be '2'");
+            end if;
+         end loop;
+         Assert (Iterations = Value.Get ("foo").Length, Iterations_Message);
+      end;
+
+      declare
+         Iterations  : Natural := 0;
+      begin
+         for Element of Value.Get ("bar") loop
+            Iterations := Iterations + 1;
+            if Iterations = 1 then
+               Assert (Element.Kind = Float_Kind, "Not a float");
+               Assert (Element.Value = 2.71, "Expected float value to be 2.71");
+            end if;
+         end loop;
+         Assert (Iterations = Value.Get ("bar").Length, Iterations_Message);
+      end;
+   end Test_Multiple_Array_Iterable;
+
    procedure Test_Empty_Object_Text is
       Text : aliased String := "{}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
       Assert (Value.Length = 0, "Expected object to be empty");
@@ -248,8 +304,9 @@ package body Test_Parsers is
    procedure Test_One_Member_Object_Text is
       Text : aliased String := "{""foo"":""bar""}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
       Assert (Value.Length = 1, "Expected length of object to be 1");
@@ -260,8 +317,9 @@ package body Test_Parsers is
    procedure Test_Multiple_Members_Object_Text is
       Text : aliased String := "{""foo"":1,""bar"":2}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
       Assert (Value.Length = 2, "Expected length of object to be 2");
@@ -275,8 +333,9 @@ package body Test_Parsers is
       Iterations_Message : constant String := "Unexpected number of iterations";
       All_Keys_Message   : constant String := "Did not iterate over all expected keys";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
       Assert (Value.Length = 2, "Expected length of object to be 2");
@@ -289,7 +348,7 @@ package body Test_Parsers is
          for Key of Value loop
             Iterations := Iterations + 1;
             if Iterations in 1 .. 2 then
-               Assert (Key.Kind = Unbounded_String_Kind, "Not String");
+               Assert (Key.Kind = String_Kind, "Not String");
                Assert (Key.Value in "foo" | "bar",
                  "Expected string value to be equal to 'foo' or 'bar'");
 
@@ -305,8 +364,9 @@ package body Test_Parsers is
    procedure Test_Array_Object_Array is
       Text : aliased String := "[{""foo"":[true, 42]}]";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Array_Kind, "Not an array");
       Assert (Value.Length = 1, "Expected length of array to be 1");
@@ -336,8 +396,9 @@ package body Test_Parsers is
    procedure Test_Object_Array_Object is
       Text : aliased String := "{""foo"":[null, {""bar"": 42}]}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
       Assert (Value.Length = 1, "Expected length of object to be 1");
@@ -373,8 +434,9 @@ package body Test_Parsers is
    procedure Test_Object_No_Array is
       Text : aliased String := "{}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       begin
          declare
@@ -403,8 +465,9 @@ package body Test_Parsers is
    procedure Test_Object_No_Object is
       Text : aliased String := "{}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Value  : constant JSON_Value := Parsers.Parse (Stream);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
    begin
       begin
          declare
@@ -433,10 +496,11 @@ package body Test_Parsers is
    procedure Test_Empty_Text_Exception is
       Text : aliased String := "";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");
@@ -449,10 +513,11 @@ package body Test_Parsers is
    procedure Test_Array_No_Value_Separator_Exception is
       Text : aliased String := "[3.14""test""]";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");
@@ -465,10 +530,11 @@ package body Test_Parsers is
    procedure Test_Array_No_End_Array_Exception is
       Text : aliased String := "[true";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");
@@ -481,10 +547,11 @@ package body Test_Parsers is
    procedure Test_No_EOF_After_Array_Exception is
       Text : aliased String := "[1]2";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");
@@ -497,10 +564,11 @@ package body Test_Parsers is
    procedure Test_Object_No_Value_Separator_Exception is
       Text : aliased String := "{""foo"":1""bar"":2}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");
@@ -513,10 +581,11 @@ package body Test_Parsers is
    procedure Test_Object_No_Name_Separator_Exception is
       Text : aliased String := "{""foo"",true}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");
@@ -529,10 +598,11 @@ package body Test_Parsers is
    procedure Test_Object_Key_No_String_Exception is
       Text : aliased String := "{42:true}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");
@@ -545,10 +615,11 @@ package body Test_Parsers is
    procedure Test_Object_No_Second_Member_Exception is
       Text : aliased String := "{""foo"":true,}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");
@@ -561,10 +632,11 @@ package body Test_Parsers is
    procedure Test_Object_Duplicate_Keys_Exception is
       Text : aliased String := "{""foo"":1,""foo"":2}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Constraint_Error");
@@ -577,10 +649,11 @@ package body Test_Parsers is
    procedure Test_Object_No_Value_Exception is
       Text : aliased String := "{""foo"":}";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");
@@ -593,10 +666,11 @@ package body Test_Parsers is
    procedure Test_Object_No_End_Object_Exception is
       Text : aliased String := "{""foo"":true";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");
@@ -609,10 +683,11 @@ package body Test_Parsers is
    procedure Test_No_EOF_After_Object_Exception is
       Text : aliased String := "{""foo"":true}[true]";
 
-      Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
    begin
       declare
-         Value  : JSON_Value := Parsers.Parse (Stream);
+         Value  : JSON_Value := Parsers.Parse (Stream, Allocator);
          pragma Unreferenced (Value);
       begin
          Fail ("Expected Parse_Error");

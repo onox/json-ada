@@ -17,12 +17,16 @@ with JSON.Streams;
 
 generic
    with package Types is new JSON.Types (<>);
+
+   Check_Duplicate_Keys  : Boolean  := False;
+   --  If enabled, raise a Constraint_Error when an object contains
+   --  duplicate keys. Parsing a JSON text will be slower if enabled.
 package JSON.Parsers with SPARK_Mode => On is
    pragma Preelaborate;
 
-   function Parse (Stream : Streams.Stream_Ptr) return Types.JSON_Value;
-
-   function Parse (Stream : aliased in out Streams.Stream'Class) return Types.JSON_Value;
+   function Parse
+     (Stream    : aliased in out Streams.Stream'Class;
+      Allocator : aliased in out Types.Memory_Allocator) return Types.JSON_Value;
 
    Parse_Error : exception;
 

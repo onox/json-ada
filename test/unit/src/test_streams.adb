@@ -60,8 +60,9 @@ package body Test_Streams is
          Byte_Array'Read (Stream_IO.Stream (File), Bytes.all);
 
          declare
-            Stream : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Bytes);
-            Value  : constant JSON_Value := Parsers.Parse (Stream);
+            Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Bytes);
+            Allocator : Types.Memory_Allocator;
+            Value  : constant JSON_Value := Parsers.Parse (Stream, Allocator);
          begin
             Assert (Value.Kind = Float_Kind, "Not a float");
             Assert (Value.Value = 3.14, "Expected float value to be equal to 3.14");

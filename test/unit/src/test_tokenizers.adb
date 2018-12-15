@@ -81,7 +81,6 @@ package body Test_Tokenizers is
    end Initialize;
 
    use type Tokenizers.Token_Kind;
-   use type Types.SU.Unbounded_String;
 
    procedure Assert_Kind is new Assert_Equal
      (Tokenizers.Token_Kind, Tokenizers.Token_Kind'Image);
