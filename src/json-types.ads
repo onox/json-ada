@@ -23,7 +23,7 @@ generic
    type Integer_Type is range <>;
    type Float_Type is digits <>;
 
-   Maximum_Number_Length : Positive := 20;
+   Maximum_Number_Length : Positive := 30;
    Default_Maximum_Depth : Positive := 10;
 package JSON.Types is
    pragma Preelaborate;

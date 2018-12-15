@@ -22,7 +22,7 @@ package Parsers is new JSON.Parsers (Types);
 ```
 
 You can replace the actual generic parameters of `JSON.Types` with your
-own types if you want. Specify `Maximum_Number_Length` (default is 20)
+own types if you want. Specify `Maximum_Number_Length` (default is 30)
 when instantiating `JSON.Types` to set the maximum length in characters
 of numbers. The default maximum nesting depth can be specified with
 `Default_Maximum_Depth` (default is 10).
