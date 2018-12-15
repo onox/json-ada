@@ -14,7 +14,7 @@
 
 abstract project Config is
 
-   Version := "2";
+   Version := "3";
 
    for Source_Dirs use ();
 
