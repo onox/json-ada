@@ -94,6 +94,8 @@ package body JSON.Tokenizers is
         := "Prefixing number with '+' character is not allowed";
       Error_One_Digit_Message : constant String
         := "Expected at least one digit after +/- sign in number";
+      Error_Length_Message : constant String
+        := "Number is longer than" & Types.Maximum_String_Length_Numbers'Image & " characters";
 
       procedure Create_Token_From_Number is
          Number : constant String := SB.To_String (Value);
@@ -201,6 +203,8 @@ package body JSON.Tokenizers is
          end if;
 
          Create_Token_From_Number;
+      when Ada.Strings.Length_Error =>
+         raise Tokenizer_Error with Error_Length_Message;
    end Read_Number;
 
    procedure Read_Literal
