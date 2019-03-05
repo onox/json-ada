@@ -1,9 +1,10 @@
 /lib/
 /obj/
 /test/unit/obj/
+/test/cov/
 /bin/
 *.swp
 .DS_Store
 .#*#
 auto.cgpr
-test/unit/test_bindings
+/test/unit/test_bindings

@@ -1,10 +1,7 @@
-MODE ?= release
-
-GNAT_FLAGS ?= -dm
 CFLAGS  ?= -O2 -march=native
 LDFLAGS ?= -Wl,-z,relro -Wl,-z,now
 
-GNATMAKE  = gprbuild $(GNAT_FLAGS) -p -XCompiler_Flags="$(CFLAGS)" -XMode=$(MODE)
+GNATMAKE  = gprbuild -dm -p
 GNATCLEAN = gprclean -q
 GNATINSTALL = gprinstall
 
@@ -15,23 +12,34 @@ gprdir     = $(PREFIX)/share/gpr
 libdir     = $(PREFIX)/lib
 alidir     = $(libdir)
 
-.PHONY: build test clean run_unit_tests install
+.PHONY: build test debug clean coverage install
 
 build:
-	$(GNATMAKE) -P json_ada.gpr -largs $(LDFLAGS)
+	$(GNATMAKE) -P json_ada.gpr -cargs $(CFLAGS) -largs $(LDFLAGS)
 
-test:
-	$(GNATMAKE) -P test/unit/unit_tests.gpr -largs $(LDFLAGS)
+build_test:
+	$(GNATMAKE) -P test/unit/unit_tests.gpr -XMode=coverage -cargs -O0 -largs $(LDFLAGS)
+
+debug:
+	$(GNATMAKE) -P json_ada.gpr -XMode=debug -cargs $(CFLAGS) -largs $(LDFLAGS)
 
 clean:
 	$(GNATCLEAN) -P json_ada.gpr
 	$(GNATCLEAN) -P test/unit/unit_tests.gpr
-	rmdir lib/json-ada lib obj test/unit/obj
+	rm -rf lib obj test/unit/obj test/cov
 
-run_unit_tests:
+test: build_test
 	./test/unit/test_bindings
 
-install:
+coverage:
+	mkdir -p test/cov
+	lcov -q -c -d test/unit/obj -o test/cov/unit.info
+	lcov -q -r test/cov/unit.info */adainclude/* -o test/cov/unit.info
+	lcov -q -r test/cov/unit.info */test/unit/* -o test/cov/unit.info
+	genhtml -q --ignore-errors source -o test/cov/html test/cov/unit.info
+	lcov -l test/cov/unit.info
+
+install: build
 	$(GNATINSTALL) --relocate-build-tree -p -q -f --install-name='json-ada' \
 		--sources-subdir=$(includedir) \
 		--project-subdir=$(gprdir) \

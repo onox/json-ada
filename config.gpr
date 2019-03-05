@@ -18,10 +18,8 @@ abstract project Config is
 
    for Source_Dirs use ();
 
-   type Mode_Type is ("debug", "release");
+   type Mode_Type is ("debug", "release", "coverage");
    Mode : Mode_Type := external ("Mode", "release");
-
-   Compiler_Flags := external_as_list ("Compiler_Flags", " ");
 
    Compiler_Switches := (
       "-fstack-check",  --  Stack overflow checking
@@ -34,7 +32,7 @@ abstract project Config is
       "-gnatyAdOSux-msbc",
       "-gnat2012",      --  Use Ada 2012
       "-Wall"           --  All GCC warnings
-   ) & Compiler_Flags;
+   );
 
    Dev_Switches := (
       "-gnato13",       --  Numeric overflow checking
@@ -61,6 +59,9 @@ abstract project Config is
          when "release" =>
             for Switches ("ada") use Compiler_Switches &
               ("-gnatn2", "-fomit-frame-pointer", "-flto");
+         when "coverage" =>
+            for Switches ("ada") use Compiler_Switches & Dev_Switches &
+              ("-fprofile-arcs", "-ftest-coverage");
       end case;
 
       for Local_Configuration_Pragmas use "gnat.adc";
@@ -71,9 +72,18 @@ abstract project Config is
          when "debug" =>
             --  Store tracebacks in exception occurrences
             for Switches ("ada") use ("-E");
-         when "release" =>
+         when others =>
             null;
       end case;
    end Binder;
+
+   package Linker is
+      case Mode is
+         when "coverage" =>
+            for Switches ("ada") use ("-lgcov", "-fprofile-arcs");
+         when others =>
+            null;
+      end case;
+   end Linker;
 
 end Config;

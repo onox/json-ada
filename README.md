@@ -38,7 +38,7 @@ Then create a stream and parse it:
 ```ada
 Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
 Allocator : Types.Memory_Allocator (Maximum_Depth => 10);
-Value  : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+Value     : constant JSON_Value := Parsers.Parse (Stream, Allocator);
 ```
 
 The actual parameter of `Create_Stream` can be an access to a `String`
@@ -94,6 +94,7 @@ In order to build the library, you need to have:
 Optional dependencies:
 
  * [Ahven 2.x][url-ahven] if you want to build and run the unit tests
+ * `lcov` to generate a coverage report for unit tests
 
 Using json-ada in your project
 ------------------------------
@@ -113,13 +114,13 @@ the source code:
 Tests
 -----
 
-The project contains a set of unit tests. Use `make test` to build the unit tests:
+The project contains a set of unit tests. Use `make test` to build and run the unit tests:
 
     $ make test
 
-After having build the tests, run the unit tests:
+To generate a coverage report, run:
 
-    $ make run_unit_tests
+    $ make coverage
 
 Installation
 ------------
