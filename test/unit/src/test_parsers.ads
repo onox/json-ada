@@ -35,6 +35,7 @@ private
 
    --  Integer/float number
    procedure Test_Integer_Number_Text;
+   procedure Test_Integer_Number_To_Float_Text;
    procedure Test_Float_Number_Text;
 
    --  Array

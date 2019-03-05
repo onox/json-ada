@@ -63,6 +63,8 @@ private
    procedure Test_End_Exponent_Number_Exception;
    procedure Test_End_Dot_Exponent_Number_Exception;
    procedure Test_End_Exponent_Minus_Number_Exception;
+   procedure Test_End_Exponent_One_Digit_Exception;
+   procedure Test_End_Exponent_Minus_One_Digit_Exception;
    procedure Test_Prefixed_Plus_Number_Exception;
    procedure Test_Leading_Zeroes_Integer_Number_Exception;
    procedure Test_Leading_Zeroes_Float_Number_Exception;

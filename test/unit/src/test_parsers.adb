@@ -37,6 +37,7 @@ package body Test_Parsers is
       T.Add_Test_Routine (Test_Number_String_Text'Access, "Parse text '""12.34""'");
 
       T.Add_Test_Routine (Test_Integer_Number_Text'Access, "Parse text '42'");
+      T.Add_Test_Routine (Test_Integer_Number_To_Float_Text'Access, "Parse text '42' as float");
       T.Add_Test_Routine (Test_Float_Number_Text'Access, "Parse text '3.14'");
 
       T.Add_Test_Routine (Test_Empty_Array_Text'Access, "Parse text '[]'");
@@ -150,6 +151,17 @@ package body Test_Parsers is
       Assert (Value.Kind = Integer_Kind, "Not an integer");
       Assert (Value.Value = 42, "Integer value not equal to 42");
    end Test_Integer_Number_Text;
+
+   procedure Test_Integer_Number_To_Float_Text is
+      Text : aliased String := "42";
+
+      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Allocator : Types.Memory_Allocator;
+      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+   begin
+      Assert (Value.Kind = Integer_Kind, "Not an integer");
+      Assert (Value.Value = 42.0, "Integer value not equal to 42.0");
+   end Test_Integer_Number_To_Float_Text;
 
    procedure Test_Float_Number_Text is
       Text : aliased String := "3.14";

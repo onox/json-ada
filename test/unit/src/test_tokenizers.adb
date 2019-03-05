@@ -70,6 +70,8 @@ package body Test_Tokenizers is
       T.Add_Test_Routine (Test_End_Exponent_Number_Exception'Access, "Reject text '1E'");
       T.Add_Test_Routine (Test_End_Dot_Exponent_Number_Exception'Access, "Reject text '1.E'");
       T.Add_Test_Routine (Test_End_Exponent_Minus_Number_Exception'Access, "Reject text '1E-'");
+      T.Add_Test_Routine (Test_End_Exponent_One_Digit_Exception'Access, "Reject text '1E,'");
+      T.Add_Test_Routine (Test_End_Exponent_Minus_One_Digit_Exception'Access, "Reject text '1E-,'");
       T.Add_Test_Routine (Test_Prefixed_Plus_Number_Exception'Access, "Reject text '+42'");
       T.Add_Test_Routine (Test_Leading_Zeroes_Integer_Number_Exception'Access, "Reject text '-02'");
       T.Add_Test_Routine (Test_Leading_Zeroes_Float_Number_Exception'Access, "Reject text '-003.14'");
@@ -509,6 +511,30 @@ package body Test_Tokenizers is
       when Tokenizers.Tokenizer_Error =>
          null;
    end Test_End_Exponent_Minus_Number_Exception;
+
+   procedure Test_End_Exponent_One_Digit_Exception is
+      Text : aliased String := "1E,";
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Token : Tokenizers.Token;
+   begin
+      Tokenizers.Read_Token (Stream, Token);
+      Fail ("Expected Tokenizer_Error");
+   exception
+      when Tokenizers.Tokenizer_Error =>
+         null;
+   end Test_End_Exponent_One_Digit_Exception;
+
+   procedure Test_End_Exponent_Minus_One_Digit_Exception is
+      Text : aliased String := "1E-,";
+      Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
+      Token : Tokenizers.Token;
+   begin
+      Tokenizers.Read_Token (Stream, Token);
+      Fail ("Expected Tokenizer_Error");
+   exception
+      when Tokenizers.Tokenizer_Error =>
+         null;
+   end Test_End_Exponent_Minus_One_Digit_Exception;
 
    procedure Test_Prefixed_Plus_Number_Exception is
       Text : aliased String := "+42";
