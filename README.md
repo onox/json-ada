@@ -47,7 +47,10 @@ After parsing, elements of arrays and objects are stored in the `Allocator`
 object, while strings remain stored in the `Stream` object. These two
 objects must not go out of scope before any `JSON_Value` goes out of scope.
 
-`Value.Kind` can be one of:
+#### Using a `JSON_Value` object
+
+The **data type** of a `Value` can be retrieved with `Value.Kind`. The value
+can be one of:
 
 `Null_Kind`, `Boolean_Kind`, `Integer_Kind`, `Float_Kind`, `String_Kind`,
 `Array_Kind`, or `Object_Kind`.
@@ -55,7 +58,7 @@ objects must not go out of scope before any `JSON_Value` goes out of scope.
 To check if `Value` is of a certain type (for example an array), you can write
 `if Value.Kind = Array_Kind then`.
 
-To print the image of `Value` (to serialize it), write `Value.Image`.
+To get the **image** of `Value` (to serialize it), write `Value.Image`.
 
 **Get** the value (`String`, generic `Integer_Type` or `Float_Type`, or
 `Boolean`) of a `Value` by calling `Value.Value`. An `Invalid_Type_Error`
@@ -82,6 +85,8 @@ In order to build the library, you need to have:
 
  * An Ada 2012 compiler
 
+ * GPRBuild and `make`
+
 Optional dependencies:
 
  * [Ahven 2.x][url-ahven] if you want to build and run the unit tests
@@ -106,15 +111,11 @@ $ make
 
 ## Tests
 
-The project contains a set of unit tests. Use `make test` to build and run the unit tests:
+The project contains a set of unit tests. Use `make test` to build and
+run the unit tests. A coverage report can be generated with `make coverage`:
 
 ```
 $ make test
-```
-
-To generate a coverage report, run:
-
-```
 $ make coverage
 ```
 
@@ -136,11 +137,16 @@ Specify the dependency in your \*.gpr project file:
 with "json_ada";
 ```
 
-License
--------
+## Contributing
+
+Read the [contributing guidelines][url-contributing] if you want to add
+a bugfix or an improvement.
+
+## License
 
 The Ada code and unit tests are licensed under the [Apache License 2.0][url-apache].
 
   [url-rfc]: https://tools.ietf.org/html/rfc7159
   [url-ahven]: http://ahven.stronglytyped.org
   [url-apache]: https://opensource.org/licenses/Apache-2.0
+  [url-contributing]: /CONTRIBUTING.md
