@@ -1,5 +1,7 @@
 [![License](https://img.shields.io/:license-Apache_License_2.0-blue.svg)](https://github.com/onox/json-ada/blob/master/LICENSE.md)
+[![TravisCI](https://api.travis-ci.org/onox/json-ada.svg?branch=master)](https://travis-ci.org/onox/json-ada)
 [![GitHub release](https://img.shields.io/github/release/onox/json-ada.svg)](https://github.com/onox/json-ada/releases/latest)
+[![IRC](https://img.shields.io/badge/IRC-%23ada%20on%20freenode-orange.svg)](https://webchat.freenode.net/?channels=ada)
 
 # json-ada
 
