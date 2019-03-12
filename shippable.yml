@@ -9,6 +9,9 @@ build:
     - apt install -y --no-install-recommends gprbuild make libahven6-dev lcov
     - make test
     - make coverage
+  post_ci:
+    - mkdir -p shippable/testresults
+    - mv TEST-*.xml shippable/testresults
 
 integrations:
   notifications:

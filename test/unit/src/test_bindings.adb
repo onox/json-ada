@@ -14,6 +14,7 @@
 
 with Ahven.Framework; use Ahven.Framework;
 with Ahven.Text_Runner;
+with Ahven.XML_Runner;
 
 with Test_Tokenizers;
 with Test_Parsers;
@@ -29,4 +30,5 @@ begin
    Suite.Add_Test (new Test_Images.Test);
 
    Ahven.Text_Runner.Run (Suite);
+   Ahven.XML_Runner.Run (Suite);
 end Test_Bindings;

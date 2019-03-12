@@ -30,8 +30,6 @@ clean:
 
 test: build_test
 	./test/unit/test_bindings
-	mkdir -p shippable/testresults
-	mv TEST-*.xml shippable/testresults
 
 coverage:
 	mkdir -p test/cov
