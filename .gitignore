@@ -8,3 +8,4 @@
 .#*#
 auto.cgpr
 /test/unit/test_bindings
+/shippable/testresults/
