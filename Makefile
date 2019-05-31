@@ -39,7 +39,7 @@ coverage:
 	genhtml -q --ignore-errors source -o test/cov/html test/cov/unit.info
 	lcov -l test/cov/unit.info
 
-install: build
+install:
 	$(GNATINSTALL) --relocate-build-tree -p -q -f --install-name='json-ada' \
 		--sources-subdir=$(includedir) \
 		--project-subdir=$(gprdir) \
