@@ -12,7 +12,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ada.Characters.Handling;
 with Ada.Characters.Latin_1;
 with Ada.IO_Exceptions;
 with Ada.Strings.Bounded;
@@ -28,6 +27,7 @@ package body JSON.Tokenizers is
       Escaped : Boolean := False;
 
       use type Streams.AS.Stream_Element_Offset;
+      use Ada.Characters.Latin_1;
    begin
       loop
          C := Stream.Read_Character (Index);
@@ -49,7 +49,7 @@ package body JSON.Tokenizers is
             end case;
          elsif C /= '\' then
             --  Check C is not a control character
-            if Ada.Characters.Handling.Is_Control (C) then
+            if C in NUL .. US then
                raise Tokenizer_Error with "Unexpected control character in string";
             end if;
          end if;
