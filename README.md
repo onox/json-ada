@@ -113,11 +113,11 @@ $ make
 
 ## Tests
 
-The project contains a set of unit tests. Use `make test` to build and
+The project contains a set of unit tests. Use `make tests` to build and
 run the unit tests. A coverage report can be generated with `make coverage`:
 
 ```
-$ make test
+$ make tests
 $ make coverage
 ```
 

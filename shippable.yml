@@ -7,7 +7,7 @@ build:
     pull: true
   ci:
     - apt install -y --no-install-recommends gprbuild make libahven6-dev lcov
-    - make test
+    - make tests
     - make coverage
   post_ci:
     - mkdir -p shippable/testresults

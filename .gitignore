@@ -1,11 +1,10 @@
-/lib/
-/obj/
-/test/unit/obj/
-/test/cov/
+/build/
+/tests/unit/build/
+/tests/cov/
 /bin/
 *.swp
 .DS_Store
 .#*#
 auto.cgpr
-/test/unit/test_bindings
+/tests/unit/test_bindings
 /TEST-*.xml
