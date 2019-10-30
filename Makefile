@@ -1,5 +1,4 @@
 CFLAGS  ?= -O2 -march=native
-LDFLAGS ?= -Wl,-z,relro -Wl,-z,now
 
 GNATMAKE  = gprbuild -dm -p
 GNATCLEAN = gprclean -q
@@ -15,13 +14,13 @@ alidir     = $(libdir)
 .PHONY: build tests debug clean coverage install
 
 build:
-	$(GNATMAKE) -P tools/json_ada.gpr -cargs $(CFLAGS) -largs $(LDFLAGS)
+	$(GNATMAKE) -P tools/json_ada.gpr -cargs $(CFLAGS)
 
 build_test:
-	$(GNATMAKE) -P tests/unit/unit_tests.gpr -XMode=coverage -cargs -O0 -largs $(LDFLAGS)
+	$(GNATMAKE) -P tests/unit/unit_tests.gpr -XMode=coverage -cargs -O0
 
 debug:
-	$(GNATMAKE) -P tools/json_ada.gpr -XMode=debug -cargs $(CFLAGS) -largs $(LDFLAGS)
+	$(GNATMAKE) -P tools/json_ada.gpr -XMode=debug -cargs $(CFLAGS)
 
 clean:
 	$(GNATCLEAN) -P tools/json_ada.gpr
