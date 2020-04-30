@@ -18,7 +18,7 @@ installcmd = $(GNATINSTALL) -p \
 	--ali-subdir=$(alidir) \
 	--prefix=$(PREFIX)
 
-.PHONY: build tests debug clean coverage install uninstall
+.PHONY: build tests tools debug clean coverage install uninstall
 
 build:
 	$(GNATMAKE) -P tools/json_ada.gpr -cargs $(CFLAGS)
@@ -26,13 +26,16 @@ build:
 build_test:
 	$(GNATMAKE) -P tests/unit/unit_tests.gpr -XMode=coverage -cargs -O0
 
+tools:
+	$(GNATMAKE) -P tools/tools.gpr -cargs $(CFLAGS)
+
 debug:
 	$(GNATMAKE) -P tools/json_ada.gpr -XMode=debug -cargs $(CFLAGS)
 
 clean:
 	$(GNATCLEAN) -P tools/json_ada.gpr
 	$(GNATCLEAN) -P tests/unit/unit_tests.gpr
-	rm -rf build tests/unit/build test/cov TEST-*.xml
+	rm -rf bin build tests/unit/build test/cov TEST-*.xml
 
 tests: build_test
 	./tests/unit/test_bindings
