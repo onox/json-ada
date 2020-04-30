@@ -52,6 +52,8 @@ package JSON.Streams is
    function Create_Stream
      (Bytes : not null access AS.Stream_Element_Array) return Stream'Class;
 
+   function Get_Stream_Element_Array (File_Name : String) return AS.Stream_Element_Array;
+
 private
 
    type Stream is abstract tagged limited record

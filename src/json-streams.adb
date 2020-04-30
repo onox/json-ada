@@ -16,6 +16,7 @@
 
 with Ada.Characters.Latin_1;
 with Ada.IO_Exceptions;
+with Ada.Streams.Stream_IO;
 with Ada.Unchecked_Conversion;
 
 package body JSON.Streams is
@@ -111,5 +112,29 @@ package body JSON.Streams is
                            Next_Character => Ada.Characters.Latin_1.NUL,
                            Index => Bytes'First);
    end Create_Stream;
+
+   function Get_Stream_Element_Array (File_Name : String) return AS.Stream_Element_Array is
+      package IO renames AS.Stream_IO;
+
+      File : IO.File_Type;
+   begin
+      IO.Open (File, IO.In_File, File_Name);
+
+      begin
+         declare
+            subtype Byte_Array is AS.Stream_Element_Array
+              (1 .. AS.Stream_Element_Offset (IO.Size (File)));
+            Content : Byte_Array;
+         begin
+            Byte_Array'Read (IO.Stream (File), Content);
+            IO.Close (File);
+            return Content;
+         end;
+      exception
+         when others =>
+            IO.Close (File);
+            raise;
+      end;
+   end Get_Stream_Element_Array;
 
 end JSON.Streams;
