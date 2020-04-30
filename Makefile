@@ -11,7 +11,14 @@ gprdir     = $(PREFIX)/share/gpr
 libdir     = $(PREFIX)/lib
 alidir     = $(libdir)
 
-.PHONY: build tests debug clean coverage install
+installcmd = $(GNATINSTALL) -p \
+	--sources-subdir=$(includedir) \
+	--project-subdir=$(gprdir) \
+	--lib-subdir=$(libdir) \
+	--ali-subdir=$(alidir) \
+	--prefix=$(PREFIX)
+
+.PHONY: build tests debug clean coverage install uninstall
 
 build:
 	$(GNATMAKE) -P tools/json_ada.gpr -cargs $(CFLAGS)
@@ -39,9 +46,7 @@ coverage:
 	lcov -l tests/cov/unit.info
 
 install:
-	$(GNATINSTALL) -p -q -f --install-name='json-ada' \
-		--sources-subdir=$(includedir) \
-		--project-subdir=$(gprdir) \
-		--lib-subdir=$(libdir) \
-		--ali-subdir=$(alidir) \
-		--prefix=$(PREFIX) -P tools/json_ada.gpr
+	$(installcmd) -f --install-name='json-ada' -P tools/json_ada.gpr
+
+uninstall:
+	$(installcmd) --uninstall --install-name='json-ada' -P tools/json_ada.gpr
