@@ -26,12 +26,11 @@ procedure Pretty_Print is
    package Types   is new JSON.Types (Long_Integer, Long_Float);
    package Parsers is new JSON.Parsers (Types);
 
-   Text : aliased JSON.Streams.AS.Stream_Element_Array :=
+   Text : constant not null JSON.Streams.Stream_Element_Array_Access :=
      JSON.Streams.Get_Stream_Element_Array (Ada.Command_Line.Argument (1));
 
-   Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-   Allocator : Types.Memory_Allocator (Maximum_Depth => 10);
-   Value     : constant Types.JSON_Value := Parsers.Parse (Stream, Allocator);
+   Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text));
+   Value : constant Types.JSON_Value := Parser.Parse;
 
    type Indent_Type is range 2 .. 8;
 

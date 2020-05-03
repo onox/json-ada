@@ -27,12 +27,12 @@ package body JSON.Parsers is
    function Parse_Token
      (Stream : Streams.Stream_Ptr;
       Token  : Tokenizers.Token;
-      Allocator : Types.Memory_Allocator_Ptr;
+      Allocator : aliased in out Types.Memory_Allocator;
       Depth     : Positive) return Types.JSON_Value;
 
    function Parse_Array
      (Stream    : Streams.Stream_Ptr;
-      Allocator : Types.Memory_Allocator_Ptr;
+      Allocator : aliased in out Types.Memory_Allocator;
       Depth     : Positive) return Types.JSON_Value
    is
       Token : Tokenizers.Token;
@@ -65,7 +65,7 @@ package body JSON.Parsers is
 
    function Parse_Object
      (Stream    : Streams.Stream_Ptr;
-      Allocator : Types.Memory_Allocator_Ptr;
+      Allocator : aliased in out Types.Memory_Allocator;
       Depth     : Positive) return Types.JSON_Value
    is
       Token : Tokenizers.Token;
@@ -118,7 +118,7 @@ package body JSON.Parsers is
    function Parse_Token
      (Stream : Streams.Stream_Ptr;
       Token  : Tokenizers.Token;
-      Allocator : Types.Memory_Allocator_Ptr;
+      Allocator : aliased in out Types.Memory_Allocator;
       Depth     : Positive) return Types.JSON_Value is
    begin
       case Token.Kind is
@@ -149,13 +149,25 @@ package body JSON.Parsers is
    begin
       Tokenizers.Read_Token (Stream, Token);
       return Value : constant Types.JSON_Value
-        := Parse_Token (Stream'Access, Token, Allocator'Access, Positive'First)
+        := Parse_Token (Stream'Access, Token, Allocator, Positive'First)
       do
          Tokenizers.Read_Token (Stream, Token, Expect_EOF => True);
       end return;
    exception
       when E : Tokenizers.Tokenizer_Error =>
          raise Parse_Error with Ada.Exceptions.Exception_Message (E);
+   end Parse;
+
+   function Create
+     (Stream        : Streams.Stream'Class;
+      Maximum_Depth : Positive := Default_Maximum_Depth) return Parser
+   is ((Maximum_Depth => Maximum_Depth,
+        Stream => Stream_Holders.To_Holder (Stream),
+        others => <>));
+
+   function Parse (Object : in out Parser) return Types.JSON_Value is
+   begin
+      return Parse (Object.Stream.Reference.Element.all, Object.Allocator);
    end Parse;
 
 end JSON.Parsers;

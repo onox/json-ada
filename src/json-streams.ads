@@ -21,7 +21,7 @@ package JSON.Streams is
 
    package AS renames Ada.Streams;
 
-   type Stream is abstract tagged limited private;
+   type Stream is abstract tagged private;
 
    type Stream_Ptr is not null access all Streams.Stream'Class;
 
@@ -56,7 +56,7 @@ package JSON.Streams is
 
 private
 
-   type Stream is abstract tagged limited record
+   type Stream is abstract tagged record
       Next_Character : Character;
       Index : AS.Stream_Element_Offset;
    end record;

@@ -70,6 +70,32 @@ package body JSON.Types is
    end Unescape;
 
    -----------------------------------------------------------------------------
+   --                             Memory allocator                            --
+   -----------------------------------------------------------------------------
+
+   function Create_Array
+     (Object : Memory_Allocator;
+      Depth  : Positive) return Array_Offset is
+   begin
+      if Depth > Object.Maximum_Depth then
+         raise Constraint_Error with
+           "Maximum depth (" & Object.Maximum_Depth'Image & ") exceeded";
+      end if;
+      return Array_Offset (Object.Array_Levels (Depth).Length);
+   end Create_Array;
+
+   function Create_Object
+     (Object : Memory_Allocator;
+      Depth  : Positive) return Array_Offset is
+   begin
+      if Depth > Object.Maximum_Depth then
+         raise Constraint_Error with
+           "Maximum depth (" & Object.Maximum_Depth'Image & ") exceeded";
+      end if;
+      return Array_Offset (Object.Object_Levels (Depth).Length);
+   end Create_Object;
+
+   -----------------------------------------------------------------------------
    --                              Constructors                               --
    -----------------------------------------------------------------------------
 
@@ -102,24 +128,24 @@ package body JSON.Types is
    end Create_Null;
 
    function Create_Array
-     (Allocator : Memory_Allocator_Ptr;
+     (Allocator : aliased in out Memory_Allocator;
       Depth     : Positive) return JSON_Value is
    begin
       return (Kind      => Array_Kind,
-              Allocator => Allocator,
+              Allocator => Allocator'Access,
               Depth     => Depth,
-              Offset    => Allocator.Create_Array (Depth),
+              Offset    => Create_Array (Allocator, Depth),
               Length    => 0);
    end Create_Array;
 
    function Create_Object
-     (Allocator : Memory_Allocator_Ptr;
+     (Allocator : aliased in out Memory_Allocator;
       Depth     : Positive) return JSON_Value is
    begin
       return (Kind      => Object_Kind,
-              Allocator => Allocator,
+              Allocator => Allocator'Access,
               Depth     => Depth,
-              Offset    => Allocator.Create_Object (Depth),
+              Offset    => Create_Object (Allocator, Depth),
               Length    => 0);
    end Create_Object;
 
@@ -474,29 +500,5 @@ package body JSON.Types is
             return Image_Null (Object);
       end case;
    end Image;
-
-   -----------------------------------------------------------------------------
-
-   function Create_Array
-     (Object : Memory_Allocator;
-      Depth  : Positive) return Array_Offset is
-   begin
-      if Depth > Object.Maximum_Depth then
-         raise Constraint_Error with
-           "Maximum depth (" & Object.Maximum_Depth'Image & ") exceeded";
-      end if;
-      return Array_Offset (Object.Array_Levels (Depth).Length);
-   end Create_Array;
-
-   function Create_Object
-     (Object : Memory_Allocator;
-      Depth  : Positive) return Array_Offset is
-   begin
-      if Depth > Object.Maximum_Depth then
-         raise Constraint_Error with
-           "Maximum depth (" & Object.Maximum_Depth'Image & ") exceeded";
-      end if;
-      return Array_Offset (Object.Object_Levels (Depth).Length);
-   end Create_Object;
 
 end JSON.Types;

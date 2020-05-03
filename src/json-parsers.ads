@@ -14,11 +14,15 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
+private with Ada.Containers.Indefinite_Holders;
+
 with JSON.Types;
 with JSON.Streams;
 
 generic
    with package Types is new JSON.Types (<>);
+
+   Default_Maximum_Depth : Positive := 10;
 
    Check_Duplicate_Keys  : Boolean  := False;
    --  If enabled, raise a Constraint_Error when an object contains
@@ -26,10 +30,24 @@ generic
 package JSON.Parsers with SPARK_Mode => On is
    pragma Preelaborate;
 
-   function Parse
-     (Stream    : aliased in out Streams.Stream'Class;
-      Allocator : aliased in out Types.Memory_Allocator) return Types.JSON_Value;
+   type Parser is tagged limited private;
+
+   function Create
+     (Stream        : Streams.Stream'Class;
+      Maximum_Depth : Positive := Default_Maximum_Depth) return Parser;
+
+   function Parse (Object : in out Parser) return Types.JSON_Value;
 
    Parse_Error : exception;
+
+private
+
+   package Stream_Holders is new Ada.Containers.Indefinite_Holders
+     (Element_Type => Streams.Stream'Class, "=" => Streams."=");
+
+   type Parser (Maximum_Depth : Positive := Default_Maximum_Depth) is tagged limited record
+      Stream    : Stream_Holders.Holder;
+      Allocator : aliased Types.Memory_Allocator (Maximum_Depth);
+   end record;
 
 end JSON.Parsers;

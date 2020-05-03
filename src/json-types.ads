@@ -26,7 +26,6 @@ generic
    type Float_Type is digits <>;
 
    Maximum_Number_Length : Positive := 30;
-   Default_Maximum_Depth : Positive := 10;
 package JSON.Types is
    pragma Preelaborate;
 
@@ -36,22 +35,8 @@ package JSON.Types is
    --                             Memory allocator                            --
    -----------------------------------------------------------------------------
 
-   subtype Array_Offset is Natural;
-
    type Memory_Allocator
-     (Maximum_Depth : Positive := Default_Maximum_Depth) is tagged limited private;
-
-   function Create_Array
-     (Object : Memory_Allocator;
-      Depth  : Positive) return Array_Offset;
-   --  Internal function
-
-   function Create_Object
-     (Object : Memory_Allocator;
-      Depth  : Positive) return Array_Offset;
-   --  Internal function
-
-   type Memory_Allocator_Ptr is not null access all Memory_Allocator;
+     (Maximum_Depth : Positive) is limited private;
 
    -----------------------------------------------------------------------------
 
@@ -163,11 +148,11 @@ package JSON.Types is
    function Create_Null return JSON_Value;
 
    function Create_Array
-     (Allocator : Memory_Allocator_Ptr;
+     (Allocator : aliased in out Memory_Allocator;
       Depth     : Positive) return JSON_Value;
 
    function Create_Object
-     (Allocator : Memory_Allocator_Ptr;
+     (Allocator : aliased in out Memory_Allocator;
       Depth     : Positive) return JSON_Value;
 
    -----------------------------------------------------------------------------
@@ -196,6 +181,10 @@ package JSON.Types is
      return Value_Iterator_Interfaces.Forward_Iterator'Class;
 
 private
+
+   type Memory_Allocator_Ptr is not null access all Memory_Allocator;
+
+   subtype Array_Offset is Natural;
 
    type JSON_Value (Kind : Value_Kind) is tagged record
       case Kind is
@@ -261,7 +250,7 @@ private
    type Object_Level_Array is array (Positive range <>) of Object_Vectors.Vector;
 
    type Memory_Allocator
-     (Maximum_Depth : Positive := Default_Maximum_Depth) is tagged limited
+     (Maximum_Depth : Positive) is limited
    record
       Array_Levels  : Array_Level_Array  (1 .. Maximum_Depth);
       Object_Levels : Object_Level_Array (1 .. Maximum_Depth);
