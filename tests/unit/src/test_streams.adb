@@ -14,9 +14,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ada.Streams.Stream_IO;
-with Ada.Unchecked_Deallocation;
-
 with Ahven; use Ahven;
 
 with JSON.Parsers;
@@ -37,47 +34,18 @@ package body Test_Streams is
    end Initialize;
 
    use Types;
-   use Ada.Streams;
-
-   type Stream_Element_Array_Access is access Stream_Element_Array;
-
-   procedure Free is new Ada.Unchecked_Deallocation
-     (Object => Stream_Element_Array, Name => Stream_Element_Array_Access);
 
    procedure Test_Stream_IO is
-      File      : Stream_IO.File_Type;
       File_Name : constant String := "float_number.txt";
 
-      Bytes : Stream_Element_Array_Access;
+      Text : constant JSON.Streams.Stream_Element_Array_Controlled :=
+        JSON.Streams.Get_Stream_Element_Array (File_Name);
+
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text.Pointer));
+      Value  : constant JSON_Value := Parser.Parse;
    begin
-      Stream_IO.Open (File, Stream_IO.In_File, File_Name);
-
-      declare
-         File_Size : constant Stream_Element_Offset
-           := Stream_Element_Offset (Stream_IO.Size (File));
-
-         subtype Byte_Array is Stream_Element_Array (1 .. File_Size);
-      begin
-         Bytes := new Byte_Array;
-         Byte_Array'Read (Stream_IO.Stream (File), Bytes.all);
-
-         declare
-            Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Bytes);
-            Allocator : Types.Memory_Allocator;
-            Value  : constant JSON_Value := Parsers.Parse (Stream, Allocator);
-         begin
-            Assert (Value.Kind = Float_Kind, "Not a float");
-            Assert (Value.Value = 3.14, "Expected float value to be equal to 3.14");
-         end;
-      end;
-
-      Stream_IO.Close (File);
-      Free (Bytes);
-   exception
-      when others =>
-         Stream_IO.Close (File);
-         Free (Bytes);
-         raise;
+      Assert (Value.Kind = Float_Kind, "Not a float");
+      Assert (Value.Value = 3.14, "Expected float value to be equal to 3.14");
    end Test_Stream_IO;
 
 end Test_Streams;

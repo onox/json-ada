@@ -58,9 +58,8 @@ package body Test_Images is
    procedure Test_True_Text is
       Text : aliased String := "true";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -69,9 +68,8 @@ package body Test_Images is
    procedure Test_False_Text is
       Text : aliased String := "false";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -80,9 +78,8 @@ package body Test_Images is
    procedure Test_Null_Text is
       Text : aliased String := "null";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -91,9 +88,8 @@ package body Test_Images is
    procedure Test_Escaped_Text is
       Text : aliased String := """BS:\b LF:\n CR:\r \\ \/ HT:\t""";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -102,9 +98,8 @@ package body Test_Images is
    procedure Test_Empty_String_Text is
       Text : aliased String := """""";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -113,9 +108,8 @@ package body Test_Images is
    procedure Test_Non_Empty_String_Text is
       Text : aliased String := """test""";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -124,9 +118,8 @@ package body Test_Images is
    procedure Test_Number_String_Text is
       Text : aliased String := """12.34""";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -135,9 +128,8 @@ package body Test_Images is
    procedure Test_Integer_Number_Text is
       Text : aliased String := "42";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -146,9 +138,8 @@ package body Test_Images is
    procedure Test_Empty_Array_Text is
       Text : aliased String := "[]";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -157,9 +148,8 @@ package body Test_Images is
    procedure Test_One_Element_Array_Text is
       Text : aliased String := "[""test""]";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -168,9 +158,8 @@ package body Test_Images is
    procedure Test_Multiple_Elements_Array_Text is
       Text : aliased String := "[42,true]";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -179,9 +168,8 @@ package body Test_Images is
    procedure Test_Empty_Object_Text is
       Text : aliased String := "{}";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -190,9 +178,8 @@ package body Test_Images is
    procedure Test_One_Member_Object_Text is
       Text : aliased String := "{""foo"":""bar""}";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -202,9 +189,8 @@ package body Test_Images is
       Text  : aliased String := "{""foo"":1,""bar"":2}";
       Text2 : constant String := "{""bar"":2,""foo"":1}";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert ((Text = Image) or else (Text2 = Image), "Image '" & Image & "' is not '" & Text & "'");
@@ -213,9 +199,8 @@ package body Test_Images is
    procedure Test_Array_Object_Array is
       Text : aliased String := "[{""foo"":[true,42]}]";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
@@ -224,9 +209,8 @@ package body Test_Images is
    procedure Test_Object_Array_Object is
       Text : aliased String := "{""foo"":[null,{""bar"":42}]}";
 
-      Stream    : JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
-      Allocator : Types.Memory_Allocator;
-      Value : constant JSON_Value := Parsers.Parse (Stream, Allocator);
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
       Assert (Text = Image, "Image not '" & Text & "'");
