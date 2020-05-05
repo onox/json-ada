@@ -18,6 +18,7 @@ with Ada.Characters.Latin_1;
 with Ada.IO_Exceptions;
 with Ada.Streams.Stream_IO;
 with Ada.Unchecked_Conversion;
+with Ada.Unchecked_Deallocation;
 
 package body JSON.Streams is
 
@@ -113,7 +114,25 @@ package body JSON.Streams is
                            Index => Bytes'First);
    end Create_Stream;
 
-   function Get_Stream_Element_Array (File_Name : String) return AS.Stream_Element_Array is
+   -----------------------------------------------------------------------------
+
+   function Pointer
+     (Object : Stream_Element_Array_Controlled) return Stream_Element_Array_Access
+   is (Object.Pointer);
+
+   overriding
+   procedure Finalize (Object : in out Stream_Element_Array_Controlled) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Object => AS.Stream_Element_Array, Name => Stream_Element_Array_Access);
+   begin
+      if Object.Pointer /= null then
+         Free (Object.Pointer);
+      end if;
+   end Finalize;
+
+   function Get_Stream_Element_Array
+     (File_Name : String) return Stream_Element_Array_Controlled
+   is
       package IO renames AS.Stream_IO;
 
       File : IO.File_Type;
@@ -124,11 +143,11 @@ package body JSON.Streams is
          declare
             subtype Byte_Array is AS.Stream_Element_Array
               (1 .. AS.Stream_Element_Offset (IO.Size (File)));
-            Content : Byte_Array;
+            Content : constant not null Stream_Element_Array_Access := new Byte_Array;
          begin
-            Byte_Array'Read (IO.Stream (File), Content);
+            Byte_Array'Read (IO.Stream (File), Content.all);
             IO.Close (File);
-            return Content;
+            return (Ada.Finalization.Limited_Controlled with Pointer => Content);
          end;
       exception
          when others =>

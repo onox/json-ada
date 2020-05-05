@@ -14,6 +14,8 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
+private with Ada.Finalization;
+
 with Ada.Streams;
 
 package JSON.Streams is
@@ -52,7 +54,17 @@ package JSON.Streams is
    function Create_Stream
      (Bytes : not null access AS.Stream_Element_Array) return Stream'Class;
 
-   function Get_Stream_Element_Array (File_Name : String) return AS.Stream_Element_Array;
+   -----------------------------------------------------------------------------
+
+   type Stream_Element_Array_Controlled is tagged limited private;
+
+   type Stream_Element_Array_Access is access AS.Stream_Element_Array;
+
+   function Pointer
+     (Object : Stream_Element_Array_Controlled) return Stream_Element_Array_Access;
+
+   function Get_Stream_Element_Array
+     (File_Name : String) return Stream_Element_Array_Controlled;
 
 private
 
@@ -81,5 +93,16 @@ private
    function Get_String
      (Object : Stream_Bytes;
       Offset, Length : AS.Stream_Element_Offset) return String;
+
+   -----------------------------------------------------------------------------
+
+   type Stream_Element_Array_Controlled is limited
+     new Ada.Finalization.Limited_Controlled with
+   record
+      Pointer : Stream_Element_Array_Access;
+   end record;
+
+   overriding
+   procedure Finalize (Object : in out Stream_Element_Array_Controlled);
 
 end JSON.Streams;
