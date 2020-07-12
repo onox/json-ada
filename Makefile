@@ -3,6 +3,7 @@ CFLAGS  ?= -O2 -march=native
 GNATMAKE  = gprbuild -dm -p
 GNATCLEAN = gprclean -q
 GNATINSTALL = gprinstall
+GNATPROVE = gnatprove --cwe --pedantic -k -j0 --output-header
 
 PREFIX ?= /usr
 
@@ -18,7 +19,7 @@ installcmd = $(GNATINSTALL) -p \
 	--ali-subdir=$(alidir) \
 	--prefix=$(PREFIX)
 
-.PHONY: build tests tools debug clean coverage install uninstall
+.PHONY: build tests tools debug clean coverage prove install uninstall
 
 build:
 	$(GNATMAKE) -P tools/json_ada.gpr -cargs $(CFLAGS)
@@ -33,9 +34,13 @@ debug:
 	$(GNATMAKE) -P tools/json_ada.gpr -XMode=debug -cargs $(CFLAGS)
 
 clean:
+	-$(GNATPROVE) --clean -P tools/json_ada.gpr
 	$(GNATCLEAN) -P tools/json_ada.gpr
 	$(GNATCLEAN) -P tests/unit/unit_tests.gpr
 	rm -rf bin build tests/unit/build test/cov TEST-*.xml
+
+prove:
+	$(GNATPROVE) --level=4 --prover=all --mode=check -P tools/json_ada.gpr
 
 tests: build_test
 	./tests/unit/test_bindings
