@@ -45,9 +45,12 @@ private
    package Stream_Holders is new Ada.Containers.Indefinite_Holders
      (Element_Type => Streams.Stream'Class, "=" => Streams."=");
 
-   type Parser (Maximum_Depth : Positive := Default_Maximum_Depth) is tagged limited record
+   package Memory_Holders is new Ada.Containers.Indefinite_Holders
+     (Element_Type => Types.Memory_Allocator, "=" => Types."=");
+
+   type Parser is tagged limited record
       Stream    : Stream_Holders.Holder;
-      Allocator : aliased Types.Memory_Allocator (Maximum_Depth);
+      Allocator : Memory_Holders.Holder;
    end record;
 
 end JSON.Parsers;

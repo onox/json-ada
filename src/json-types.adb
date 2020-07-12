@@ -128,24 +128,24 @@ package body JSON.Types is
    end Create_Null;
 
    function Create_Array
-     (Allocator : aliased in out Memory_Allocator;
+     (Allocator : Memory_Allocator_Ptr;
       Depth     : Positive) return JSON_Value is
    begin
       return (Kind      => Array_Kind,
-              Allocator => Allocator'Access,
+              Allocator => Allocator,
               Depth     => Depth,
-              Offset    => Create_Array (Allocator, Depth),
+              Offset    => Create_Array (Allocator.all, Depth),
               Length    => 0);
    end Create_Array;
 
    function Create_Object
-     (Allocator : aliased in out Memory_Allocator;
+     (Allocator : Memory_Allocator_Ptr;
       Depth     : Positive) return JSON_Value is
    begin
       return (Kind      => Object_Kind,
-              Allocator => Allocator'Access,
+              Allocator => Allocator,
               Depth     => Depth,
-              Offset    => Create_Object (Allocator, Depth),
+              Offset    => Create_Object (Allocator.all, Depth),
               Length    => 0);
    end Create_Object;
 

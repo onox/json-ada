@@ -27,12 +27,12 @@ package body JSON.Parsers is
    function Parse_Token
      (Stream : Streams.Stream_Ptr;
       Token  : Tokenizers.Token;
-      Allocator : aliased in out Types.Memory_Allocator;
+      Allocator : Types.Memory_Allocator_Ptr;
       Depth     : Positive) return Types.JSON_Value;
 
    function Parse_Array
      (Stream    : Streams.Stream_Ptr;
-      Allocator : aliased in out Types.Memory_Allocator;
+      Allocator : Types.Memory_Allocator_Ptr;
       Depth     : Positive) return Types.JSON_Value
    is
       Token : Tokenizers.Token;
@@ -65,7 +65,7 @@ package body JSON.Parsers is
 
    function Parse_Object
      (Stream    : Streams.Stream_Ptr;
-      Allocator : aliased in out Types.Memory_Allocator;
+      Allocator : Types.Memory_Allocator_Ptr;
       Depth     : Positive) return Types.JSON_Value
    is
       Token : Tokenizers.Token;
@@ -118,7 +118,7 @@ package body JSON.Parsers is
    function Parse_Token
      (Stream : Streams.Stream_Ptr;
       Token  : Tokenizers.Token;
-      Allocator : aliased in out Types.Memory_Allocator;
+      Allocator : Types.Memory_Allocator_Ptr;
       Depth     : Positive) return Types.JSON_Value is
    begin
       case Token.Kind is
@@ -142,16 +142,16 @@ package body JSON.Parsers is
    end Parse_Token;
 
    function Parse
-     (Stream    : aliased in out Streams.Stream'Class;
-      Allocator : aliased in out Types.Memory_Allocator) return Types.JSON_Value
+     (Stream    : Streams.Stream_Ptr;
+      Allocator : Types.Memory_Allocator_Ptr) return Types.JSON_Value
    is
       Token : Tokenizers.Token;
    begin
-      Tokenizers.Read_Token (Stream, Token);
+      Tokenizers.Read_Token (Stream.all, Token);
       return Value : constant Types.JSON_Value
-        := Parse_Token (Stream'Access, Token, Allocator, Positive'First)
+        := Parse_Token (Stream, Token, Allocator, Positive'First)
       do
-         Tokenizers.Read_Token (Stream, Token, Expect_EOF => True);
+         Tokenizers.Read_Token (Stream.all, Token, Expect_EOF => True);
       end return;
    exception
       when E : Tokenizers.Tokenizer_Error =>
@@ -161,13 +161,17 @@ package body JSON.Parsers is
    function Create
      (Stream        : Streams.Stream'Class;
       Maximum_Depth : Positive := Default_Maximum_Depth) return Parser
-   is ((Maximum_Depth => Maximum_Depth,
-        Stream => Stream_Holders.To_Holder (Stream),
-        others => <>));
+   is
+      Allocator : Types.Memory_Allocator (Maximum_Depth);
+   begin
+      return
+        (Stream    => Stream_Holders.To_Holder (Stream),
+         Allocator => Memory_Holders.To_Holder (Allocator));
+   end Create;
 
    function Parse (Object : in out Parser) return Types.JSON_Value is
    begin
-      return Parse (Object.Stream.Reference.Element.all, Object.Allocator);
+      return Parse (Object.Stream.Reference.Element, Object.Allocator.Reference.Element);
    end Parse;
 
 end JSON.Parsers;
