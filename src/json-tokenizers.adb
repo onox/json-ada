@@ -239,7 +239,7 @@ package body JSON.Tokenizers is
       SB.Append (Value, First);
       loop
          C := Stream.Read_Character;
-         exit when C not in 'a' .. 'z';
+         exit when C not in 'a' .. 'z' or else SB.Length (Value) = SB.Max_Length;
          SB.Append (Value, C);
       end loop;
 
