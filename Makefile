@@ -19,7 +19,7 @@ installcmd = $(GNATINSTALL) -p \
 	--ali-subdir=$(alidir) \
 	--prefix=$(PREFIX)
 
-.PHONY: build tests tools debug clean coverage prove install uninstall
+.PHONY: build tests tools debug clean coverage prove ce install uninstall
 
 build:
 	$(GNATMAKE) -P tools/json_ada.gpr -cargs $(CFLAGS)
@@ -41,6 +41,9 @@ clean:
 
 prove:
 	$(GNATPROVE) --level=4 --prover=all --mode=check -P tools/json_ada.gpr
+
+ce:
+	docker run --rm -it -v ${PWD}:/test -u $(shell id -u):$(shell id -g) -w /test alire/gnat:community-latest make tools
 
 tests: build_test
 	./tests/unit/test_bindings
