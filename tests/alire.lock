@@ -11,6 +11,6 @@ transitivity = "direct"
 versions = "*"
 [solution.state.link]
 kind = "softlink"
-path = "file:../../json-ada"
+path = "file:../json"
 relative = true
 

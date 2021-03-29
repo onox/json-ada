@@ -1,6 +1,5 @@
-/build/
-/tests/build/
 /tests/cov/
 /tests/TEST-*.xml
+build/
 alire/
 config/
