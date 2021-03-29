@@ -1,3 +1,4 @@
+[![Alire json](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/json.json)](https://alire.ada.dev/crates/json.html)
 [![License](https://img.shields.io/github/license/onox/json-ada.svg?color=blue)](https://github.com/onox/json-ada/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/onox/json-ada.svg)](https://github.com/onox/json-ada/releases/latest)
 [![IRC](https://img.shields.io/badge/IRC-%23ada%20on%20freenode-orange.svg)](https://webchat.freenode.net/?channels=ada)
@@ -107,28 +108,40 @@ In order to build the library, you need to have:
 
  * An Ada 2012 compiler
 
- * GPRBuild and `make`
+ * [Alire][url-alire]
 
 Optional dependencies:
 
  * [Ahven 2.x][url-ahven] if you want to build and run the unit tests
+
  * `lcov` to generate a coverage report for unit tests
+
+ * `make`
 
 ## Installing dependencies on Ubuntu 18.04 LTS
 
 Install the dependencies using apt:
 
 ```sh
-$ sudo apt install gnat-7 gprbuild libahven6-dev lcov
+$ sudo apt install gnat-7 gprbuild libahven6-dev lcov make
 ```
 
-## Compilation
+and then install Alire.
 
-A Makefile is provided to build the source code and tests. Use `make` to build
-the source code:
+## Using the library
+
+Use the library in your crates as follows:
 
 ```
-$ make
+$ alr with json
+```
+
+## Tools
+
+The JSON pretty printer can be run as follows:
+
+```
+$ alr run -q --args=path/to/file.json
 ```
 
 ## Tests
@@ -139,24 +152,6 @@ run the unit tests. A coverage report can be generated with `make coverage`:
 ```
 $ make tests
 $ make coverage
-```
-
-## Installation
-
-After having compiled the source code, the library can be installed by executing:
-
-```
-$ make PREFIX=/usr install
-```
-
-Change `PREFIX` to the preferred destination folder, for example `~/.local`.
-
-## Using json-ada in your project
-
-Specify the dependency in your \*.gpr project file:
-
-```ada
-with "json_ada";
 ```
 
 ## Contributing
@@ -172,6 +167,7 @@ refers to this license:
 
     SPDX-License-Identifier: Apache-2.0
 
+  [url-alire]: https://alire.ada.dev/
   [url-rfc]: https://tools.ietf.org/html/rfc7159
   [url-ahven]: http://ahven.stronglytyped.org
   [url-apache]: https://opensource.org/licenses/Apache-2.0
