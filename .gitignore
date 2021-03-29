@@ -1,10 +1,6 @@
 /build/
-/tests/unit/build/
+/tests/build/
 /tests/cov/
-/bin/
-*.swp
-.DS_Store
-.#*#
-auto.cgpr
-/tests/unit/test_bindings
-/TEST-*.xml
+/tests/TEST-*.xml
+alire/
+config/

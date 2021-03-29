@@ -44,8 +44,10 @@ package body Test_Tokenizers is
       T.Add_Test_Routine (Test_Empty_String_Token'Access, "Tokenize text '""""'");
       T.Add_Test_Routine (Test_Non_Empty_String_Token'Access, "Tokenize text '""test""'");
       T.Add_Test_Routine (Test_Number_String_Token'Access, "Tokenize text '""12.34""'");
-      T.Add_Test_Routine (Test_Escaped_Character_String_Token'Access, "Tokenize text '""horizontal\ttab""'");
-      T.Add_Test_Routine (Test_Escaped_Quotation_Solidus_String_Token'Access, "Tokenize text '""foo\""\\bar""'");
+      T.Add_Test_Routine
+        (Test_Escaped_Character_String_Token'Access, "Tokenize text '""horizontal\ttab""'");
+      T.Add_Test_Routine
+        (Test_Escaped_Quotation_Solidus_String_Token'Access, "Tokenize text '""foo\""\\bar""'");
 
       T.Add_Test_Routine (Test_Zero_Number_Token'Access, "Tokenize text '0'");
       T.Add_Test_Routine (Test_Integer_Number_Token'Access, "Tokenize text '42'");
@@ -53,7 +55,8 @@ package body Test_Tokenizers is
       T.Add_Test_Routine (Test_Negative_Float_Number_Token'Access, "Tokenize text '-2.71'");
       T.Add_Test_Routine (Test_Integer_Exponent_Number_Token'Access, "Tokenize text '4e2'");
       T.Add_Test_Routine (Test_Float_Exponent_Number_Token'Access, "Tokenize text '0.314e1'");
-      T.Add_Test_Routine (Test_Float_Negative_Exponent_Number_Token'Access,  "Tokenize text '4e-1'");
+      T.Add_Test_Routine
+        (Test_Float_Negative_Exponent_Number_Token'Access,  "Tokenize text '4e-1'");
 
       T.Add_Test_Routine (Test_Empty_Array_Tokens'Access, "Tokenize text '[]'");
       T.Add_Test_Routine (Test_One_Element_Array_Tokens'Access, "Tokenize text '[null]'");
@@ -61,11 +64,15 @@ package body Test_Tokenizers is
 
       T.Add_Test_Routine (Test_Empty_Object_Tokens'Access, "Tokenize text '{}'");
       T.Add_Test_Routine (Test_One_Pair_Object_Tokens'Access, "Tokenize text '{""foo"":""bar""}'");
-      T.Add_Test_Routine (Test_Two_Pairs_Object_Tokens'Access, "Tokenize text '{""foo"": true,""bar"":false}'");
+      T.Add_Test_Routine
+        (Test_Two_Pairs_Object_Tokens'Access, "Tokenize text '{""foo"": true,""bar"":false}'");
 
       --  Exceptions
-      T.Add_Test_Routine (Test_Control_Character_String_Exception'Access, "Reject text '""no\nnewline""'");
-      T.Add_Test_Routine (Test_Unexpected_Escaped_Character_String_Exception'Access, "Reject text '""unexpected\xcharacter""'");
+      T.Add_Test_Routine
+        (Test_Control_Character_String_Exception'Access, "Reject text '""no\nnewline""'");
+      T.Add_Test_Routine
+        (Test_Unexpected_Escaped_Character_String_Exception'Access,
+         "Reject text '""unexpected\xcharacter""'");
       T.Add_Test_Routine (Test_Minus_Number_EOF_Exception'Access, "Reject text '-'");
       T.Add_Test_Routine (Test_Minus_Number_Exception'Access, "Reject text '-,'");
       T.Add_Test_Routine (Test_End_Dot_Number_Exception'Access, "Reject text '3.'");
@@ -73,10 +80,13 @@ package body Test_Tokenizers is
       T.Add_Test_Routine (Test_End_Dot_Exponent_Number_Exception'Access, "Reject text '1.E'");
       T.Add_Test_Routine (Test_End_Exponent_Minus_Number_Exception'Access, "Reject text '1E-'");
       T.Add_Test_Routine (Test_End_Exponent_One_Digit_Exception'Access, "Reject text '1E,'");
-      T.Add_Test_Routine (Test_End_Exponent_Minus_One_Digit_Exception'Access, "Reject text '1E-,'");
+      T.Add_Test_Routine
+        (Test_End_Exponent_Minus_One_Digit_Exception'Access, "Reject text '1E-,'");
       T.Add_Test_Routine (Test_Prefixed_Plus_Number_Exception'Access, "Reject text '+42'");
-      T.Add_Test_Routine (Test_Leading_Zeroes_Integer_Number_Exception'Access, "Reject text '-02'");
-      T.Add_Test_Routine (Test_Leading_Zeroes_Float_Number_Exception'Access, "Reject text '-003.14'");
+      T.Add_Test_Routine
+        (Test_Leading_Zeroes_Integer_Number_Exception'Access, "Reject text '-02'");
+      T.Add_Test_Routine
+        (Test_Leading_Zeroes_Float_Number_Exception'Access, "Reject text '-003.14'");
       T.Add_Test_Routine (Test_Incomplete_True_Text_Exception'Access, "Reject text 'tr'");
       T.Add_Test_Routine (Test_Incomplete_False_Text_Exception'Access, "Reject text 'f'");
       T.Add_Test_Routine (Test_Incomplete_Null_Text_Exception'Access, "Reject text 'nul'");

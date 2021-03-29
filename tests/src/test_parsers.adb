@@ -51,29 +51,38 @@ package body Test_Parsers is
 
       T.Add_Test_Routine (Test_Empty_Object_Text'Access, "Parse text '{}'");
       T.Add_Test_Routine (Test_One_Member_Object_Text'Access, "Parse text '{""foo"":""bar""}'");
-      T.Add_Test_Routine (Test_Multiple_Members_Object_Text'Access, "Parse text '{""foo"":1,""bar"":2}'");
+      T.Add_Test_Routine
+        (Test_Multiple_Members_Object_Text'Access, "Parse text '{""foo"":1,""bar"":2}'");
       T.Add_Test_Routine (Test_Object_Iterable'Access, "Iterate over '{""foo"":1,""bar"":2}'");
 
       T.Add_Test_Routine (Test_Array_Object_Array'Access, "Parse text '[{""foo"":[true, 42]}]'");
-      T.Add_Test_Routine (Test_Object_Array_Object'Access, "Parse text '{""foo"":[null, {""bar"": 42}]}'");
+      T.Add_Test_Routine
+        (Test_Object_Array_Object'Access, "Parse text '{""foo"":[null, {""bar"": 42}]}'");
 
       T.Add_Test_Routine (Test_Object_No_Array'Access, "Test getting array from text '{}'");
       T.Add_Test_Routine (Test_Object_No_Object'Access, "Test getting object from text '{}'");
 
       --  Exceptions
-      T.Add_Test_Routine (Test_Array_No_Value_Separator_Exception'Access, "Reject text '[3.14""test""]'");
+      T.Add_Test_Routine
+        (Test_Array_No_Value_Separator_Exception'Access, "Reject text '[3.14""test""]'");
       T.Add_Test_Routine (Test_Array_No_End_Array_Exception'Access, "Reject text '[true'");
       T.Add_Test_Routine (Test_No_EOF_After_Array_Exception'Access, "Reject text '[1]2'");
 
       T.Add_Test_Routine (Test_Empty_Text_Exception'Access, "Reject text ''");
-      T.Add_Test_Routine (Test_Object_No_Value_Separator_Exception'Access, "Reject text '{""foo"":1""bar"":2}'");
-      T.Add_Test_Routine (Test_Object_No_Name_Separator_Exception'Access, "Reject text '{""foo"",true}'");
+      T.Add_Test_Routine
+        (Test_Object_No_Value_Separator_Exception'Access, "Reject text '{""foo"":1""bar"":2}'");
+      T.Add_Test_Routine
+        (Test_Object_No_Name_Separator_Exception'Access, "Reject text '{""foo"",true}'");
       T.Add_Test_Routine (Test_Object_Key_No_String_Exception'Access, "Reject text '{42:true}'");
-      T.Add_Test_Routine (Test_Object_No_Second_Member_Exception'Access, "Reject text '{""foo"":true,}'");
-      T.Add_Test_Routine (Test_Object_Duplicate_Keys_Exception'Access, "Reject text '{""foo"":1,""foo"":2}'");
+      T.Add_Test_Routine
+        (Test_Object_No_Second_Member_Exception'Access, "Reject text '{""foo"":true,}'");
+      T.Add_Test_Routine
+        (Test_Object_Duplicate_Keys_Exception'Access, "Reject text '{""foo"":1,""foo"":2}'");
       T.Add_Test_Routine (Test_Object_No_Value_Exception'Access, "Reject text '{""foo"":}'");
-      T.Add_Test_Routine (Test_Object_No_End_Object_Exception'Access, "Reject text '{""foo"":true'");
-      T.Add_Test_Routine (Test_No_EOF_After_Object_Exception'Access, "Reject text '{""foo"":true}[true]'");
+      T.Add_Test_Routine
+        (Test_Object_No_End_Object_Exception'Access, "Reject text '{""foo"":true'");
+      T.Add_Test_Routine
+        (Test_No_EOF_After_Object_Exception'Access, "Reject text '{""foo"":true}[true]'");
    end Initialize;
 
    use Types;

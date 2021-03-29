@@ -1,0 +1,15 @@
+name = "json_tests"
+description = "Unit tests for json-ada"
+version = "4.0.1"
+website = "https://github.com/onox/json-ada"
+licenses = "Apache-2.0"
+tags = ["json"]
+
+executables = ["test_bindings"]
+
+authors = ["onox"]
+maintainers = ["onox <denkpadje@gmail.com>"]
+maintainers-logins = ["onox"]
+
+[[depends-on]]  # This line was added by `alr with`
+json = "^4.0.1"  # This line was added by `alr with`

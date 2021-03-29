@@ -47,10 +47,12 @@ package body Test_Images is
 
       T.Add_Test_Routine (Test_Empty_Object_Text'Access, "Image '{}'");
       T.Add_Test_Routine (Test_One_Member_Object_Text'Access, "Image '{""foo"":""bar""}'");
-      T.Add_Test_Routine (Test_Multiple_Members_Object_Text'Access, "Image '{""foo"":1,""bar"":2}'");
+      T.Add_Test_Routine
+        (Test_Multiple_Members_Object_Text'Access, "Image '{""foo"":1,""bar"":2}'");
 
       T.Add_Test_Routine (Test_Array_Object_Array'Access, "Image '[{""foo"":[true, 42]}]'");
-      T.Add_Test_Routine (Test_Object_Array_Object'Access, "Image '{""foo"":[null, {""bar"": 42}]}'");
+      T.Add_Test_Routine
+        (Test_Object_Array_Object'Access, "Image '{""foo"":[null, {""bar"": 42}]}'");
    end Initialize;
 
    use Types;
@@ -193,7 +195,8 @@ package body Test_Images is
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
-      Assert ((Text = Image) or else (Text2 = Image), "Image '" & Image & "' is not '" & Text & "'");
+      Assert
+        ((Text = Image) or else (Text2 = Image), "Image '" & Image & "' is not '" & Text & "'");
    end Test_Multiple_Members_Object_Text;
 
    procedure Test_Array_Object_Array is

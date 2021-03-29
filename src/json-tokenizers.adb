@@ -134,7 +134,7 @@ package body JSON.Tokenizers is
          --  Append the dot
          SB.Append (Value, C);
 
-         -- Require at least one digit after decimal point
+         --  Require at least one digit after decimal point
          begin
             C := Stream.Read_Character;
             if C not in '0' .. '9' then

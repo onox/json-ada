@@ -1,63 +1,30 @@
-CFLAGS  ?= -O2 -march=native
-
-GNATMAKE  = gprbuild -dm -p
-GNATCLEAN = gprclean -q
-GNATINSTALL = gprinstall
 GNATPROVE = gnatprove --cwe --pedantic -k -j0 --output-header
 
-PREFIX ?= /usr
-
-includedir = $(PREFIX)/include
-gprdir     = $(PREFIX)/share/gpr
-libdir     = $(PREFIX)/lib
-alidir     = $(libdir)
-
-installcmd = $(GNATINSTALL) -p \
-	--sources-subdir=$(includedir) \
-	--project-subdir=$(gprdir) \
-	--lib-subdir=$(libdir) \
-	--ali-subdir=$(alidir) \
-	--prefix=$(PREFIX)
-
-.PHONY: build tests tools debug clean coverage prove ce install uninstall
+.PHONY: build debug clean prove tests coverage
 
 build:
-	$(GNATMAKE) -P tools/json_ada.gpr -cargs $(CFLAGS)
-
-build_test:
-	$(GNATMAKE) -P tests/unit/unit_tests.gpr -XMode=coverage -cargs -O0
-
-tools:
-	$(GNATMAKE) -P tools/tools.gpr -cargs $(CFLAGS)
+	alr build
 
 debug:
-	$(GNATMAKE) -P tools/json_ada.gpr -XMode=debug -cargs $(CFLAGS)
+	alr build -XJSON_BUILD_MODE=debug
 
 clean:
-	-$(GNATPROVE) --clean -P tools/json_ada.gpr
-	$(GNATCLEAN) -P tools/json_ada.gpr
-	$(GNATCLEAN) -P tests/unit/unit_tests.gpr
-	rm -rf bin build tests/unit/build test/cov TEST-*.xml
+	-$(GNATPROVE) --clean -P json.gpr
+	alr clean
+	cd tests && alr clean
+	rm -rf build tests/build tests/cov tests/TEST-*.xml
 
 prove:
-	$(GNATPROVE) --level=4 --prover=all --mode=check -P tools/json_ada.gpr
+	$(GNATPROVE) --level=4 --prover=all --mode=check -P json.gpr
 
-ce:
-	docker run --rm -it -v ${PWD}:/test -u $(shell id -u):$(shell id -g) -w /test alire/gnat:community-latest make tools
+tests:
+	cd tests && alr build -XJSON_BUILD_MODE=coverage
+	cd tests && alr run -s
 
-tests: build_test
-	./tests/unit/test_bindings
-
-coverage:
+coverage: tests
 	mkdir -p tests/cov
-	lcov -q -c -d tests/unit/build/obj -o tests/cov/unit.info
+	lcov -q -c -d build/obj -d tests/build/obj -o tests/cov/unit.info
 	lcov -q -r tests/cov/unit.info */adainclude/* -o tests/cov/unit.info
-	lcov -q -r tests/cov/unit.info */tests/unit/* -o tests/cov/unit.info
+	lcov -q -r tests/cov/unit.info */tests/* -o tests/cov/unit.info
 	genhtml -q --ignore-errors source -o tests/cov/html tests/cov/unit.info
 	lcov -l tests/cov/unit.info
-
-install:
-	$(installcmd) -f --install-name='json-ada' -P tools/json_ada.gpr
-
-uninstall:
-	$(installcmd) --uninstall --install-name='json-ada' -P tools/json_ada.gpr

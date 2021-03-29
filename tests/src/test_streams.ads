@@ -14,26 +14,17 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with "config";
+with Ahven.Framework;
 
-project JSON_Ada is
+package Test_Streams is
 
-   for Languages use ("Ada");
+   type Test is new Ahven.Framework.Test_Case with null record;
 
-   for Create_Missing_Dirs use "True";
+   overriding
+   procedure Initialize (T : in out Test);
 
-   for Source_Dirs use ("../src");
-   for Object_Dir  use "../build/obj";
+private
 
-   for Library_Name use "json-ada";
-   for Library_Version use "libjson-ada.so." & Config.Version;
-   for Library_Dir  use "../build/lib";
-   for Library_ALI_Dir use "../build/lib/json-ada";
-   for Library_Kind use "relocatable";
+   procedure Test_Stream_IO;
 
-   package Ide renames Config.Ide;
-   package Builder renames Config.Builder;
-   package Compiler renames Config.Compiler;
-   package Binder renames Config.Binder;
-
-end JSON_Ada;
+end Test_Streams;
