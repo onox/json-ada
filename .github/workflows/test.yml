@@ -1,0 +1,47 @@
+name: Test
+
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+
+jobs:
+  build:
+    name: Testing on ${{matrix.os}} using ${{matrix.compiler}}
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        compiler: [fsf, community]
+        exclude:
+          - os: windows-latest
+            compiler: fsf
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install toolchain
+      uses: ada-actions/toolchain@ce2021
+      with:
+        distrib: ${{matrix.compiler}}
+        target: native
+
+    - name: Install Alire
+      uses: alire-project/setup-alire@latest-devel
+
+    - name: Run tests
+      run: make tests
+
+    - name: Install lcov
+      run: sudo apt install lcov
+      continue-on-error: true
+      if: ${{ matrix.os != 'windows-latest'}}
+
+    - name: Generate coverage
+      run: make coverage
+      continue-on-error: true
+      if: ${{ matrix.os != 'windows-latest'}}
