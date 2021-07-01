@@ -11,5 +11,9 @@ authors = ["onox"]
 maintainers = ["onox <denkpadje@gmail.com>"]
 maintainers-logins = ["onox"]
 
-[[depends-on]]  # This line was added by `alr with`
-json = "^4.0.1"  # This line was added by `alr with`
+[[depends-on]]
+aunit = "^21.0.0"
+json = "^4.0.1"
+
+[[pins]]
+json = { path = "../json" }

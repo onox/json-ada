@@ -14,7 +14,8 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ahven; use Ahven;
+with AUnit.Assertions;
+with AUnit.Test_Caller;
 
 with JSON.Parsers;
 with JSON.Streams;
@@ -25,69 +26,102 @@ package body Test_Parsers is
    package Types is new JSON.Types (Long_Integer, Long_Float);
    package Parsers is new JSON.Parsers (Types, Check_Duplicate_Keys => True);
 
-   overriding
-   procedure Initialize (T : in out Test) is
+   use AUnit.Assertions;
+
+   package Caller is new AUnit.Test_Caller (Test);
+
+   Test_Suite : aliased AUnit.Test_Suites.Test_Suite;
+
+   function Suite return AUnit.Test_Suites.Access_Test_Suite is
+      Name : constant String := "(Parsers) ";
    begin
-      T.Set_Name ("Parsers");
+      Test_Suite.Add_Test (Caller.Create (Name & "Parse text 'true'", Test_True_Text'Access));
+      Test_Suite.Add_Test (Caller.Create (Name & "Parse text 'false'", Test_False_Text'Access));
+      Test_Suite.Add_Test (Caller.Create (Name & "Parse text 'null'", Test_Null_Text'Access));
 
-      T.Add_Test_Routine (Test_True_Text'Access, "Parse text 'true'");
-      T.Add_Test_Routine (Test_False_Text'Access, "Parse text 'false'");
-      T.Add_Test_Routine (Test_Null_Text'Access, "Parse text 'null'");
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '""""'", Test_Empty_String_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '""test""'", Test_Non_Empty_String_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '""12.34""'", Test_Number_String_Text'Access));
 
-      T.Add_Test_Routine (Test_Empty_String_Text'Access, "Parse text '""""'");
-      T.Add_Test_Routine (Test_Non_Empty_String_Text'Access, "Parse text '""test""'");
-      T.Add_Test_Routine (Test_Number_String_Text'Access, "Parse text '""12.34""'");
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '42'", Test_Integer_Number_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '42' as float", Test_Integer_Number_To_Float_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '3.14'", Test_Float_Number_Text'Access));
 
-      T.Add_Test_Routine (Test_Integer_Number_Text'Access, "Parse text '42'");
-      T.Add_Test_Routine (Test_Integer_Number_To_Float_Text'Access, "Parse text '42' as float");
-      T.Add_Test_Routine (Test_Float_Number_Text'Access, "Parse text '3.14'");
+      Test_Suite.Add_Test (Caller.Create (Name & "Parse text '[]'", Test_Empty_Array_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '[""test""]'", Test_One_Element_Array_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '[3.14, true]'", Test_Multiple_Elements_Array_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Iterate over '[false, ""test"", 0.271e1]'", Test_Array_Iterable'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Iterate over '{""foo"":[1, ""2""],""bar"":[0.271e1]}'",
+         Test_Multiple_Array_Iterable'Access));
 
-      T.Add_Test_Routine (Test_Empty_Array_Text'Access, "Parse text '[]'");
-      T.Add_Test_Routine (Test_One_Element_Array_Text'Access, "Parse text '[""test""]'");
-      T.Add_Test_Routine (Test_Multiple_Elements_Array_Text'Access, "Parse text '[3.14, true]'");
-      T.Add_Test_Routine (Test_Array_Iterable'Access, "Iterate over '[false, ""test"", 0.271e1]'");
-      T.Add_Test_Routine (Test_Multiple_Array_Iterable'Access,
-        "Iterate over '{""foo"":[1, ""2""],""bar"":[0.271e1]}'");
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '{}'", Test_Empty_Object_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '{""foo"":""bar""}'", Test_One_Member_Object_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '{""foo"":1,""bar"":2}'", Test_Multiple_Members_Object_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Iterate over '{""foo"":1,""bar"":2}'", Test_Object_Iterable'Access));
 
-      T.Add_Test_Routine (Test_Empty_Object_Text'Access, "Parse text '{}'");
-      T.Add_Test_Routine (Test_One_Member_Object_Text'Access, "Parse text '{""foo"":""bar""}'");
-      T.Add_Test_Routine
-        (Test_Multiple_Members_Object_Text'Access, "Parse text '{""foo"":1,""bar"":2}'");
-      T.Add_Test_Routine (Test_Object_Iterable'Access, "Iterate over '{""foo"":1,""bar"":2}'");
-
-      T.Add_Test_Routine (Test_Array_Object_Array'Access, "Parse text '[{""foo"":[true, 42]}]'");
-      T.Add_Test_Routine
-        (Test_Object_Array_Object'Access, "Parse text '{""foo"":[null, {""bar"": 42}]}'");
-
-      T.Add_Test_Routine (Test_Object_No_Array'Access, "Test getting array from text '{}'");
-      T.Add_Test_Routine (Test_Object_No_Object'Access, "Test getting object from text '{}'");
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '[{""foo"":[true, 42]}]'", Test_Array_Object_Array'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text '{""foo"":[null, {""bar"": 42}]}'", Test_Object_Array_Object'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Test getting array from text '{}'", Test_Object_No_Array'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Test getting object from text '{}'", Test_Object_No_Object'Access));
 
       --  Exceptions
-      T.Add_Test_Routine
-        (Test_Array_No_Value_Separator_Exception'Access, "Reject text '[3.14""test""]'");
-      T.Add_Test_Routine (Test_Array_No_End_Array_Exception'Access, "Reject text '[true'");
-      T.Add_Test_Routine (Test_No_EOF_After_Array_Exception'Access, "Reject text '[1]2'");
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '[3.14""test""]'", Test_Array_No_Value_Separator_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '[true'", Test_Array_No_End_Array_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '[1]2'", Test_No_EOF_After_Array_Exception'Access));
 
-      T.Add_Test_Routine (Test_Empty_Text_Exception'Access, "Reject text ''");
-      T.Add_Test_Routine
-        (Test_Object_No_Value_Separator_Exception'Access, "Reject text '{""foo"":1""bar"":2}'");
-      T.Add_Test_Routine
-        (Test_Object_No_Name_Separator_Exception'Access, "Reject text '{""foo"",true}'");
-      T.Add_Test_Routine (Test_Object_Key_No_String_Exception'Access, "Reject text '{42:true}'");
-      T.Add_Test_Routine
-        (Test_Object_No_Second_Member_Exception'Access, "Reject text '{""foo"":true,}'");
-      T.Add_Test_Routine
-        (Test_Object_Duplicate_Keys_Exception'Access, "Reject text '{""foo"":1,""foo"":2}'");
-      T.Add_Test_Routine (Test_Object_No_Value_Exception'Access, "Reject text '{""foo"":}'");
-      T.Add_Test_Routine
-        (Test_Object_No_End_Object_Exception'Access, "Reject text '{""foo"":true'");
-      T.Add_Test_Routine
-        (Test_No_EOF_After_Object_Exception'Access, "Reject text '{""foo"":true}[true]'");
-   end Initialize;
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text ''", Test_Empty_Text_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '{""foo"":1""bar"":2}'",
+         Test_Object_No_Value_Separator_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '{""foo"",true}'", Test_Object_No_Name_Separator_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '{42:true}'", Test_Object_Key_No_String_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '{""foo"":true,}'", Test_Object_No_Second_Member_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '{""foo"":1,""foo"":2}'",
+         Test_Object_Duplicate_Keys_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '{""foo"":}'", Test_Object_No_Value_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '{""foo"":true'", Test_Object_No_End_Object_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '{""foo"":true}[true]'", Test_No_EOF_After_Object_Exception'Access));
+
+      return Test_Suite'Access;
+   end Suite;
 
    use Types;
 
-   procedure Test_True_Text is
+   procedure Fail (Message : String) is
+   begin
+      Assert (False, Message);
+   end Fail;
+
+   procedure Test_True_Text (Object : in out Test) is
       Text : aliased String := "true";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -97,7 +131,7 @@ package body Test_Parsers is
       Assert (Value.Value, "Expected boolean value to be True");
    end Test_True_Text;
 
-   procedure Test_False_Text is
+   procedure Test_False_Text (Object : in out Test) is
       Text : aliased String := "false";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -107,7 +141,7 @@ package body Test_Parsers is
       Assert (not Value.Value, "Expected boolean value to be False");
    end Test_False_Text;
 
-   procedure Test_Null_Text is
+   procedure Test_Null_Text (Object : in out Test) is
       Text : aliased String := "null";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -116,7 +150,7 @@ package body Test_Parsers is
       Assert (Value.Kind = Null_Kind, "Not a null");
    end Test_Null_Text;
 
-   procedure Test_Empty_String_Text is
+   procedure Test_Empty_String_Text (Object : in out Test) is
       Text : aliased String := """""";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -126,7 +160,7 @@ package body Test_Parsers is
       Assert (Value.Value = "", "String value not empty");
    end Test_Empty_String_Text;
 
-   procedure Test_Non_Empty_String_Text is
+   procedure Test_Non_Empty_String_Text (Object : in out Test) is
       Text : aliased String := """test""";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -136,7 +170,7 @@ package body Test_Parsers is
       Assert (Value.Value = "test", "String value not equal to 'test'");
    end Test_Non_Empty_String_Text;
 
-   procedure Test_Number_String_Text is
+   procedure Test_Number_String_Text (Object : in out Test) is
       Text : aliased String := """12.34""";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -146,7 +180,7 @@ package body Test_Parsers is
       Assert (Value.Value = "12.34", "String value not equal to 12.34''");
    end Test_Number_String_Text;
 
-   procedure Test_Integer_Number_Text is
+   procedure Test_Integer_Number_Text (Object : in out Test) is
       Text : aliased String := "42";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -156,7 +190,7 @@ package body Test_Parsers is
       Assert (Value.Value = 42, "Integer value not equal to 42");
    end Test_Integer_Number_Text;
 
-   procedure Test_Integer_Number_To_Float_Text is
+   procedure Test_Integer_Number_To_Float_Text (Object : in out Test) is
       Text : aliased String := "42";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -166,7 +200,7 @@ package body Test_Parsers is
       Assert (Value.Value = 42.0, "Integer value not equal to 42.0");
    end Test_Integer_Number_To_Float_Text;
 
-   procedure Test_Float_Number_Text is
+   procedure Test_Float_Number_Text (Object : in out Test) is
       Text : aliased String := "3.14";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -176,7 +210,7 @@ package body Test_Parsers is
       Assert (Value.Value = 3.14, "Float value not equal to 3.14");
    end Test_Float_Number_Text;
 
-   procedure Test_Empty_Array_Text is
+   procedure Test_Empty_Array_Text (Object : in out Test) is
       Text : aliased String := "[]";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -186,7 +220,7 @@ package body Test_Parsers is
       Assert (Value.Length = 0, "Expected array to be empty");
    end Test_Empty_Array_Text;
 
-   procedure Test_One_Element_Array_Text is
+   procedure Test_One_Element_Array_Text (Object : in out Test) is
       Text : aliased String := "[""test""]";
       String_Value_Message : constant String := "Expected string at index 1 to be equal to 'test'";
 
@@ -204,7 +238,7 @@ package body Test_Parsers is
       end;
    end Test_One_Element_Array_Text;
 
-   procedure Test_Multiple_Elements_Array_Text is
+   procedure Test_Multiple_Elements_Array_Text (Object : in out Test) is
       Text : aliased String := "[3.14, true]";
       Float_Value_Message   : constant String := "Expected float at index 1 to be equal to 3.14";
       Boolean_Value_Message : constant String := "Expected boolean at index 2 to be True";
@@ -229,7 +263,7 @@ package body Test_Parsers is
       end;
    end Test_Multiple_Elements_Array_Text;
 
-   procedure Test_Array_Iterable is
+   procedure Test_Array_Iterable (Object : in out Test) is
       Text : aliased String := "[false, ""test"", 0.271e1]";
       Iterations_Message : constant String := "Unexpected number of iterations";
 
@@ -259,7 +293,7 @@ package body Test_Parsers is
       end;
    end Test_Array_Iterable;
 
-   procedure Test_Multiple_Array_Iterable is
+   procedure Test_Multiple_Array_Iterable (Object : in out Test) is
       Text : aliased String := "{""foo"":[1, ""2""],""bar"":[0.271e1]}";
       Iterations_Message : constant String := "Unexpected number of iterations";
 
@@ -299,7 +333,7 @@ package body Test_Parsers is
       end;
    end Test_Multiple_Array_Iterable;
 
-   procedure Test_Empty_Object_Text is
+   procedure Test_Empty_Object_Text (Object : in out Test) is
       Text : aliased String := "{}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -309,7 +343,7 @@ package body Test_Parsers is
       Assert (Value.Length = 0, "Expected object to be empty");
    end Test_Empty_Object_Text;
 
-   procedure Test_One_Member_Object_Text is
+   procedure Test_One_Member_Object_Text (Object : in out Test) is
       Text : aliased String := "{""foo"":""bar""}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -321,7 +355,7 @@ package body Test_Parsers is
       Assert (Value.Get ("foo").Value = "bar", "Expected string value of 'foo' to be 'bar'");
    end Test_One_Member_Object_Text;
 
-   procedure Test_Multiple_Members_Object_Text is
+   procedure Test_Multiple_Members_Object_Text (Object : in out Test) is
       Text : aliased String := "{""foo"":1,""bar"":2}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -334,7 +368,7 @@ package body Test_Parsers is
       Assert (Value.Get ("bar").Value = 2, "Expected integer value of 'bar' to be 2");
    end Test_Multiple_Members_Object_Text;
 
-   procedure Test_Object_Iterable is
+   procedure Test_Object_Iterable (Object : in out Test) is
       Text : aliased String := "{""foo"":1,""bar"":2}";
       Iterations_Message : constant String := "Unexpected number of iterations";
       All_Keys_Message   : constant String := "Did not iterate over all expected keys";
@@ -366,7 +400,7 @@ package body Test_Parsers is
       end;
    end Test_Object_Iterable;
 
-   procedure Test_Array_Object_Array is
+   procedure Test_Array_Object_Array (Object : in out Test) is
       Text : aliased String := "[{""foo"":[true, 42]}]";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -397,7 +431,7 @@ package body Test_Parsers is
       end;
    end Test_Array_Object_Array;
 
-   procedure Test_Object_Array_Object is
+   procedure Test_Object_Array_Object (Object : in out Test) is
       Text : aliased String := "{""foo"":[null, {""bar"": 42}]}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -434,7 +468,7 @@ package body Test_Parsers is
       end;
    end Test_Object_Array_Object;
 
-   procedure Test_Object_No_Array is
+   procedure Test_Object_No_Array (Object : in out Test) is
       Text : aliased String := "{}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -464,7 +498,7 @@ package body Test_Parsers is
       end;
    end Test_Object_No_Array;
 
-   procedure Test_Object_No_Object is
+   procedure Test_Object_No_Object (Object : in out Test) is
       Text : aliased String := "{}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -494,7 +528,7 @@ package body Test_Parsers is
       end;
    end Test_Object_No_Object;
 
-   procedure Test_Empty_Text_Exception is
+   procedure Test_Empty_Text_Exception (Object : in out Test) is
       Text : aliased String := "";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -510,7 +544,7 @@ package body Test_Parsers is
          null;
    end Test_Empty_Text_Exception;
 
-   procedure Test_Array_No_Value_Separator_Exception is
+   procedure Test_Array_No_Value_Separator_Exception (Object : in out Test) is
       Text : aliased String := "[3.14""test""]";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -526,7 +560,7 @@ package body Test_Parsers is
          null;
    end Test_Array_No_Value_Separator_Exception;
 
-   procedure Test_Array_No_End_Array_Exception is
+   procedure Test_Array_No_End_Array_Exception (Object : in out Test) is
       Text : aliased String := "[true";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -542,7 +576,7 @@ package body Test_Parsers is
          null;
    end Test_Array_No_End_Array_Exception;
 
-   procedure Test_No_EOF_After_Array_Exception is
+   procedure Test_No_EOF_After_Array_Exception (Object : in out Test) is
       Text : aliased String := "[1]2";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -558,7 +592,7 @@ package body Test_Parsers is
          null;
    end Test_No_EOF_After_Array_Exception;
 
-   procedure Test_Object_No_Value_Separator_Exception is
+   procedure Test_Object_No_Value_Separator_Exception (Object : in out Test) is
       Text : aliased String := "{""foo"":1""bar"":2}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -574,7 +608,7 @@ package body Test_Parsers is
          null;
    end Test_Object_No_Value_Separator_Exception;
 
-   procedure Test_Object_No_Name_Separator_Exception is
+   procedure Test_Object_No_Name_Separator_Exception (Object : in out Test) is
       Text : aliased String := "{""foo"",true}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -590,7 +624,7 @@ package body Test_Parsers is
          null;
    end Test_Object_No_Name_Separator_Exception;
 
-   procedure Test_Object_Key_No_String_Exception is
+   procedure Test_Object_Key_No_String_Exception (Object : in out Test) is
       Text : aliased String := "{42:true}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -606,7 +640,7 @@ package body Test_Parsers is
          null;
    end Test_Object_Key_No_String_Exception;
 
-   procedure Test_Object_No_Second_Member_Exception is
+   procedure Test_Object_No_Second_Member_Exception (Object : in out Test) is
       Text : aliased String := "{""foo"":true,}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -622,7 +656,7 @@ package body Test_Parsers is
          null;
    end Test_Object_No_Second_Member_Exception;
 
-   procedure Test_Object_Duplicate_Keys_Exception is
+   procedure Test_Object_Duplicate_Keys_Exception (Object : in out Test) is
       Text : aliased String := "{""foo"":1,""foo"":2}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -638,7 +672,7 @@ package body Test_Parsers is
          null;
    end Test_Object_Duplicate_Keys_Exception;
 
-   procedure Test_Object_No_Value_Exception is
+   procedure Test_Object_No_Value_Exception (Object : in out Test) is
       Text : aliased String := "{""foo"":}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -654,7 +688,7 @@ package body Test_Parsers is
          null;
    end Test_Object_No_Value_Exception;
 
-   procedure Test_Object_No_End_Object_Exception is
+   procedure Test_Object_No_End_Object_Exception (Object : in out Test) is
       Text : aliased String := "{""foo"":true";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -670,7 +704,7 @@ package body Test_Parsers is
          null;
    end Test_Object_No_End_Object_Exception;
 
-   procedure Test_No_EOF_After_Object_Exception is
+   procedure Test_No_EOF_After_Object_Exception (Object : in out Test) is
       Text : aliased String := "{""foo"":true}[true]";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));

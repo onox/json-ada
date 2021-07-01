@@ -15,7 +15,7 @@
 --  limitations under the License.
 
 with "json";
-with "ahven";
+with "aunit";
 
 project JSON_Tests is
 

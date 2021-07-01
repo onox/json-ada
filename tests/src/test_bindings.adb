@@ -14,9 +14,9 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ahven.Framework; use Ahven.Framework;
-with Ahven.Text_Runner;
-with Ahven.XML_Runner;
+with AUnit.Reporter.Text;
+with AUnit.Run;
+with AUnit.Test_Suites;
 
 with Test_Tokenizers;
 with Test_Parsers;
@@ -24,13 +24,24 @@ with Test_Streams;
 with Test_Images;
 
 procedure Test_Bindings is
-   Suite : Test_Suite := Create_Suite ("all");
-begin
-   Suite.Add_Test (new Test_Tokenizers.Test);
-   Suite.Add_Test (new Test_Parsers.Test);
-   Suite.Add_Test (new Test_Streams.Test);
-   Suite.Add_Test (new Test_Images.Test);
+   function Suite return AUnit.Test_Suites.Access_Test_Suite;
 
-   Ahven.Text_Runner.Run (Suite);
-   Ahven.XML_Runner.Run (Suite);
+   function Suite return AUnit.Test_Suites.Access_Test_Suite is
+      Result : constant AUnit.Test_Suites.Access_Test_Suite :=
+        AUnit.Test_Suites.New_Suite;
+   begin
+      Result.Add_Test (Test_Tokenizers.Suite);
+      Result.Add_Test (Test_Parsers.Suite);
+      Result.Add_Test (Test_Streams.Suite);
+      Result.Add_Test (Test_Images.Suite);
+
+      return Result;
+   end Suite;
+
+   procedure Runner is new AUnit.Run.Test_Runner (Suite);
+
+   Reporter : AUnit.Reporter.Text.Text_Reporter;
+begin
+   Reporter.Set_Use_ANSI_Colors (True);
+   Runner (Reporter);
 end Test_Bindings;

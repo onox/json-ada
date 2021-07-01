@@ -14,65 +14,65 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ahven.Framework;
+with AUnit.Test_Suites;
+with AUnit.Test_Fixtures;
 
 package Test_Parsers is
 
-   type Test is new Ahven.Framework.Test_Case with null record;
-
-   overriding
-   procedure Initialize (T : in out Test);
+   function Suite return AUnit.Test_Suites.Access_Test_Suite;
 
 private
 
+   type Test is new AUnit.Test_Fixtures.Test_Fixture with null record;
+
    --  Keyword
-   procedure Test_True_Text;
-   procedure Test_False_Text;
-   procedure Test_Null_Text;
+   procedure Test_True_Text (Object : in out Test);
+   procedure Test_False_Text (Object : in out Test);
+   procedure Test_Null_Text (Object : in out Test);
 
    --  String
-   procedure Test_Empty_String_Text;
-   procedure Test_Non_Empty_String_Text;
-   procedure Test_Number_String_Text;
+   procedure Test_Empty_String_Text (Object : in out Test);
+   procedure Test_Non_Empty_String_Text (Object : in out Test);
+   procedure Test_Number_String_Text (Object : in out Test);
 
    --  Integer/float number
-   procedure Test_Integer_Number_Text;
-   procedure Test_Integer_Number_To_Float_Text;
-   procedure Test_Float_Number_Text;
+   procedure Test_Integer_Number_Text (Object : in out Test);
+   procedure Test_Integer_Number_To_Float_Text (Object : in out Test);
+   procedure Test_Float_Number_Text (Object : in out Test);
 
    --  Array
-   procedure Test_Empty_Array_Text;
-   procedure Test_One_Element_Array_Text;
-   procedure Test_Multiple_Elements_Array_Text;
-   procedure Test_Array_Iterable;
-   procedure Test_Multiple_Array_Iterable;
+   procedure Test_Empty_Array_Text (Object : in out Test);
+   procedure Test_One_Element_Array_Text (Object : in out Test);
+   procedure Test_Multiple_Elements_Array_Text (Object : in out Test);
+   procedure Test_Array_Iterable (Object : in out Test);
+   procedure Test_Multiple_Array_Iterable (Object : in out Test);
 
    --  Object
-   procedure Test_Empty_Object_Text;
-   procedure Test_One_Member_Object_Text;
-   procedure Test_Multiple_Members_Object_Text;
-   procedure Test_Object_Iterable;
+   procedure Test_Empty_Object_Text (Object : in out Test);
+   procedure Test_One_Member_Object_Text (Object : in out Test);
+   procedure Test_Multiple_Members_Object_Text (Object : in out Test);
+   procedure Test_Object_Iterable (Object : in out Test);
 
-   procedure Test_Array_Object_Array;
-   procedure Test_Object_Array_Object;
+   procedure Test_Array_Object_Array (Object : in out Test);
+   procedure Test_Object_Array_Object (Object : in out Test);
 
-   procedure Test_Object_No_Array;
-   procedure Test_Object_No_Object;
+   procedure Test_Object_No_Array (Object : in out Test);
+   procedure Test_Object_No_Object (Object : in out Test);
 
    --  Exceptions
-   procedure Test_Empty_Text_Exception;
+   procedure Test_Empty_Text_Exception (Object : in out Test);
 
-   procedure Test_Array_No_Value_Separator_Exception;
-   procedure Test_Array_No_End_Array_Exception;
-   procedure Test_No_EOF_After_Array_Exception;
+   procedure Test_Array_No_Value_Separator_Exception (Object : in out Test);
+   procedure Test_Array_No_End_Array_Exception (Object : in out Test);
+   procedure Test_No_EOF_After_Array_Exception (Object : in out Test);
 
-   procedure Test_Object_No_Value_Separator_Exception;
-   procedure Test_Object_No_Name_Separator_Exception;
-   procedure Test_Object_Key_No_String_Exception;
-   procedure Test_Object_No_Second_Member_Exception;
-   procedure Test_Object_Duplicate_Keys_Exception;
-   procedure Test_Object_No_Value_Exception;
-   procedure Test_Object_No_End_Object_Exception;
-   procedure Test_No_EOF_After_Object_Exception;
+   procedure Test_Object_No_Value_Separator_Exception (Object : in out Test);
+   procedure Test_Object_No_Name_Separator_Exception (Object : in out Test);
+   procedure Test_Object_Key_No_String_Exception (Object : in out Test);
+   procedure Test_Object_No_Second_Member_Exception (Object : in out Test);
+   procedure Test_Object_Duplicate_Keys_Exception (Object : in out Test);
+   procedure Test_Object_No_Value_Exception (Object : in out Test);
+   procedure Test_Object_No_End_Object_Exception (Object : in out Test);
+   procedure Test_No_EOF_After_Object_Exception (Object : in out Test);
 
 end Test_Parsers;

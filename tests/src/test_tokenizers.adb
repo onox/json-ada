@@ -16,7 +16,8 @@
 
 with Ada.Characters.Latin_1;
 
-with Ahven; use Ahven;
+with AUnit.Assertions;
+with AUnit.Test_Caller;
 
 with JSON.Streams;
 with JSON.Tokenizers;
@@ -32,72 +33,113 @@ package body Test_Tokenizers is
    String_Offset_Message : constant String := "String value at wrong offset";
    String_Length_Message : constant String := "String value has incorrect length";
 
-   overriding
-   procedure Initialize (T : in out Test) is
+   use AUnit.Assertions;
+
+   package Caller is new AUnit.Test_Caller (Test);
+
+   Test_Suite : aliased AUnit.Test_Suites.Test_Suite;
+
+   function Suite return AUnit.Test_Suites.Access_Test_Suite is
+      Name : constant String := "(Tokenizers) ";
    begin
-      T.Set_Name ("Tokenizers");
-
-      T.Add_Test_Routine (Test_Null_Token'Access, "Tokenize text 'null'");
-      T.Add_Test_Routine (Test_True_Token'Access, "Tokenize text 'true'");
-      T.Add_Test_Routine (Test_False_Token'Access, "Tokenize text 'false'");
-
-      T.Add_Test_Routine (Test_Empty_String_Token'Access, "Tokenize text '""""'");
-      T.Add_Test_Routine (Test_Non_Empty_String_Token'Access, "Tokenize text '""test""'");
-      T.Add_Test_Routine (Test_Number_String_Token'Access, "Tokenize text '""12.34""'");
-      T.Add_Test_Routine
-        (Test_Escaped_Character_String_Token'Access, "Tokenize text '""horizontal\ttab""'");
-      T.Add_Test_Routine
-        (Test_Escaped_Quotation_Solidus_String_Token'Access, "Tokenize text '""foo\""\\bar""'");
-
-      T.Add_Test_Routine (Test_Zero_Number_Token'Access, "Tokenize text '0'");
-      T.Add_Test_Routine (Test_Integer_Number_Token'Access, "Tokenize text '42'");
-      T.Add_Test_Routine (Test_Float_Number_Token'Access, "Tokenize text '3.14'");
-      T.Add_Test_Routine (Test_Negative_Float_Number_Token'Access, "Tokenize text '-2.71'");
-      T.Add_Test_Routine (Test_Integer_Exponent_Number_Token'Access, "Tokenize text '4e2'");
-      T.Add_Test_Routine (Test_Float_Exponent_Number_Token'Access, "Tokenize text '0.314e1'");
-      T.Add_Test_Routine
-        (Test_Float_Negative_Exponent_Number_Token'Access,  "Tokenize text '4e-1'");
-
-      T.Add_Test_Routine (Test_Empty_Array_Tokens'Access, "Tokenize text '[]'");
-      T.Add_Test_Routine (Test_One_Element_Array_Tokens'Access, "Tokenize text '[null]'");
-      T.Add_Test_Routine (Test_Two_Elements_Array_Tokens'Access, "Tokenize text '[1,2]'");
-
-      T.Add_Test_Routine (Test_Empty_Object_Tokens'Access, "Tokenize text '{}'");
-      T.Add_Test_Routine (Test_One_Pair_Object_Tokens'Access, "Tokenize text '{""foo"":""bar""}'");
-      T.Add_Test_Routine
-        (Test_Two_Pairs_Object_Tokens'Access, "Tokenize text '{""foo"": true,""bar"":false}'");
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text 'null'", Test_Null_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text 'true'", Test_True_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text 'false'", Test_False_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '""""'", Test_Empty_String_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '""test""'", Test_Non_Empty_String_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '""12.34""'", Test_Number_String_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '""horizontal\ttab""'",
+         Test_Escaped_Character_String_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '""foo\""\\bar""'",
+         Test_Escaped_Quotation_Solidus_String_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '0'", Test_Zero_Number_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '42'", Test_Integer_Number_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '3.14'", Test_Float_Number_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '-2.71'", Test_Negative_Float_Number_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '4e2'", Test_Integer_Exponent_Number_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '0.314e1'", Test_Float_Exponent_Number_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '4e-1'", Test_Float_Negative_Exponent_Number_Token'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '[]'", Test_Empty_Array_Tokens'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '[null]'", Test_One_Element_Array_Tokens'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '[1,2]'", Test_Two_Elements_Array_Tokens'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '{}'", Test_Empty_Object_Tokens'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '{""foo"":""bar""}'", Test_One_Pair_Object_Tokens'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Tokenize text '{""foo"": true,""bar"":false}'",
+         Test_Two_Pairs_Object_Tokens'Access));
 
       --  Exceptions
-      T.Add_Test_Routine
-        (Test_Control_Character_String_Exception'Access, "Reject text '""no\nnewline""'");
-      T.Add_Test_Routine
-        (Test_Unexpected_Escaped_Character_String_Exception'Access,
-         "Reject text '""unexpected\xcharacter""'");
-      T.Add_Test_Routine (Test_Minus_Number_EOF_Exception'Access, "Reject text '-'");
-      T.Add_Test_Routine (Test_Minus_Number_Exception'Access, "Reject text '-,'");
-      T.Add_Test_Routine (Test_End_Dot_Number_Exception'Access, "Reject text '3.'");
-      T.Add_Test_Routine (Test_End_Exponent_Number_Exception'Access, "Reject text '1E'");
-      T.Add_Test_Routine (Test_End_Dot_Exponent_Number_Exception'Access, "Reject text '1.E'");
-      T.Add_Test_Routine (Test_End_Exponent_Minus_Number_Exception'Access, "Reject text '1E-'");
-      T.Add_Test_Routine (Test_End_Exponent_One_Digit_Exception'Access, "Reject text '1E,'");
-      T.Add_Test_Routine
-        (Test_End_Exponent_Minus_One_Digit_Exception'Access, "Reject text '1E-,'");
-      T.Add_Test_Routine (Test_Prefixed_Plus_Number_Exception'Access, "Reject text '+42'");
-      T.Add_Test_Routine
-        (Test_Leading_Zeroes_Integer_Number_Exception'Access, "Reject text '-02'");
-      T.Add_Test_Routine
-        (Test_Leading_Zeroes_Float_Number_Exception'Access, "Reject text '-003.14'");
-      T.Add_Test_Routine (Test_Incomplete_True_Text_Exception'Access, "Reject text 'tr'");
-      T.Add_Test_Routine (Test_Incomplete_False_Text_Exception'Access, "Reject text 'f'");
-      T.Add_Test_Routine (Test_Incomplete_Null_Text_Exception'Access, "Reject text 'nul'");
-      T.Add_Test_Routine (Test_Unknown_Keyword_Text_Exception'Access, "Reject text 'unexpected'");
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '""no\nnewline""'",
+         Test_Control_Character_String_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '""unexpected\xcharacter""'",
+         Test_Unexpected_Escaped_Character_String_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '-'", Test_Minus_Number_EOF_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '-,'", Test_Minus_Number_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '3.'", Test_End_Dot_Number_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '1E'", Test_End_Exponent_Number_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '1.E'", Test_End_Dot_Exponent_Number_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '1E-'", Test_End_Exponent_Minus_Number_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '1E,'", Test_End_Exponent_One_Digit_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '1E-,'", Test_End_Exponent_Minus_One_Digit_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '+42'", Test_Prefixed_Plus_Number_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '-02'", Test_Leading_Zeroes_Integer_Number_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '-003.14'", Test_Leading_Zeroes_Float_Number_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text 'tr'", Test_Incomplete_True_Text_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text 'f'", Test_Incomplete_False_Text_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text 'nul'", Test_Incomplete_Null_Text_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text 'unexpected'", Test_Unknown_Keyword_Text_Exception'Access));
 
-   end Initialize;
+      return Test_Suite'Access;
+   end Suite;
 
    use type Tokenizers.Token_Kind;
 
-   procedure Assert_Kind is new Assert_Equal
-     (Tokenizers.Token_Kind, Tokenizers.Token_Kind'Image);
+   procedure Assert_Kind (Left, Right : Tokenizers.Token_Kind; Message : String) is
+   begin
+      Assert (Left = Right, Message & " (Expected " & Right'Image & "; Got " & Left'Image & ")");
+   end Assert_Kind;
+
+   procedure Fail (Message : String) is
+   begin
+      Assert (False, Message);
+   end Fail;
 
    procedure Expect_EOF (Stream : aliased in out JSON.Streams.Stream'Class) is
       Token : Tokenizers.Token;
@@ -109,7 +151,7 @@ package body Test_Tokenizers is
    end Expect_EOF;
 
    --  Keyword
-   procedure Test_Null_Token is
+   procedure Test_Null_Token (Object : in out Test) is
       Text : aliased String := "null";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -119,7 +161,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Null_Token;
 
-   procedure Test_True_Token is
+   procedure Test_True_Token (Object : in out Test) is
       Text : aliased String := "true";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -130,7 +172,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_True_Token;
 
-   procedure Test_False_Token is
+   procedure Test_False_Token (Object : in out Test) is
       Text : aliased String := "false";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -142,7 +184,7 @@ package body Test_Tokenizers is
    end Test_False_Token;
 
    --  String
-   procedure Test_Empty_String_Token is
+   procedure Test_Empty_String_Token (Object : in out Test) is
       Text : aliased String := """""";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -154,7 +196,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Empty_String_Token;
 
-   procedure Test_Non_Empty_String_Token is
+   procedure Test_Non_Empty_String_Token (Object : in out Test) is
       Text : aliased String := """test""";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -166,7 +208,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Non_Empty_String_Token;
 
-   procedure Test_Number_String_Token is
+   procedure Test_Number_String_Token (Object : in out Test) is
       Text : aliased String := """12.34""";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -178,7 +220,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Number_String_Token;
 
-   procedure Test_Escaped_Character_String_Token is
+   procedure Test_Escaped_Character_String_Token (Object : in out Test) is
       Text : aliased String := """horizontal\ttab""";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -190,7 +232,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Escaped_Character_String_Token;
 
-   procedure Test_Escaped_Quotation_Solidus_String_Token is
+   procedure Test_Escaped_Quotation_Solidus_String_Token (Object : in out Test) is
       Text : aliased String := """foo\""\\bar""";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -203,7 +245,7 @@ package body Test_Tokenizers is
    end Test_Escaped_Quotation_Solidus_String_Token;
 
    --  Integer/Float number
-   procedure Test_Zero_Number_Token is
+   procedure Test_Zero_Number_Token (Object : in out Test) is
       Text : aliased String := "0";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -214,7 +256,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Zero_Number_Token;
 
-   procedure Test_Integer_Number_Token is
+   procedure Test_Integer_Number_Token (Object : in out Test) is
       Text : aliased String := "42";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -225,7 +267,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Integer_Number_Token;
 
-   procedure Test_Float_Number_Token is
+   procedure Test_Float_Number_Token (Object : in out Test) is
       Text : aliased String := "3.14";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -236,7 +278,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Float_Number_Token;
 
-   procedure Test_Negative_Float_Number_Token is
+   procedure Test_Negative_Float_Number_Token (Object : in out Test) is
       Text : aliased String := "-2.71";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -247,7 +289,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Negative_Float_Number_Token;
 
-   procedure Test_Integer_Exponent_Number_Token is
+   procedure Test_Integer_Exponent_Number_Token (Object : in out Test) is
       Text : aliased String := "4e2";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -258,7 +300,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Integer_Exponent_Number_Token;
 
-   procedure Test_Float_Exponent_Number_Token is
+   procedure Test_Float_Exponent_Number_Token (Object : in out Test) is
       Text : aliased String := "0.314e1";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -269,7 +311,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Float_Exponent_Number_Token;
 
-   procedure Test_Float_Negative_Exponent_Number_Token is
+   procedure Test_Float_Negative_Exponent_Number_Token (Object : in out Test) is
       Text : aliased String := "4e-1";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -281,7 +323,7 @@ package body Test_Tokenizers is
    end Test_Float_Negative_Exponent_Number_Token;
 
    --  Array
-   procedure Test_Empty_Array_Tokens is
+   procedure Test_Empty_Array_Tokens (Object : in out Test) is
       Text : aliased String := "[]";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -293,7 +335,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Empty_Array_Tokens;
 
-   procedure Test_One_Element_Array_Tokens is
+   procedure Test_One_Element_Array_Tokens (Object : in out Test) is
       Text : aliased String := "[null]";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -310,7 +352,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_One_Element_Array_Tokens;
 
-   procedure Test_Two_Elements_Array_Tokens is
+   procedure Test_Two_Elements_Array_Tokens (Object : in out Test) is
       Text : aliased String := "[1,2]";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -338,7 +380,7 @@ package body Test_Tokenizers is
    end Test_Two_Elements_Array_Tokens;
 
    --  Object
-   procedure Test_Empty_Object_Tokens is
+   procedure Test_Empty_Object_Tokens (Object : in out Test) is
       Text : aliased String := "{}";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -350,7 +392,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_Empty_Object_Tokens;
 
-   procedure Test_One_Pair_Object_Tokens is
+   procedure Test_One_Pair_Object_Tokens (Object : in out Test) is
       Text : aliased String := "{""foo"":""bar""}";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -379,7 +421,7 @@ package body Test_Tokenizers is
       Expect_EOF (Stream);
    end Test_One_Pair_Object_Tokens;
 
-   procedure Test_Two_Pairs_Object_Tokens is
+   procedure Test_Two_Pairs_Object_Tokens (Object : in out Test) is
       Text : aliased String := "{""foo"":true,""bar"":false}";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -427,7 +469,7 @@ package body Test_Tokenizers is
    end Test_Two_Pairs_Object_Tokens;
 
    --  Exceptions
-   procedure Test_Control_Character_String_Exception is
+   procedure Test_Control_Character_String_Exception (Object : in out Test) is
       LF : Character renames Ada.Characters.Latin_1.LF;
       Text : aliased String := """no" & LF & "newline""";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
@@ -440,7 +482,7 @@ package body Test_Tokenizers is
          null;
    end Test_Control_Character_String_Exception;
 
-   procedure Test_Unexpected_Escaped_Character_String_Exception is
+   procedure Test_Unexpected_Escaped_Character_String_Exception (Object : in out Test) is
       Text : aliased String := """unexpected\xcharacter""";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -452,7 +494,7 @@ package body Test_Tokenizers is
          null;
    end Test_Unexpected_Escaped_Character_String_Exception;
 
-   procedure Test_Minus_Number_EOF_Exception is
+   procedure Test_Minus_Number_EOF_Exception (Object : in out Test) is
       Text : aliased String := "-";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -464,7 +506,7 @@ package body Test_Tokenizers is
          null;
    end Test_Minus_Number_EOF_Exception;
 
-   procedure Test_Minus_Number_Exception is
+   procedure Test_Minus_Number_Exception (Object : in out Test) is
       Text : aliased String := "-,";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -476,7 +518,7 @@ package body Test_Tokenizers is
          null;
    end Test_Minus_Number_Exception;
 
-   procedure Test_End_Dot_Number_Exception is
+   procedure Test_End_Dot_Number_Exception (Object : in out Test) is
       Text : aliased String := "3.";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -488,7 +530,7 @@ package body Test_Tokenizers is
          null;
    end Test_End_Dot_Number_Exception;
 
-   procedure Test_End_Exponent_Number_Exception is
+   procedure Test_End_Exponent_Number_Exception (Object : in out Test) is
       Text : aliased String := "1E";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -500,7 +542,7 @@ package body Test_Tokenizers is
          null;
    end Test_End_Exponent_Number_Exception;
 
-   procedure Test_End_Dot_Exponent_Number_Exception is
+   procedure Test_End_Dot_Exponent_Number_Exception (Object : in out Test) is
       Text : aliased String := "1.E";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -512,7 +554,7 @@ package body Test_Tokenizers is
          null;
    end Test_End_Dot_Exponent_Number_Exception;
 
-   procedure Test_End_Exponent_Minus_Number_Exception is
+   procedure Test_End_Exponent_Minus_Number_Exception (Object : in out Test) is
       Text : aliased String := "1E-";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -524,7 +566,7 @@ package body Test_Tokenizers is
          null;
    end Test_End_Exponent_Minus_Number_Exception;
 
-   procedure Test_End_Exponent_One_Digit_Exception is
+   procedure Test_End_Exponent_One_Digit_Exception (Object : in out Test) is
       Text : aliased String := "1E,";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -536,7 +578,7 @@ package body Test_Tokenizers is
          null;
    end Test_End_Exponent_One_Digit_Exception;
 
-   procedure Test_End_Exponent_Minus_One_Digit_Exception is
+   procedure Test_End_Exponent_Minus_One_Digit_Exception (Object : in out Test) is
       Text : aliased String := "1E-,";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -548,7 +590,7 @@ package body Test_Tokenizers is
          null;
    end Test_End_Exponent_Minus_One_Digit_Exception;
 
-   procedure Test_Prefixed_Plus_Number_Exception is
+   procedure Test_Prefixed_Plus_Number_Exception (Object : in out Test) is
       Text : aliased String := "+42";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -560,7 +602,7 @@ package body Test_Tokenizers is
          null;
    end Test_Prefixed_Plus_Number_Exception;
 
-   procedure Test_Leading_Zeroes_Integer_Number_Exception is
+   procedure Test_Leading_Zeroes_Integer_Number_Exception (Object : in out Test) is
       Text : aliased String := "-02";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -572,7 +614,7 @@ package body Test_Tokenizers is
          null;
    end Test_Leading_Zeroes_Integer_Number_Exception;
 
-   procedure Test_Leading_Zeroes_Float_Number_Exception is
+   procedure Test_Leading_Zeroes_Float_Number_Exception (Object : in out Test) is
       Text : aliased String := "-003.14";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -584,7 +626,7 @@ package body Test_Tokenizers is
          null;
    end Test_Leading_Zeroes_Float_Number_Exception;
 
-   procedure Test_Incomplete_True_Text_Exception is
+   procedure Test_Incomplete_True_Text_Exception (Object : in out Test) is
       Text : aliased String := "tr";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -596,7 +638,7 @@ package body Test_Tokenizers is
          null;
    end Test_Incomplete_True_Text_Exception;
 
-   procedure Test_Incomplete_False_Text_Exception is
+   procedure Test_Incomplete_False_Text_Exception (Object : in out Test) is
       Text : aliased String := "f";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -608,7 +650,7 @@ package body Test_Tokenizers is
          null;
    end Test_Incomplete_False_Text_Exception;
 
-   procedure Test_Incomplete_Null_Text_Exception is
+   procedure Test_Incomplete_Null_Text_Exception (Object : in out Test) is
       Text : aliased String := "nul";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;
@@ -620,7 +662,7 @@ package body Test_Tokenizers is
          null;
    end Test_Incomplete_Null_Text_Exception;
 
-   procedure Test_Unknown_Keyword_Text_Exception is
+   procedure Test_Unknown_Keyword_Text_Exception (Object : in out Test) is
       Text : aliased String := "unexpected";
       Stream : aliased JSON.Streams.Stream'Class := JSON.Streams.Create_Stream (Text'Access);
       Token : Tokenizers.Token;

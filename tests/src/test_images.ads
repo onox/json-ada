@@ -14,42 +14,42 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ahven.Framework;
+with AUnit.Test_Suites;
+with AUnit.Test_Fixtures;
 
 package Test_Images is
 
-   type Test is new Ahven.Framework.Test_Case with null record;
-
-   overriding
-   procedure Initialize (T : in out Test);
+   function Suite return AUnit.Test_Suites.Access_Test_Suite;
 
 private
 
+   type Test is new AUnit.Test_Fixtures.Test_Fixture with null record;
+
    --  Keyword
-   procedure Test_True_Text;
-   procedure Test_False_Text;
-   procedure Test_Null_Text;
-   procedure Test_Escaped_Text;
+   procedure Test_True_Text (Object : in out Test);
+   procedure Test_False_Text (Object : in out Test);
+   procedure Test_Null_Text (Object : in out Test);
+   procedure Test_Escaped_Text (Object : in out Test);
 
    --  String
-   procedure Test_Empty_String_Text;
-   procedure Test_Non_Empty_String_Text;
-   procedure Test_Number_String_Text;
+   procedure Test_Empty_String_Text (Object : in out Test);
+   procedure Test_Non_Empty_String_Text (Object : in out Test);
+   procedure Test_Number_String_Text (Object : in out Test);
 
    --  Integer number
-   procedure Test_Integer_Number_Text;
+   procedure Test_Integer_Number_Text (Object : in out Test);
 
    --  Array
-   procedure Test_Empty_Array_Text;
-   procedure Test_One_Element_Array_Text;
-   procedure Test_Multiple_Elements_Array_Text;
+   procedure Test_Empty_Array_Text (Object : in out Test);
+   procedure Test_One_Element_Array_Text (Object : in out Test);
+   procedure Test_Multiple_Elements_Array_Text (Object : in out Test);
 
    --  Object
-   procedure Test_Empty_Object_Text;
-   procedure Test_One_Member_Object_Text;
-   procedure Test_Multiple_Members_Object_Text;
+   procedure Test_Empty_Object_Text (Object : in out Test);
+   procedure Test_One_Member_Object_Text (Object : in out Test);
+   procedure Test_Multiple_Members_Object_Text (Object : in out Test);
 
-   procedure Test_Array_Object_Array;
-   procedure Test_Object_Array_Object;
+   procedure Test_Array_Object_Array (Object : in out Test);
+   procedure Test_Object_Array_Object (Object : in out Test);
 
 end Test_Images;

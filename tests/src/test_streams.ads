@@ -14,17 +14,17 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ahven.Framework;
+with AUnit.Test_Suites;
+with AUnit.Test_Fixtures;
 
 package Test_Streams is
 
-   type Test is new Ahven.Framework.Test_Case with null record;
-
-   overriding
-   procedure Initialize (T : in out Test);
+   function Suite return AUnit.Test_Suites.Access_Test_Suite;
 
 private
 
-   procedure Test_Stream_IO;
+   type Test is new AUnit.Test_Fixtures.Test_Fixture with null record;
+
+   procedure Test_Stream_IO (Object : in out Test);
 
 end Test_Streams;

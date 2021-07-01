@@ -14,7 +14,8 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ahven; use Ahven;
+with AUnit.Assertions;
+with AUnit.Test_Caller;
 
 with JSON.Parsers;
 with JSON.Streams;
@@ -25,39 +26,53 @@ package body Test_Images is
    package Types is new JSON.Types (Long_Integer, Long_Float);
    package Parsers is new JSON.Parsers (Types);
 
-   overriding
-   procedure Initialize (T : in out Test) is
+   use AUnit.Assertions;
+
+   package Caller is new AUnit.Test_Caller (Test);
+
+   Test_Suite : aliased AUnit.Test_Suites.Test_Suite;
+
+   function Suite return AUnit.Test_Suites.Access_Test_Suite is
+      Name : constant String := "(Images) ";
    begin
-      T.Set_Name ("Images");
+      Test_Suite.Add_Test (Caller.Create (Name & "Image 'true'", Test_True_Text'Access));
+      Test_Suite.Add_Test (Caller.Create (Name & "Image 'false'", Test_False_Text'Access));
+      Test_Suite.Add_Test (Caller.Create (Name & "Image 'null'", Test_Null_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Image '""BS CR LF \ / HT""'", Test_Escaped_Text'Access));
 
-      T.Add_Test_Routine (Test_True_Text'Access, "Image 'true'");
-      T.Add_Test_Routine (Test_False_Text'Access, "Image 'false'");
-      T.Add_Test_Routine (Test_Null_Text'Access, "Image 'null'");
-      T.Add_Test_Routine (Test_Escaped_Text'Access, "Image '""BS CR LF \ / HT""'");
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Image '""""'", Test_Empty_String_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Image '""test""'", Test_Non_Empty_String_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Image '""12.34""'", Test_Number_String_Text'Access));
 
-      T.Add_Test_Routine (Test_Empty_String_Text'Access, "Image '""""'");
-      T.Add_Test_Routine (Test_Non_Empty_String_Text'Access, "Image '""test""'");
-      T.Add_Test_Routine (Test_Number_String_Text'Access, "Image '""12.34""'");
+      Test_Suite.Add_Test (Caller.Create (Name & "Image '42'", Test_Integer_Number_Text'Access));
 
-      T.Add_Test_Routine (Test_Integer_Number_Text'Access, "Image '42'");
+      Test_Suite.Add_Test (Caller.Create (Name & "Image '[]'", Test_Empty_Array_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Image '[""test""]'", Test_One_Element_Array_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Image '[3.14, true]'", Test_Multiple_Elements_Array_Text'Access));
 
-      T.Add_Test_Routine (Test_Empty_Array_Text'Access, "Image '[]'");
-      T.Add_Test_Routine (Test_One_Element_Array_Text'Access, "Image '[""test""]'");
-      T.Add_Test_Routine (Test_Multiple_Elements_Array_Text'Access, "Image '[3.14, true]'");
+      Test_Suite.Add_Test (Caller.Create (Name & "Image '{}'", Test_Empty_Object_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Image '{""foo"":""bar""}'", Test_One_Member_Object_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Image '{""foo"":1,""bar"":2}'", Test_Multiple_Members_Object_Text'Access));
 
-      T.Add_Test_Routine (Test_Empty_Object_Text'Access, "Image '{}'");
-      T.Add_Test_Routine (Test_One_Member_Object_Text'Access, "Image '{""foo"":""bar""}'");
-      T.Add_Test_Routine
-        (Test_Multiple_Members_Object_Text'Access, "Image '{""foo"":1,""bar"":2}'");
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Image '[{""foo"":[true, 42]}]'", Test_Array_Object_Array'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Image '{""foo"":[null, {""bar"": 42}]}'", Test_Object_Array_Object'Access));
 
-      T.Add_Test_Routine (Test_Array_Object_Array'Access, "Image '[{""foo"":[true, 42]}]'");
-      T.Add_Test_Routine
-        (Test_Object_Array_Object'Access, "Image '{""foo"":[null, {""bar"": 42}]}'");
-   end Initialize;
+      return Test_Suite'Access;
+   end Suite;
 
    use Types;
 
-   procedure Test_True_Text is
+   procedure Test_True_Text (Object : in out Test) is
       Text : aliased String := "true";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -67,7 +82,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_True_Text;
 
-   procedure Test_False_Text is
+   procedure Test_False_Text (Object : in out Test) is
       Text : aliased String := "false";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -77,7 +92,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_False_Text;
 
-   procedure Test_Null_Text is
+   procedure Test_Null_Text (Object : in out Test) is
       Text : aliased String := "null";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -87,7 +102,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_Null_Text;
 
-   procedure Test_Escaped_Text is
+   procedure Test_Escaped_Text (Object : in out Test) is
       Text : aliased String := """BS:\b LF:\n CR:\r \\ \/ HT:\t""";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -97,7 +112,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_Escaped_Text;
 
-   procedure Test_Empty_String_Text is
+   procedure Test_Empty_String_Text (Object : in out Test) is
       Text : aliased String := """""";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -107,7 +122,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_Empty_String_Text;
 
-   procedure Test_Non_Empty_String_Text is
+   procedure Test_Non_Empty_String_Text (Object : in out Test) is
       Text : aliased String := """test""";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -117,7 +132,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_Non_Empty_String_Text;
 
-   procedure Test_Number_String_Text is
+   procedure Test_Number_String_Text (Object : in out Test) is
       Text : aliased String := """12.34""";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -127,7 +142,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_Number_String_Text;
 
-   procedure Test_Integer_Number_Text is
+   procedure Test_Integer_Number_Text (Object : in out Test) is
       Text : aliased String := "42";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -137,7 +152,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_Integer_Number_Text;
 
-   procedure Test_Empty_Array_Text is
+   procedure Test_Empty_Array_Text (Object : in out Test) is
       Text : aliased String := "[]";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -147,7 +162,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_Empty_Array_Text;
 
-   procedure Test_One_Element_Array_Text is
+   procedure Test_One_Element_Array_Text (Object : in out Test) is
       Text : aliased String := "[""test""]";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -157,7 +172,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_One_Element_Array_Text;
 
-   procedure Test_Multiple_Elements_Array_Text is
+   procedure Test_Multiple_Elements_Array_Text (Object : in out Test) is
       Text : aliased String := "[42,true]";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -167,7 +182,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_Multiple_Elements_Array_Text;
 
-   procedure Test_Empty_Object_Text is
+   procedure Test_Empty_Object_Text (Object : in out Test) is
       Text : aliased String := "{}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -177,7 +192,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_Empty_Object_Text;
 
-   procedure Test_One_Member_Object_Text is
+   procedure Test_One_Member_Object_Text (Object : in out Test) is
       Text : aliased String := "{""foo"":""bar""}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -187,7 +202,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_One_Member_Object_Text;
 
-   procedure Test_Multiple_Members_Object_Text is
+   procedure Test_Multiple_Members_Object_Text (Object : in out Test) is
       Text  : aliased String := "{""foo"":1,""bar"":2}";
       Text2 : constant String := "{""bar"":2,""foo"":1}";
 
@@ -199,7 +214,7 @@ package body Test_Images is
         ((Text = Image) or else (Text2 = Image), "Image '" & Image & "' is not '" & Text & "'");
    end Test_Multiple_Members_Object_Text;
 
-   procedure Test_Array_Object_Array is
+   procedure Test_Array_Object_Array (Object : in out Test) is
       Text : aliased String := "[{""foo"":[true,42]}]";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
@@ -209,7 +224,7 @@ package body Test_Images is
       Assert (Text = Image, "Image not '" & Text & "'");
    end Test_Array_Object_Array;
 
-   procedure Test_Object_Array_Object is
+   procedure Test_Object_Array_Object (Object : in out Test) is
       Text : aliased String := "{""foo"":[null,{""bar"":42}]}";
 
       Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));

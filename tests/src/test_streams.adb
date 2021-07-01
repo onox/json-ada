@@ -14,7 +14,8 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-with Ahven; use Ahven;
+with AUnit.Assertions;
+with AUnit.Test_Caller;
 
 with JSON.Parsers;
 with JSON.Streams;
@@ -25,17 +26,24 @@ package body Test_Streams is
    package Types is new JSON.Types (Long_Integer, Long_Float);
    package Parsers is new JSON.Parsers (Types);
 
-   overriding
-   procedure Initialize (T : in out Test) is
-   begin
-      T.Set_Name ("Streams");
+   use AUnit.Assertions;
 
-      T.Add_Test_Routine (Test_Stream_IO'Access, "Parse float_number.txt");
-   end Initialize;
+   package Caller is new AUnit.Test_Caller (Test);
+
+   Test_Suite : aliased AUnit.Test_Suites.Test_Suite;
+
+   function Suite return AUnit.Test_Suites.Access_Test_Suite is
+      Name : constant String := "(Streams) ";
+   begin
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse float_number.txt", Test_Stream_IO'Access));
+
+      return Test_Suite'Access;
+   end Suite;
 
    use Types;
 
-   procedure Test_Stream_IO is
+   procedure Test_Stream_IO (Object : in out Test) is
       File_Name : constant String := "float_number.txt";
 
       Text : constant JSON.Streams.Stream_Element_Array_Controlled :=
