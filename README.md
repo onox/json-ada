@@ -114,8 +114,6 @@ In order to build the library, you need to have:
 
 Optional dependencies:
 
- * [Ahven 2.x][url-ahven] if you want to build and run the unit tests
-
  * `lcov` to generate a coverage report for unit tests
 
  * `make`
@@ -125,7 +123,7 @@ Optional dependencies:
 Install the dependencies using apt:
 
 ```sh
-$ sudo apt install gnat-7 gprbuild libahven6-dev lcov make
+$ sudo apt install gnat-7 gprbuild lcov make
 ```
 
 and then install Alire.
@@ -171,6 +169,5 @@ refers to this license:
 
   [url-alire]: https://alire.ada.dev/
   [url-rfc]: https://tools.ietf.org/html/rfc7159
-  [url-ahven]: http://ahven.stronglytyped.org
   [url-apache]: https://opensource.org/licenses/Apache-2.0
   [url-contributing]: /CONTRIBUTING.md
