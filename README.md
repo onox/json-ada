@@ -1,3 +1,4 @@
+[![Build status](https://github.com/onox/json-ada/actions/workflows/build.yaml/badge.svg)](https://github.com/onox/json-ada/actions/workflows/build.yaml)
 [![Alire json](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/json.json)](https://alire.ada.dev/crates/json.html)
 [![License](https://img.shields.io/github/license/onox/json-ada.svg?color=blue)](https://github.com/onox/json-ada/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/onox/json-ada.svg)](https://github.com/onox/json-ada/releases/latest)
