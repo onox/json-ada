@@ -21,7 +21,7 @@ tests:
 	cd tests && alr build -XJSON_BUILD_MODE=coverage
 	cd tests && alr run -s
 
-coverage: tests
+coverage:
 	mkdir -p tests/cov
 	lcov -q -c -d json/build/obj -d tests/build/obj -o tests/cov/unit.info
 	lcov -q -r tests/cov/unit.info */adainclude/* -o tests/cov/unit.info
