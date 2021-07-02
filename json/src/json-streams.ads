@@ -50,14 +50,14 @@ package JSON.Streams with SPARK_Mode => On is
 
    function Create_Stream (Text : not null access String) return Stream;
 
+   type Stream_Element_Array_Access is access all AS.Stream_Element_Array;
+
    function Create_Stream
-     (Bytes : not null access AS.Stream_Element_Array) return Stream;
+     (Bytes : not null Stream_Element_Array_Access) return Stream;
 
    -----------------------------------------------------------------------------
 
    type Stream_Element_Array_Controlled is tagged limited private;
-
-   type Stream_Element_Array_Access is access all AS.Stream_Element_Array;
 
    function Pointer
      (Object : Stream_Element_Array_Controlled) return Stream_Element_Array_Access;

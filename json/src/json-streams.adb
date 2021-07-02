@@ -84,12 +84,12 @@ package body JSON.Streams is
       function Convert is new Ada.Unchecked_Conversion
         (Source => String, Target => Constrained_SEA);
    begin
-      return Create_Stream (new AS.Stream_Element_Array'(Convert (Text.all)));
+      return Create_Stream (new Constrained_SEA'(Convert (Text.all)));
       --  TODO Leaks memory
    end Create_Stream;
 
    function Create_Stream
-     (Bytes : not null access AS.Stream_Element_Array) return Stream is
+     (Bytes : not null Stream_Element_Array_Access) return Stream is
    begin
       return (Bytes          => Bytes,
               Next_Character => Ada.Characters.Latin_1.NUL,

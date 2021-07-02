@@ -1,8 +1,8 @@
 pragma Restrictions (No_Implicit_Aliasing);
 pragma Restrictions (No_Implicit_Dynamic_Code);
 
---  pragma Restrictions (No_Access_Parameter_Allocators);
---  pragma Restrictions (No_Anonymous_Allocators);
+pragma Restrictions (No_Access_Parameter_Allocators);
+pragma Restrictions (No_Anonymous_Allocators);
 pragma Restrictions (No_Implicit_Heap_Allocations);
 
 pragma Restrictions (No_Abort_Statements);
