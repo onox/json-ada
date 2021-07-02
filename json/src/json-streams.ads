@@ -21,6 +21,8 @@ with Ada.Streams;
 package JSON.Streams with SPARK_Mode => On is
    pragma Preelaborate;
 
+   pragma Elaborate_Body;
+
    package AS renames Ada.Streams;
 
    type Stream (<>) is tagged private;
