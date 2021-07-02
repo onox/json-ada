@@ -23,14 +23,11 @@ with JSON.Parsers;
 with JSON.Streams;
 
 procedure Pretty_Print is
+   package ACL renames Ada.Command_Line;
+   package TIO renames Ada.Text_IO;
+
    package Types   is new JSON.Types (Long_Integer, Long_Float);
    package Parsers is new JSON.Parsers (Types);
-
-   Text : constant JSON.Streams.Stream_Element_Array_Controlled :=
-     JSON.Streams.Get_Stream_Element_Array (Ada.Command_Line.Argument (1));
-
-   Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text.Pointer));
-   Value  : constant Types.JSON_Value := Parser.Parse;
 
    type Indent_Type is range 2 .. 8;
 
@@ -92,6 +89,25 @@ procedure Pretty_Print is
             Ada.Text_IO.Put (Value.Image);
       end case;
    end Print;
+
+   File_Only : constant Boolean := ACL.Argument_Count = 1;
+   Is_Quiet  : constant Boolean := ACL.Argument_Count = 2 and ACL.Argument (1) = "-q";
 begin
-   Print (Value, Indent => 4);
+   if not (File_Only or Is_Quiet) then
+      TIO.Put_Line ("Usage: [-q] <path to .json file>");
+      ACL.Set_Exit_Status (ACL.Failure);
+      return;
+   end if;
+
+   declare
+      Text : constant JSON.Streams.Stream_Element_Array_Controlled :=
+        JSON.Streams.Get_Stream_Element_Array (ACL.Argument (ACL.Argument_Count));
+
+      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text.Pointer));
+      Value  : constant Types.JSON_Value := Parser.Parse;
+   begin
+      if not Is_Quiet then
+         Print (Value, Indent => 4);
+      end if;
+   end;
 end Pretty_Print;
