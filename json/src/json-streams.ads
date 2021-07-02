@@ -18,7 +18,7 @@ private with Ada.Finalization;
 
 with Ada.Streams;
 
-package JSON.Streams is
+package JSON.Streams with SPARK_Mode => On is
    pragma Preelaborate;
 
    package AS renames Ada.Streams;
