@@ -24,19 +24,7 @@ package body JSON.Streams is
 
    use type AS.Stream_Element_Offset;
 
-   overriding
-   procedure Read_Character (Object : in out Stream_String; Item : out Character) is
-   begin
-      if Integer (Object.Index) not in Object.Text'Range then
-         raise Ada.IO_Exceptions.End_Error;
-      end if;
-
-      Item := Object.Text (Integer (Object.Index));
-      Object.Index := Object.Index + 1;
-   end Read_Character;
-
-   overriding
-   procedure Read_Character (Object : in out Stream_Bytes; Item : out Character) is
+   procedure Read_Character (Object : in out Stream; Item : out Character) is
       function Convert is new Ada.Unchecked_Conversion
         (Source => AS.Stream_Element, Target => Character);
    begin
@@ -65,7 +53,7 @@ package body JSON.Streams is
    begin
       Index := Object.Index;
       if Object.Next_Character = Ada.Characters.Latin_1.NUL then
-         Stream'Class (Object).Read_Character (C);
+         Object.Read_Character (C);
       else
          C := Object.Next_Character;
          Object.Next_Character := Ada.Characters.Latin_1.NUL;
@@ -78,17 +66,8 @@ package body JSON.Streams is
       Object.Next_Character := Next;
    end Write_Character;
 
-   overriding
    function Get_String
-     (Object : Stream_String;
-      Offset, Length : AS.Stream_Element_Offset) return String is
-   begin
-      return Object.Text (Integer (Offset) .. Integer (Offset + Length - 1));
-   end Get_String;
-
-   overriding
-   function Get_String
-     (Object : Stream_Bytes;
+     (Object : Stream;
       Offset, Length : AS.Stream_Element_Offset) return String
    is
       subtype Constrained_String is String (1 .. Integer (Length));
@@ -99,19 +78,22 @@ package body JSON.Streams is
       return Convert (Object.Bytes (Offset .. Offset + Length - 1));
    end Get_String;
 
-   function Create_Stream (Text : not null access String) return Stream'Class is
+   function Create_Stream (Text : not null access String) return Stream is
+      subtype Constrained_SEA is AS.Stream_Element_Array (1 .. Text'Length);
+
+      function Convert is new Ada.Unchecked_Conversion
+        (Source => String, Target => Constrained_SEA);
    begin
-      return Stream_String'(Text => Text,
-                            Next_Character => Ada.Characters.Latin_1.NUL,
-                            Index => AS.Stream_Element_Offset (Text'First));
+      return Create_Stream (new AS.Stream_Element_Array'(Convert (Text.all)));
+      --  TODO Leaks memory
    end Create_Stream;
 
    function Create_Stream
-     (Bytes : not null access AS.Stream_Element_Array) return Stream'Class is
+     (Bytes : not null access AS.Stream_Element_Array) return Stream is
    begin
-      return Stream_Bytes'(Bytes => Bytes,
-                           Next_Character => Ada.Characters.Latin_1.NUL,
-                           Index => Bytes'First);
+      return (Bytes          => Bytes,
+              Next_Character => Ada.Characters.Latin_1.NUL,
+              Index          => Bytes'First);
    end Create_Stream;
 
    -----------------------------------------------------------------------------

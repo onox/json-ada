@@ -23,42 +23,39 @@ package JSON.Streams is
 
    package AS renames Ada.Streams;
 
-   type Stream is abstract tagged private;
+   type Stream (<>) is tagged private;
 
-   type Stream_Ptr is not null access all Streams.Stream'Class;
+   type Stream_Ptr is not null access all Streams.Stream;
 
-   procedure Read_Character (Object : in out Stream; Item : out Character) is abstract;
-
-   function Has_Buffered_Character (Object : Stream) return Boolean
-     with Inline;
+   function Has_Buffered_Character (Object : Stream) return Boolean;
 
    function Read_Character (Object : in out Stream) return Character
-     with Post'Class => not Stream'Class (Object).Has_Buffered_Character;
+     with Post => not Object.Has_Buffered_Character;
 
    function Read_Character
      (Object : in out Stream;
       Index  : out AS.Stream_Element_Offset) return Character
-   with Post'Class => not Stream'Class (Object).Has_Buffered_Character;
+   with Post => not Object.Has_Buffered_Character;
    --  Writes the offset of the read character to Index. This is needed
    --  for string tokens.
 
    procedure Write_Character (Object : in out Stream; Next : Character)
-     with Pre'Class => not Stream'Class (Object).Has_Buffered_Character;
+     with Pre => not Object.Has_Buffered_Character;
 
    function Get_String
      (Object : Stream;
-      Offset, Length : AS.Stream_Element_Offset) return String is abstract;
+      Offset, Length : AS.Stream_Element_Offset) return String;
 
-   function Create_Stream (Text : not null access String) return Stream'Class;
+   function Create_Stream (Text : not null access String) return Stream;
 
    function Create_Stream
-     (Bytes : not null access AS.Stream_Element_Array) return Stream'Class;
+     (Bytes : not null access AS.Stream_Element_Array) return Stream;
 
    -----------------------------------------------------------------------------
 
    type Stream_Element_Array_Controlled is tagged limited private;
 
-   type Stream_Element_Array_Access is access AS.Stream_Element_Array;
+   type Stream_Element_Array_Access is access all AS.Stream_Element_Array;
 
    function Pointer
      (Object : Stream_Element_Array_Controlled) return Stream_Element_Array_Access;
@@ -68,31 +65,10 @@ package JSON.Streams is
 
 private
 
-   type Stream is abstract tagged record
+   type Stream (Bytes : not null Stream_Element_Array_Access) is tagged record
       Next_Character : Character;
       Index : AS.Stream_Element_Offset;
    end record;
-
-   type Stream_String (Text : not null access String) is new Stream with null record;
-
-   overriding
-   procedure Read_Character (Object : in out Stream_String; Item : out Character);
-
-   overriding
-   function Get_String
-     (Object : Stream_String;
-      Offset, Length : AS.Stream_Element_Offset) return String;
-
-   type Stream_Bytes
-     (Bytes : not null access AS.Stream_Element_Array) is new Stream with null record;
-
-   overriding
-   procedure Read_Character (Object : in out Stream_Bytes; Item : out Character);
-
-   overriding
-   function Get_String
-     (Object : Stream_Bytes;
-      Offset, Length : AS.Stream_Element_Offset) return String;
 
    -----------------------------------------------------------------------------
 

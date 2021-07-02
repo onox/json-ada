@@ -1,9 +1,12 @@
 GNATPROVE = gnatprove --cwe --pedantic -k -j0 --output-header
 
-.PHONY: build debug clean prove tests coverage
+.PHONY: build fast debug clean prove tests coverage
 
 build:
 	cd json && alr build
+
+fast:
+	cd json && alr build -XJSON_RUNTIME_CHECKS=disabled -XJSON_CONTRACTS=disabled
 
 debug:
 	cd json && alr build -XJSON_BUILD_MODE=debug
