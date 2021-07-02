@@ -159,7 +159,7 @@ package body JSON.Parsers is
    end Parse;
 
    function Create
-     (Stream        : Streams.Stream'Class;
+     (Stream        : Streams.Stream;
       Maximum_Depth : Positive := Default_Maximum_Depth) return Parser
    is
       Allocator : Types.Memory_Allocator (Maximum_Depth);

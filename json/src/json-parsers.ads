@@ -33,7 +33,7 @@ package JSON.Parsers with SPARK_Mode => On is
    type Parser is tagged limited private;
 
    function Create
-     (Stream        : Streams.Stream'Class;
+     (Stream        : Streams.Stream;
       Maximum_Depth : Positive := Default_Maximum_Depth) return Parser;
 
    function Parse (Object : in out Parser) return Types.JSON_Value;
@@ -43,7 +43,7 @@ package JSON.Parsers with SPARK_Mode => On is
 private
 
    package Stream_Holders is new Ada.Containers.Indefinite_Holders
-     (Element_Type => Streams.Stream'Class, "=" => Streams."=");
+     (Element_Type => Streams.Stream, "=" => Streams."=");
 
    package Memory_Holders is new Ada.Containers.Indefinite_Holders
      (Element_Type => Types.Memory_Allocator, "=" => Types."=");
