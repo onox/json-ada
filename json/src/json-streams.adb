@@ -66,6 +66,19 @@ package body JSON.Streams is
       Object.Next_Character := Next;
    end Write_Character;
 
+   function Is_Equal_String
+     (Object : Stream;
+      Offset, Length : AS.Stream_Element_Offset;
+      Value : String) return Boolean
+   is
+      subtype Constrained_String is String (1 .. Integer (Length));
+
+      function Convert is new Ada.Unchecked_Conversion
+        (Source => AS.Stream_Element_Array, Target => Constrained_String);
+   begin
+      return Value = Convert (Object.Bytes (Offset .. Offset + Length - 1));
+   end Is_Equal_String;
+
    function Get_String
      (Object : Stream;
       Offset, Length : AS.Stream_Element_Offset) return String

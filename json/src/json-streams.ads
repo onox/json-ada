@@ -44,6 +44,11 @@ package JSON.Streams with SPARK_Mode => On is
    procedure Write_Character (Object : in out Stream; Next : Character)
      with Pre => not Object.Has_Buffered_Character;
 
+   function Is_Equal_String
+     (Object : Stream;
+      Offset, Length : AS.Stream_Element_Offset;
+      Value : String) return Boolean;
+
    function Get_String
      (Object : Stream;
       Offset, Length : AS.Stream_Element_Offset) return String;

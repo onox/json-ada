@@ -153,6 +153,12 @@ package body JSON.Types is
    --                                  Value                                  --
    -----------------------------------------------------------------------------
 
+   function "=" (Left : String; Right : JSON_Value) return Boolean is
+     (if Right.Kind = String_Kind then
+        Right.Stream.Is_Equal_String (Right.String_Offset, Right.String_Length, Left)
+      else
+        False);
+
    function Value (Object : JSON_Value) return String is
    begin
       if Object.Kind = String_Kind then
@@ -211,7 +217,7 @@ package body JSON.Types is
                Pair : Key_Value_Pair renames Object.Allocator.Object_Levels
                  (Object.Depth).Element (Object.Offset + Index);
             begin
-               if Key = Pair.Key.Value then
+               if Key = Pair.Key then
                   return True;
                end if;
             end;
@@ -244,7 +250,7 @@ package body JSON.Types is
                Pair : constant Key_Value_Pair := Object.Allocator.Object_Levels
                  (Object.Depth).Element (Object.Offset + Index);
             begin
-               if Key = Pair.Key.Value then
+               if Key = Pair.Key then
                   return Pair.Element;
                end if;
             end;
