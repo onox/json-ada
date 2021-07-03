@@ -206,7 +206,18 @@ package body JSON.Types is
    function Contains (Object : JSON_Value; Key : String) return Boolean is
    begin
       if Object.Kind = Object_Kind then
-         return (for some Pair_Key of Object => Key = Pair_Key.Value);
+         for Index in 1 .. Object.Length loop
+            declare
+               Pair : Key_Value_Pair renames Object.Allocator.Object_Levels
+                 (Object.Depth).Element (Object.Offset + Index);
+            begin
+               if Key = Pair.Key.Value then
+                  return True;
+               end if;
+            end;
+         end loop;
+
+         return False;
       else
          raise Invalid_Type_Error with "Value not an object";
       end if;
