@@ -15,6 +15,7 @@
 --  limitations under the License.
 
 with Ada.Exceptions;
+with Ada.Unchecked_Deallocation;
 
 with JSON.Tokenizers;
 
@@ -159,19 +160,76 @@ package body JSON.Parsers is
    end Parse;
 
    function Create
-     (Stream        : Streams.Stream;
+     (Pointer       : not null JSON.Streams.Stream_Element_Array_Access;
       Maximum_Depth : Positive := Default_Maximum_Depth) return Parser
    is
       Allocator : Types.Memory_Allocator (Maximum_Depth);
    begin
       return
-        (Stream    => Stream_Holders.To_Holder (Stream),
-         Allocator => Memory_Holders.To_Holder (Allocator));
+        (AF.Limited_Controlled with
+         Pointer     => Pointer,
+         Own_Pointer => False,
+         Stream      => Stream_Holders.To_Holder (Streams.Create_Stream (Pointer)),
+         Allocator   => Memory_Holders.To_Holder (Allocator));
    end Create;
+
+   function Create
+     (Text          : String;
+      Maximum_Depth : Positive := Default_Maximum_Depth) return Parser
+   is
+      Allocator : Types.Memory_Allocator (Maximum_Depth);
+   begin
+      return Result : Parser :=
+        (AF.Limited_Controlled with
+         Pointer     => Streams.From_Text (Text),
+         Own_Pointer => True,
+         Allocator   => Memory_Holders.To_Holder (Allocator),
+         others      => <>)
+      do
+         Result.Stream := Stream_Holders.To_Holder (Streams.Create_Stream (Result.Pointer));
+      end return;
+   end Create;
+
+   function Create_From_File
+     (File_Name     : String;
+      Maximum_Depth : Positive := Default_Maximum_Depth) return Parser
+   is
+      Allocator : Types.Memory_Allocator (Maximum_Depth);
+   begin
+      return Result : Parser :=
+        (AF.Limited_Controlled with
+         Pointer     => Streams.From_File (File_Name),
+         Own_Pointer => True,
+         Allocator   => Memory_Holders.To_Holder (Allocator),
+         others      => <>)
+      do
+         Result.Stream := Stream_Holders.To_Holder (Streams.Create_Stream (Result.Pointer));
+      end return;
+   end Create_From_File;
 
    function Parse (Object : in out Parser) return Types.JSON_Value is
    begin
       return Parse (Object.Stream.Reference.Element, Object.Allocator.Reference.Element);
    end Parse;
+
+   overriding
+   procedure Finalize (Object : in out Parser) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Object => Streams.AS.Stream_Element_Array,
+         Name   => Streams.Stream_Element_Array_Access);
+
+      use type Streams.Stream_Element_Array_Access;
+   begin
+      if Object.Pointer /= null then
+         Object.Stream.Clear;
+         Object.Allocator.Clear;
+
+         if Object.Own_Pointer then
+            Free (Object.Pointer);
+         end if;
+
+         Object.Pointer := null;
+      end if;
+   end Finalize;
 
 end JSON.Parsers;

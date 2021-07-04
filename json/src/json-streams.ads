@@ -25,7 +25,7 @@ package JSON.Streams with SPARK_Mode => On is
 
    package AS renames Ada.Streams;
 
-   type Stream (<>) is tagged private;
+   type Stream is tagged private;
 
    type Stream_Ptr is not null access all Streams.Stream;
 
@@ -53,8 +53,6 @@ package JSON.Streams with SPARK_Mode => On is
      (Object : Stream;
       Offset, Length : AS.Stream_Element_Offset) return String;
 
-   function Create_Stream (Text : not null access String) return Stream;
-
    type Stream_Element_Array_Access is access all AS.Stream_Element_Array;
 
    function Create_Stream
@@ -62,30 +60,18 @@ package JSON.Streams with SPARK_Mode => On is
 
    -----------------------------------------------------------------------------
 
-   type Stream_Element_Array_Controlled is tagged limited private;
+   function From_File
+     (File_Name : String) return Stream_Element_Array_Access;
 
-   function Pointer
-     (Object : Stream_Element_Array_Controlled) return Stream_Element_Array_Access;
-
-   function Get_Stream_Element_Array
-     (File_Name : String) return Stream_Element_Array_Controlled;
+   function From_Text
+     (Text : String) return Stream_Element_Array_Access;
 
 private
 
-   type Stream (Bytes : not null Stream_Element_Array_Access) is tagged record
+   type Stream is tagged record
+      Bytes : not null Stream_Element_Array_Access;
       Next_Character : Character;
       Index : AS.Stream_Element_Offset;
    end record;
-
-   -----------------------------------------------------------------------------
-
-   type Stream_Element_Array_Controlled is limited
-     new Ada.Finalization.Limited_Controlled with
-   record
-      Pointer : Stream_Element_Array_Access;
-   end record;
-
-   overriding
-   procedure Finalize (Object : in out Stream_Element_Array_Controlled);
 
 end JSON.Streams;

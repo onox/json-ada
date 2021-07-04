@@ -100,10 +100,7 @@ begin
    end if;
 
    declare
-      Text : constant JSON.Streams.Stream_Element_Array_Controlled :=
-        JSON.Streams.Get_Stream_Element_Array (ACL.Argument (ACL.Argument_Count));
-
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text.Pointer));
+      Parser : Parsers.Parser := Parsers.Create_From_File (ACL.Argument (ACL.Argument_Count));
       Value  : constant Types.JSON_Value := Parser.Parse;
    begin
       if not Is_Quiet then

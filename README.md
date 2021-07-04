@@ -28,10 +28,7 @@ procedure Example is
    package Types   is new JSON.Types (Long_Integer, Long_Float);
    package Parsers is new JSON.Parsers (Types);
 
-   Text : constant JSON.Streams.Stream_Element_Array_Controlled :=
-     JSON.Streams.Get_Stream_Element_Array (Ada.Command_Line.Argument (1));
-
-   Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text.Pointer));
+   Parser : Parsers.Parser := Parsers.Create_From_File (Ada.Command_Line.Argument (1));
    Value  : constant Types.JSON_Value := Parser.Parse;
 
    use Types;
@@ -93,15 +90,18 @@ Optional generic parameters of `JSON.Parsers`:
   parsing. Parsing large JSON texts will be slower if enabled. If disabled
   then the `Get` operation will return the value of the first key that matches.
 
-The actual parameter of `Create_Stream` can be an access to a `String`
-or an access to a `Ada.Streams.Stream_Element_Array`.
+A parser can be created by calling `Create_From_File` or `Create`.
+The actual parameter of `Create` can be some text as a `String`
+or an access to a `Ada.Streams.Stream_Element_Array` containing the text.
+In case an access to a `Stream_Element_Array` is given, then the `Parser`
+takes no ownership of the pointer and you must deallocate the array yourself.
 
 The default maximum nesting depth can be overriden with
 the optional second parameter `Maximum_Depth` of function `Create`.
 
 After parsing, elements of arrays and objects are stored in the `Parser`
-object, while strings remain stored in the `String` or `Stream_Element_Array`
-object. These two objects must not go out of scope before any `JSON_Value`
+object, while strings remain stored in the `String` or `Stream_Element_Array`.
+Therefore, the `Parser` object must not go out of scope before any `JSON_Value`
 goes out of scope.
 
 ## Dependencies

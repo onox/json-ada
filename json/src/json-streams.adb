@@ -18,7 +18,6 @@ with Ada.Characters.Latin_1;
 with Ada.IO_Exceptions;
 with Ada.Streams.Stream_IO;
 with Ada.Unchecked_Conversion;
-with Ada.Unchecked_Deallocation;
 
 package body JSON.Streams is
 
@@ -91,16 +90,6 @@ package body JSON.Streams is
       return Convert (Object.Bytes (Offset .. Offset + Length - 1));
    end Get_String;
 
-   function Create_Stream (Text : not null access String) return Stream is
-      subtype Constrained_SEA is AS.Stream_Element_Array (1 .. Text'Length);
-
-      function Convert is new Ada.Unchecked_Conversion
-        (Source => String, Target => Constrained_SEA);
-   begin
-      return Create_Stream (new Constrained_SEA'(Convert (Text.all)));
-      --  TODO Leaks memory
-   end Create_Stream;
-
    function Create_Stream
      (Bytes : not null Stream_Element_Array_Access) return Stream is
    begin
@@ -111,22 +100,8 @@ package body JSON.Streams is
 
    -----------------------------------------------------------------------------
 
-   function Pointer
-     (Object : Stream_Element_Array_Controlled) return Stream_Element_Array_Access
-   is (Object.Pointer);
-
-   overriding
-   procedure Finalize (Object : in out Stream_Element_Array_Controlled) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Object => AS.Stream_Element_Array, Name => Stream_Element_Array_Access);
-   begin
-      if Object.Pointer /= null then
-         Free (Object.Pointer);
-      end if;
-   end Finalize;
-
-   function Get_Stream_Element_Array
-     (File_Name : String) return Stream_Element_Array_Controlled
+   function From_File
+     (File_Name : String) return Stream_Element_Array_Access
    is
       package IO renames AS.Stream_IO;
 
@@ -142,13 +117,26 @@ package body JSON.Streams is
          begin
             Byte_Array'Read (IO.Stream (File), Content.all);
             IO.Close (File);
-            return (Ada.Finalization.Limited_Controlled with Pointer => Content);
+            return Content;
          end;
       exception
          when others =>
             IO.Close (File);
             raise;
       end;
-   end Get_Stream_Element_Array;
+   end From_File;
+
+   function From_Text
+     (Text : String) return Stream_Element_Array_Access
+   is
+      subtype Constrained_SEA is AS.Stream_Element_Array (1 .. Text'Length);
+
+      function Convert is new Ada.Unchecked_Conversion
+        (Source => String, Target => Constrained_SEA);
+
+      Content : constant Stream_Element_Array_Access := new Constrained_SEA'(Convert (Text));
+   begin
+      return Content;
+   end From_Text;
 
 end JSON.Streams;
