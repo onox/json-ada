@@ -73,9 +73,9 @@ package body Test_Images is
    use Types;
 
    procedure Test_True_Text (Object : in out Test) is
-      Text : aliased String := "true";
+      Text : constant String := "true";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -83,9 +83,9 @@ package body Test_Images is
    end Test_True_Text;
 
    procedure Test_False_Text (Object : in out Test) is
-      Text : aliased String := "false";
+      Text : constant String := "false";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -93,9 +93,9 @@ package body Test_Images is
    end Test_False_Text;
 
    procedure Test_Null_Text (Object : in out Test) is
-      Text : aliased String := "null";
+      Text : constant String := "null";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -103,9 +103,9 @@ package body Test_Images is
    end Test_Null_Text;
 
    procedure Test_Escaped_Text (Object : in out Test) is
-      Text : aliased String := """BS:\b LF:\n CR:\r \\ \/ HT:\t""";
+      Text : constant String := """BS:\b LF:\n CR:\r \\ \/ HT:\t""";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -113,9 +113,9 @@ package body Test_Images is
    end Test_Escaped_Text;
 
    procedure Test_Empty_String_Text (Object : in out Test) is
-      Text : aliased String := """""";
+      Text : constant String := """""";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -123,9 +123,9 @@ package body Test_Images is
    end Test_Empty_String_Text;
 
    procedure Test_Non_Empty_String_Text (Object : in out Test) is
-      Text : aliased String := """test""";
+      Text : constant String := """test""";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -133,9 +133,9 @@ package body Test_Images is
    end Test_Non_Empty_String_Text;
 
    procedure Test_Number_String_Text (Object : in out Test) is
-      Text : aliased String := """12.34""";
+      Text : constant String := """12.34""";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -143,9 +143,9 @@ package body Test_Images is
    end Test_Number_String_Text;
 
    procedure Test_Integer_Number_Text (Object : in out Test) is
-      Text : aliased String := "42";
+      Text : constant String := "42";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -153,9 +153,9 @@ package body Test_Images is
    end Test_Integer_Number_Text;
 
    procedure Test_Empty_Array_Text (Object : in out Test) is
-      Text : aliased String := "[]";
+      Text : constant String := "[]";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -163,9 +163,9 @@ package body Test_Images is
    end Test_Empty_Array_Text;
 
    procedure Test_One_Element_Array_Text (Object : in out Test) is
-      Text : aliased String := "[""test""]";
+      Text : constant String := "[""test""]";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -173,9 +173,9 @@ package body Test_Images is
    end Test_One_Element_Array_Text;
 
    procedure Test_Multiple_Elements_Array_Text (Object : in out Test) is
-      Text : aliased String := "[42,true]";
+      Text : constant String := "[42,true]";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -183,9 +183,9 @@ package body Test_Images is
    end Test_Multiple_Elements_Array_Text;
 
    procedure Test_Empty_Object_Text (Object : in out Test) is
-      Text : aliased String := "{}";
+      Text : constant String := "{}";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -193,9 +193,9 @@ package body Test_Images is
    end Test_Empty_Object_Text;
 
    procedure Test_One_Member_Object_Text (Object : in out Test) is
-      Text : aliased String := "{""foo"":""bar""}";
+      Text : constant String := "{""foo"":""bar""}";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -203,10 +203,10 @@ package body Test_Images is
    end Test_One_Member_Object_Text;
 
    procedure Test_Multiple_Members_Object_Text (Object : in out Test) is
-      Text  : aliased String := "{""foo"":1,""bar"":2}";
+      Text  : constant String := "{""foo"":1,""bar"":2}";
       Text2 : constant String := "{""bar"":2,""foo"":1}";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -215,9 +215,9 @@ package body Test_Images is
    end Test_Multiple_Members_Object_Text;
 
    procedure Test_Array_Object_Array (Object : in out Test) is
-      Text : aliased String := "[{""foo"":[true,42]}]";
+      Text : constant String := "[{""foo"":[true,42]}]";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin
@@ -225,9 +225,9 @@ package body Test_Images is
    end Test_Array_Object_Array;
 
    procedure Test_Object_Array_Object (Object : in out Test) is
-      Text : aliased String := "{""foo"":[null,{""bar"":42}]}";
+      Text : constant String := "{""foo"":[null,{""bar"":42}]}";
 
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text'Access));
+      Parser : constant Parsers.Parser := Parsers.Create (Text);
       Value : constant JSON_Value := Parser.Parse;
       Image : constant String := Value.Image;
    begin

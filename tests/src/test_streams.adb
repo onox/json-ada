@@ -46,10 +46,7 @@ package body Test_Streams is
    procedure Test_Stream_IO (Object : in out Test) is
       File_Name : constant String := "float_number.txt";
 
-      Text : constant JSON.Streams.Stream_Element_Array_Controlled :=
-        JSON.Streams.Get_Stream_Element_Array (File_Name);
-
-      Parser : Parsers.Parser := Parsers.Create (JSON.Streams.Create_Stream (Text.Pointer));
+      Parser : Parsers.Parser := Parsers.Create_From_File (File_Name);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Float_Kind, "Not a float");
