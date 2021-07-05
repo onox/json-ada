@@ -1,7 +1,7 @@
 project Json is
 
    for Library_Name use "json";
-   for Library_Version use "4.0.1";
+   for Library_Version use "5.0.0";
 
    for Create_Missing_Dirs use "True";
 

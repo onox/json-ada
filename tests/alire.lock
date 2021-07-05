@@ -54,7 +54,7 @@ crate = "json"
 fulfilment = "linked"
 pinned = false
 transitivity = "direct"
-versions = "^4.0.1"
+versions = "^5.0.0"
 [solution.state.link]
 lockfiled = true
 path = "../json"
