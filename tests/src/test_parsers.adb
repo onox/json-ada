@@ -124,7 +124,7 @@ package body Test_Parsers is
    procedure Test_True_Text (Object : in out Test) is
       Text : constant String := "true";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Boolean_Kind, "Not a boolean");
@@ -134,7 +134,7 @@ package body Test_Parsers is
    procedure Test_False_Text (Object : in out Test) is
       Text : constant String := "false";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Boolean_Kind, "Not a boolean");
@@ -144,7 +144,7 @@ package body Test_Parsers is
    procedure Test_Null_Text (Object : in out Test) is
       Text : constant String := "null";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Null_Kind, "Not a null");
@@ -153,7 +153,7 @@ package body Test_Parsers is
    procedure Test_Empty_String_Text (Object : in out Test) is
       Text : constant String := """""";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = String_Kind, "Not a string");
@@ -163,7 +163,7 @@ package body Test_Parsers is
    procedure Test_Non_Empty_String_Text (Object : in out Test) is
       Text : constant String := """test""";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = String_Kind, "Not a string");
@@ -173,7 +173,7 @@ package body Test_Parsers is
    procedure Test_Number_String_Text (Object : in out Test) is
       Text : constant String := """12.34""";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = String_Kind, "Not a string");
@@ -183,7 +183,7 @@ package body Test_Parsers is
    procedure Test_Integer_Number_Text (Object : in out Test) is
       Text : constant String := "42";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Integer_Kind, "Not an integer");
@@ -193,7 +193,7 @@ package body Test_Parsers is
    procedure Test_Integer_Number_To_Float_Text (Object : in out Test) is
       Text : constant String := "42";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Integer_Kind, "Not an integer");
@@ -203,7 +203,7 @@ package body Test_Parsers is
    procedure Test_Float_Number_Text (Object : in out Test) is
       Text : constant String := "3.14";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Float_Kind, "Not a float");
@@ -213,7 +213,7 @@ package body Test_Parsers is
    procedure Test_Empty_Array_Text (Object : in out Test) is
       Text : constant String := "[]";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Array_Kind, "Not an array");
@@ -224,7 +224,7 @@ package body Test_Parsers is
       Text : constant String := "[""test""]";
       String_Value_Message : constant String := "Expected string at index 1 to be equal to 'test'";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Array_Kind, "Not an array");
@@ -243,7 +243,7 @@ package body Test_Parsers is
       Float_Value_Message   : constant String := "Expected float at index 1 to be equal to 3.14";
       Boolean_Value_Message : constant String := "Expected boolean at index 2 to be True";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Array_Kind, "Not an array");
@@ -267,7 +267,7 @@ package body Test_Parsers is
       Text : constant String := "[false, ""test"", 0.271e1]";
       Iterations_Message : constant String := "Unexpected number of iterations";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Array_Kind, "Not an array");
@@ -297,7 +297,7 @@ package body Test_Parsers is
       Text : constant String := "{""foo"":[1, ""2""],""bar"":[0.271e1]}";
       Iterations_Message : constant String := "Unexpected number of iterations";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
@@ -336,7 +336,7 @@ package body Test_Parsers is
    procedure Test_Empty_Object_Text (Object : in out Test) is
       Text : constant String := "{}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
@@ -346,7 +346,7 @@ package body Test_Parsers is
    procedure Test_One_Member_Object_Text (Object : in out Test) is
       Text : constant String := "{""foo"":""bar""}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
@@ -358,7 +358,7 @@ package body Test_Parsers is
    procedure Test_Multiple_Members_Object_Text (Object : in out Test) is
       Text : constant String := "{""foo"":1,""bar"":2}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
@@ -373,7 +373,7 @@ package body Test_Parsers is
       Iterations_Message : constant String := "Unexpected number of iterations";
       All_Keys_Message   : constant String := "Did not iterate over all expected keys";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
@@ -403,7 +403,7 @@ package body Test_Parsers is
    procedure Test_Array_Object_Array (Object : in out Test) is
       Text : constant String := "[{""foo"":[true, 42]}]";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Array_Kind, "Not an array");
@@ -434,7 +434,7 @@ package body Test_Parsers is
    procedure Test_Object_Array_Object (Object : in out Test) is
       Text : constant String := "{""foo"":[null, {""bar"": 42}]}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       Assert (Value.Kind = Object_Kind, "Not an object");
@@ -471,7 +471,7 @@ package body Test_Parsers is
    procedure Test_Object_No_Array (Object : in out Test) is
       Text : constant String := "{}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       begin
@@ -501,7 +501,7 @@ package body Test_Parsers is
    procedure Test_Object_No_Object (Object : in out Test) is
       Text : constant String := "{}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
       Value  : constant JSON_Value := Parser.Parse;
    begin
       begin
@@ -531,7 +531,7 @@ package body Test_Parsers is
    procedure Test_Empty_Text_Exception (Object : in out Test) is
       Text : constant String := "";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -547,7 +547,7 @@ package body Test_Parsers is
    procedure Test_Array_No_Value_Separator_Exception (Object : in out Test) is
       Text : constant String := "[3.14""test""]";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -563,7 +563,7 @@ package body Test_Parsers is
    procedure Test_Array_No_End_Array_Exception (Object : in out Test) is
       Text : constant String := "[true";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -579,7 +579,7 @@ package body Test_Parsers is
    procedure Test_No_EOF_After_Array_Exception (Object : in out Test) is
       Text : constant String := "[1]2";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -595,7 +595,7 @@ package body Test_Parsers is
    procedure Test_Object_No_Value_Separator_Exception (Object : in out Test) is
       Text : constant String := "{""foo"":1""bar"":2}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -611,7 +611,7 @@ package body Test_Parsers is
    procedure Test_Object_No_Name_Separator_Exception (Object : in out Test) is
       Text : constant String := "{""foo"",true}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -627,7 +627,7 @@ package body Test_Parsers is
    procedure Test_Object_Key_No_String_Exception (Object : in out Test) is
       Text : constant String := "{42:true}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -643,7 +643,7 @@ package body Test_Parsers is
    procedure Test_Object_No_Second_Member_Exception (Object : in out Test) is
       Text : constant String := "{""foo"":true,}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -659,7 +659,7 @@ package body Test_Parsers is
    procedure Test_Object_Duplicate_Keys_Exception (Object : in out Test) is
       Text : constant String := "{""foo"":1,""foo"":2}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -675,7 +675,7 @@ package body Test_Parsers is
    procedure Test_Object_No_Value_Exception (Object : in out Test) is
       Text : constant String := "{""foo"":}";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -691,7 +691,7 @@ package body Test_Parsers is
    procedure Test_Object_No_End_Object_Exception (Object : in out Test) is
       Text : constant String := "{""foo"":true";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
@@ -707,7 +707,7 @@ package body Test_Parsers is
    procedure Test_No_EOF_After_Object_Exception (Object : in out Test) is
       Text : constant String := "{""foo"":true}[true]";
 
-      Parser : constant Parsers.Parser := Parsers.Create (Text);
+      Parser : Parsers.Parser := Parsers.Create (Text);
    begin
       declare
          Value  : JSON_Value := Parser.Parse;
