@@ -53,7 +53,7 @@ package JSON.Tokenizers with SPARK_Mode => On is
    end record;
 
    procedure Read_Token
-     (Stream     : in out Streams.Stream'Class;
+     (Stream     : in out Streams.Stream;
       Next_Token : out Token;
       Expect_EOF : Boolean := False)
    with Post => Next_Token.Kind /= Invalid_Token and Expect_EOF = (Next_Token.Kind = EOF_Token);

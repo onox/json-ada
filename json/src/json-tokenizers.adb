@@ -21,7 +21,7 @@ with Ada.Strings.Bounded;
 package body JSON.Tokenizers is
 
    procedure Read_String
-     (Stream     : in out Streams.Stream'Class;
+     (Stream     : in out Streams.Stream;
       Next_Token : out Token)
    is
       C : Character;
@@ -77,7 +77,7 @@ package body JSON.Tokenizers is
    end Test_Leading_Zeroes;
 
    procedure Read_Number
-     (Stream     : in out Streams.Stream'Class;
+     (Stream     : in out Streams.Stream;
       First      : Character;
       Next_Token : out Token)
    is
@@ -210,7 +210,7 @@ package body JSON.Tokenizers is
    end Read_Number;
 
    procedure Read_Literal
-     (Stream     : in out Streams.Stream'Class;
+     (Stream     : in out Streams.Stream;
       First      : Character;
       Next_Token : out Token)
    is
@@ -254,7 +254,7 @@ package body JSON.Tokenizers is
    end Read_Literal;
 
    procedure Read_Token
-     (Stream     : in out Streams.Stream'Class;
+     (Stream     : in out Streams.Stream;
       Next_Token : out Token;
       Expect_EOF : Boolean := False)
    is
