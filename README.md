@@ -22,7 +22,6 @@ with Ada.Command_Line;
 with Ada.Text_IO;
 
 with JSON.Parsers;
-with JSON.Streams;
 with JSON.Types;
 
 procedure Example is
