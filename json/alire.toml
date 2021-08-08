@@ -12,3 +12,5 @@ project-files = ["json.gpr", "json_pretty_print.gpr"]
 authors = ["onox"]
 maintainers = ["onox <denkpadje@gmail.com>"]
 maintainers-logins = ["onox"]
+
+configuration.disabled = true
