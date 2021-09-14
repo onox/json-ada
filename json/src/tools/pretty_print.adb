@@ -91,7 +91,7 @@ procedure Pretty_Print is
    end Print;
 
    File_Only : constant Boolean := ACL.Argument_Count = 1;
-   Is_Quiet  : constant Boolean := ACL.Argument_Count = 2 and ACL.Argument (1) = "-q";
+   Is_Quiet  : constant Boolean := ACL.Argument_Count = 2 and then ACL.Argument (1) = "-q";
 begin
    if not (File_Only or Is_Quiet) then
       TIO.Put_Line ("Usage: [-q] <path to .json file>");
