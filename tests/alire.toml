@@ -1,6 +1,6 @@
 name = "json_tests"
 description = "Unit tests for json-ada"
-version = "5.0.0"
+version = "5.0.1"
 website = "https://github.com/onox/json-ada"
 licenses = "Apache-2.0"
 tags = ["json"]
