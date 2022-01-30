@@ -11,7 +11,8 @@ authors = ["onox"]
 maintainers = ["onox <denkpadje@gmail.com>"]
 maintainers-logins = ["onox"]
 
-configuration.disabled = true
+[configuration]
+disabled = true
 
 [[depends-on]]
 aunit = "^21.0.0"
