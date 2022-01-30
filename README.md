@@ -118,12 +118,12 @@ Optional dependencies:
 
  * `make`
 
-## Installing dependencies on Ubuntu 18.04 LTS
+## Installing dependencies on Ubuntu
 
 Install the dependencies using apt:
 
 ```sh
-$ sudo apt install gnat-7 gprbuild lcov make
+$ sudo apt install gnat gprbuild lcov make
 ```
 
 and then install Alire.
