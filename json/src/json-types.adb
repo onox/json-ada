@@ -464,8 +464,6 @@ package body JSON.Types is
    function Image_Boolean (Object : JSON_Value) return String is
      (if Object.Boolean_Value then "true" else "false");
 
-   function Image_Null (Object : JSON_Value) return String is ("null");
-
    function Image_Array (Object : JSON_Value) return String is
       Index  : Natural             := 0;
       Result : SU.Unbounded_String := +"[";
@@ -514,7 +512,7 @@ package body JSON.Types is
          when Boolean_Kind =>
             return Image_Boolean (Object);
          when Null_Kind =>
-            return Image_Null (Object);
+            return "null";
       end case;
    end Image;
 

@@ -14,8 +14,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-private with Ada.Finalization;
-
 with Ada.Streams;
 
 package JSON.Streams with SPARK_Mode => On is

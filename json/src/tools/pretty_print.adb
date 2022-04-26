@@ -20,7 +20,6 @@ with Ada.Text_IO;
 
 with JSON.Types;
 with JSON.Parsers;
-with JSON.Streams;
 
 procedure Pretty_Print is
    package ACL renames Ada.Command_Line;
