@@ -18,7 +18,6 @@ with AUnit.Assertions;
 with AUnit.Test_Caller;
 
 with JSON.Parsers;
-with JSON.Streams;
 with JSON.Types;
 
 package body Test_Images is
