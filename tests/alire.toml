@@ -1,6 +1,6 @@
 name = "json_tests"
 description = "Unit tests for json-ada"
-version = "5.0.1"
+version = "5.0.2"
 website = "https://github.com/onox/json-ada"
 licenses = "Apache-2.0"
 tags = ["json"]
@@ -16,7 +16,7 @@ disabled = true
 
 [[depends-on]]
 aunit = "^21.0.0"
-json = "^5.0.0"
+json = "^5.0.2"
 
 [[pins]]
 json = { path = "../json" }
