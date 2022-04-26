@@ -28,7 +28,7 @@ abstract project JSON_Config is
            ("-gnatwa",  -- all warnings
             "-gnatVa",  -- all validity checks
             "-gnatf",   -- full errors
-            "-gnatwe", -- warnings as errors
+--            "-gnatwe", -- warnings as errors
             "-gnatwfl.s");
       when "warnings" =>
          compile_checks_switches :=
