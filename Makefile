@@ -4,13 +4,13 @@ build:
 	cd json && alr build --validation
 
 clean:
-	-alr gnatprove --clean
+	-gnatprove --clean -P json/json.gpr
 	cd json && alr clean
 	cd tests && alr clean
 	rm -rf json/build tests/build tests/build/cov tests/TEST-*.xml
 
 prove:
-	alr gnatprove
+	gnatprove -P json/json.gpr
 
 tests:
 	cd tests && alr build --development
