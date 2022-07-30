@@ -3,10 +3,10 @@
 #### **Did you find a bug?**
 
 * **Ensure the bug was not already reported** by searching on GitHub
-  under [Issues](https://github.com/onox/json-ada/issues).
+  under the Issues page.
 
 * If you're unable to find an open issue addressing the problem,
-  [open a new one](https://github.com/onox/json-ada/issues/new). Be sure to
+  open a new issue. Be sure to
   include a **title and clear description**, as much relevant information
   as possible, and labels.
 
@@ -44,7 +44,7 @@ and making backporting fixes harder.
 #### **Branches**
 
 * Make sure that your branch name starts with the issue number and contains
-  only a few words in lower case. For example: `5-performance`.
+  only a few words in lower case. For example: `1-performance`.
 
 * Make sure that each commit contains one logical change. Do not add
   commits that only fix whitespace, formatting, or typo's. Instead amend
@@ -69,6 +69,10 @@ and making backporting fixes harder.
 
 #### **Commit messages**
 
+* Prefix the first line of your commit message with (for example) `foo: `
+  if applicable. See previous commits to see whether the project regularly
+  uses prefixes in commit messages.
+
 * Make sure each line is at most 72 characters. If necessary, leave the
   second line blank and write a more detailed explanation starting on the
   third line. Wrap the message manually to 72 characters so that you don't
@@ -82,6 +86,9 @@ and making backporting fixes harder.
 * See [this blog post](https://chris.beams.io/posts/git-commit/) on how
   to write good commit messages.
 
+* Add a `Signed-off-by` with `git commit -s` to sign the
+  [Developer Certificate of Origin](#developer-certificate-of-origin) below.
+
 #### **Coding style**
 
 * Make sure your changes do not cause the compiler to fail with any new
@@ -93,53 +100,24 @@ and making backporting fixes harder.
   next line, and UNIX line endings.
 
 * If you add a subprogram with many parameters, put the parameters on the
-  next line and try to align the `:`, like this:
-
-  ```ada
-  function Parse
-    (Stream    : aliased in out Streams.Stream'Class;
-     Allocator : aliased in out Types.Memory_Allocator) return Types.JSON_Value;
-  ```
-
-  If the subprogram header is less than about 90 characters, then you can
+  next line and try to align the `:`.
+  If the subprogram header is less than about 90 characters, then you may
   keep it all on one line.
 
-* If you add aspects, indent `with` by 2 spaces, unless the parameters
-  are already on separate lines:
+* If you add aspects, indent `with` by 2 spaces. If the parameters
+  are on separate lines then indent by zero spaces.
 
-  ```ada
-  function Read_Character (Object : in out Stream) return Character
-    with Post'Class => not Stream'Class (Object).Has_Buffered_Character;
-  ```
-
-  and:
-
-  ```ada
-  function Read_Character
-    (Object : in out Stream;
-     Index  : out AS.Stream_Element_Offset) return Character
-  with Post'Class => not Stream'Class (Object).Has_Buffered_Character;
-  ```
-
-* If you add declarations to the declarative part of a subprogram's body,
-  put the `is` keyword on a separate line if the parameters are on separate
-  lines as well:
-
-  ```ada
-  procedure Read_Token
-    (Stream     : in out Streams.Stream'Class;
-     Next_Token : out Token;
-     Expect_EOF : Boolean := False)
-  is
-     C : Character;
-     use Ada.Characters.Latin_1;
-  begin
-  ```
-
-  If the declarative part is empty, then place `is` after the parameters
-  or return type.
+* Put the `is` keyword on a separate line if the parameters are on separate
+  lines *and* the declarative part is not empty. Otherwise place `is` after
+  the parameters or return type.
 
 * In general, try to follow the coding style of the surrounding code.
+
+#### Licensing
+
+* Each file should contain an `SPDX-License-Identifier` tag and a license
+  header. Contributions created in whole by you should be licensed under
+  the main license of the project, as specified in the [README][url-readme].
 
 ## Developer Certificate of Origin
 
@@ -153,7 +131,7 @@ knowledge, is covered under an appropriate open source license and I have
 the right under that license to submit that work with modifications,
 whether created in whole or in part by me, under the same open source
 license (unless I am permitted to submit under a different license), as
-Indicated in the file; or
+indicated in the file; or
 
 (c) The contribution was provided directly to me by some other person who
 certified (a), (b) or (c) and I have not modified it.
@@ -164,6 +142,4 @@ information I submit with it, including my sign-off) is maintained
 indefinitely and may be redistributed consistent with this project or
 the open source license(s) involved.
 
-## License
-
-This project is licensed under the Apache License 2.0.
+  [url-readme]: /README.md
