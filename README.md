@@ -118,16 +118,6 @@ Optional dependencies:
 
  * `make`
 
-## Installing dependencies on Ubuntu
-
-Install the dependencies using apt:
-
-```sh
-$ sudo apt install gnat gprbuild lcov make
-```
-
-and then install Alire.
-
 ## Using the library
 
 Use the library in your crates as follows:
