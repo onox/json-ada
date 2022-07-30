@@ -9,32 +9,18 @@ on:
     paths-ignore:
       - 'docs/**'
       - '**.md'
+  workflow_dispatch:
 
 jobs:
   build:
-    name: Testing on ${{matrix.os}} using ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        compiler: [fsf, community]
-        exclude:
-          - os: windows-latest
-            compiler: fsf
     steps:
     - uses: actions/checkout@v2
-
-    - name: Install toolchain
-      uses: ada-actions/toolchain@ce2021
-      with:
-        distrib: ${{matrix.compiler}}
-        target: native
-
-    - name: Install Alire
-      uses: alire-project/setup-alire@v1
-      with:
-        branch: "master"
-        toolchain: "gnat_external"
+    - uses: alire-project/setup-alire@v1
 
     - name: Run tests
       run: make tests
