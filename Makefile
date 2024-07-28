@@ -1,25 +1,24 @@
+ALR_CLEAN = alr clean -- -p
+ALR_BUILD = alr build --development --profiles="*=development"
+
 .PHONY: build clean prove tests coverage
 
 build:
-	cd json && alr build --validation
+	cd json && $(ALR_BUILD)
 
 clean:
 	-gnatprove --clean -P json/json.gpr
-	cd json && alr clean
-	cd tests && alr clean
-	rm -rf json/build tests/build tests/build/cov tests/TEST-*.xml
+	cd json && $(ALR_CLEAN)
+	cd tests && $(ALR_CLEAN)
+	rm -rf json/build tests/build tests/TEST-*.xml
 
 prove:
 	gnatprove -P json/json.gpr
 
 tests:
-	cd tests && alr build --development
+	cd tests && ADAFLAGS="--coverage -gnata" $(ALR_BUILD)
 	cd tests && alr run -s
 
 coverage:
 	mkdir -p tests/build/cov
-	lcov -q -c -d json/build/obj -d tests/build/obj -o tests/build/cov/unit.info
-	lcov -q -r tests/build/cov/unit.info */adainclude/* -o tests/build/cov/unit.info
-	lcov -q -r tests/build/cov/unit.info */tests/* -o tests/build/cov/unit.info
-	genhtml -q --ignore-errors source -o tests/build/cov/html tests/build/cov/unit.info
-	lcov -l tests/build/cov/unit.info
+	gcovr --exclude test --html-nested tests/build/cov/coverage.html

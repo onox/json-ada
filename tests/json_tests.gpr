@@ -30,8 +30,7 @@ project JSON_Tests is
    for Main use ("test_bindings.adb");
 
    package Compiler is
-      for Default_Switches ("Ada") use Json_Tests_Config.Ada_Compiler_Switches &
-        ("-gnatyM99", "--coverage");
+      for Default_Switches ("Ada") use Json_Tests_Config.Ada_Compiler_Switches;
       for Local_Configuration_Pragmas use "gnat.adc";
    end Compiler;
 
@@ -40,7 +39,7 @@ project JSON_Tests is
    end Binder;
 
    package Linker is
-      for Switches ("Ada") use ("-lgcov");
+      for Switches ("Ada") use ("--coverage");
    end Linker;
 
 end JSON_Tests;
