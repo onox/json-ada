@@ -210,7 +210,7 @@ package body Test_Images is
       Image : constant String := Value.Image;
    begin
       Assert
-        ((Text = Image) or else (Text2 = Image), "Image '" & Image & "' is not '" & Text & "'");
+        (Text = Image or else Text2 = Image, "Image '" & Image & "' is not '" & Text & "'");
    end Test_Multiple_Members_Object_Text;
 
    procedure Test_Array_Object_Array (Object : in out Test) is
