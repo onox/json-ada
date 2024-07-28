@@ -1,15 +1,22 @@
-name = "json"
-description = "An Ada 2012 library for parsing JSON"
+name = "json_tools"
+description = "Tools for json-ada"
 version = "5.0.3"
 website = "https://github.com/onox/json-ada"
 licenses = "Apache-2.0"
 tags = ["json"]
 
-project-files = ["json.gpr"]
+executables = ["pretty_print"]
+project-files = ["json_tools.gpr"]
 
 authors = ["onox"]
 maintainers = ["onox <denkpadje@gmail.com>"]
 maintainers-logins = ["onox"]
+
+[[depends-on]]
+json = "^5.0.3"
+
+[[pins]]
+json = { path = "../json" }
 
 [build-switches]
 validation.compile_checks = "warnings"

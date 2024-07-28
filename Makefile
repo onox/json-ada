@@ -5,6 +5,7 @@ ALR_BUILD = alr build --development --profiles="*=development"
 
 build:
 	cd json && $(ALR_BUILD)
+	cd tools && $(ALR_BUILD)
 
 clean:
 	-gnatprove --clean -P json/json.gpr

@@ -1,0 +1,2 @@
+pragma Restrictions (No_Obsolescent_Features);
+pragma Profile (No_Implementation_Extensions);
