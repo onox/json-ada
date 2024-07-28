@@ -263,22 +263,18 @@ package body JSON.Types is
 
    procedure Append (Object : in out JSON_Value; Value : JSON_Value) is
    begin
-      if Object.Kind = Array_Kind then
-         declare
-            Length : constant Natural
-              := Natural (Object.Allocator.Array_Levels (Object.Depth).Length);
-         begin
-            --  Assert that Object is the last array in a particular level
-            --  so that its elements form a continuous array
-            pragma Assert (Length = Object.Offset + Object.Length);
-         end;
+      declare
+         Length : constant Natural
+           := Natural (Object.Allocator.Array_Levels (Object.Depth).Length);
+      begin
+         --  Assert that Object is the last array in a particular level
+         --  so that its elements form a continuous array
+         pragma Assert (Length = Object.Offset + Object.Length);
+      end;
 
-         Object.Allocator.Array_Levels (Object.Depth).Append
-           (Array_Value'(Kind => Value.Kind, Value => Value));
-         Object.Length := Object.Length + 1;
-      else
-         raise Invalid_Type_Error with "Value not an array";
-      end if;
+      Object.Allocator.Array_Levels (Object.Depth).Append
+        (Array_Value'(Kind => Value.Kind, Value => Value));
+      Object.Length := Object.Length + 1;
    end Append;
 
    procedure Insert
@@ -287,27 +283,23 @@ package body JSON.Types is
       Value  : JSON_Value;
       Check_Duplicate_Keys : Boolean) is
    begin
-      if Object.Kind = Object_Kind then
-         if Check_Duplicate_Keys and then Object.Contains (Key.Value) then
-            raise Constraint_Error with "JSON object already has key '" & Key.Value & "'";
-         end if;
-
-         declare
-            Length : constant Natural
-              := Natural (Object.Allocator.Object_Levels (Object.Depth).Length);
-         begin
-            --  Assert that Object is the last object in a particular level
-            --  so that its key-value pairs form a continuous array
-            pragma Assert (Length = Object.Offset + Object.Length);
-         end;
-         pragma Assert (Key.Kind = String_Kind);
-
-         Object.Allocator.Object_Levels (Object.Depth).Append
-           (Key_Value_Pair'(Kind => Value.Kind, Key => Key, Element => Value));
-         Object.Length := Object.Length + 1;
-      else
-         raise Invalid_Type_Error with "Value not an object";
+      if Check_Duplicate_Keys and then Object.Contains (Key.Value) then
+         raise Constraint_Error with "JSON object already has key '" & Key.Value & "'";
       end if;
+
+      declare
+         Length : constant Natural
+           := Natural (Object.Allocator.Object_Levels (Object.Depth).Length);
+      begin
+         --  Assert that Object is the last object in a particular level
+         --  so that its key-value pairs form a continuous array
+         pragma Assert (Length = Object.Offset + Object.Length);
+      end;
+      pragma Assert (Key.Kind = String_Kind);
+
+      Object.Allocator.Object_Levels (Object.Depth).Append
+        (Key_Value_Pair'(Kind => Value.Kind, Key => Key, Element => Value));
+      Object.Length := Object.Length + 1;
    end Insert;
 
    -----------------------------------------------------------------------------

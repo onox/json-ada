@@ -92,7 +92,8 @@ package JSON.Types is
 
    -----------------------------------------------------------------------------
 
-   procedure Append (Object : in out JSON_Value; Value : JSON_Value);
+   procedure Append (Object : in out JSON_Value; Value : JSON_Value)
+     with Pre => Object.Kind = Array_Kind;
    --  Internal procedure
 
    procedure Insert
@@ -100,7 +101,7 @@ package JSON.Types is
       Key    : JSON_Value;
       Value  : JSON_Value;
       Check_Duplicate_Keys : Boolean)
-   with Pre => Key.Kind = String_Kind;
+   with Pre => Object.Kind = Object_Kind and Key.Kind = String_Kind;
    --  Internal procedure
 
    -----------------------------------------------------------------------------
