@@ -144,7 +144,7 @@ package body JSON.Parsers is
 
    function Parse
      (Stream    : Streams.Stream_Ptr;
-      Allocator : Types.Memory_Allocator_Ptr) return Types.JSON_Value
+      Allocator : Types.Memory_Allocator_Ptr) return Types.JSON_Value with SPARK_Mode => On
    is
       Token : Tokenizers.Token;
    begin
@@ -161,55 +161,51 @@ package body JSON.Parsers is
 
    function Create
      (Pointer       : not null JSON.Streams.Stream_Element_Array_Access;
-      Maximum_Depth : Positive := Default_Maximum_Depth) return Parser
-   is
-      Allocator : Types.Memory_Allocator (Maximum_Depth);
+      Maximum_Depth : Positive := Default_Maximum_Depth) return Parser is
    begin
       return
-        (AF.Limited_Controlled with
-         Pointer     => Pointer,
-         Own_Pointer => False,
-         Stream      => Stream_Holders.To_Holder (Streams.Create_Stream (Pointer)),
-         Allocator   => Memory_Holders.To_Holder (Allocator));
+        (Ada.Finalization.Limited_Controlled with
+         Maximum_Depth => Maximum_Depth,
+         Pointer       => Pointer,
+         Own_Pointer   => False,
+         Stream        => Streams.Create_Stream (Pointer),
+         Allocator     => <>);
    end Create;
 
    function Create
      (Text          : String;
       Maximum_Depth : Positive := Default_Maximum_Depth) return Parser
    is
-      Allocator : Types.Memory_Allocator (Maximum_Depth);
+      Pointer : constant not null Streams.Stream_Element_Array_Access := Streams.From_Text (Text);
    begin
-      return Result : Parser :=
-        (AF.Limited_Controlled with
-         Pointer     => Streams.From_Text (Text),
-         Own_Pointer => True,
-         Allocator   => Memory_Holders.To_Holder (Allocator),
-         others      => <>)
-      do
-         Result.Stream := Stream_Holders.To_Holder (Streams.Create_Stream (Result.Pointer));
-      end return;
+      return
+        (Ada.Finalization.Limited_Controlled with
+         Maximum_Depth => Maximum_Depth,
+         Pointer       => Pointer,
+         Own_Pointer   => True,
+         Stream        => Streams.Create_Stream (Pointer),
+         Allocator     => <>);
    end Create;
 
    function Create_From_File
      (File_Name     : String;
       Maximum_Depth : Positive := Default_Maximum_Depth) return Parser
    is
-      Allocator : Types.Memory_Allocator (Maximum_Depth);
+      Pointer : constant not null Streams.Stream_Element_Array_Access :=
+        Streams.From_File (File_Name);
    begin
-      return Result : Parser :=
-        (AF.Limited_Controlled with
-         Pointer     => Streams.From_File (File_Name),
-         Own_Pointer => True,
-         Allocator   => Memory_Holders.To_Holder (Allocator),
-         others      => <>)
-      do
-         Result.Stream := Stream_Holders.To_Holder (Streams.Create_Stream (Result.Pointer));
-      end return;
+      return
+        (Ada.Finalization.Limited_Controlled with
+         Maximum_Depth => Maximum_Depth,
+         Pointer       => Pointer,
+         Own_Pointer   => True,
+         Stream        => Streams.Create_Stream (Pointer),
+         Allocator     => <>);
    end Create_From_File;
 
    function Parse (Object : in out Parser) return Types.JSON_Value is
    begin
-      return Parse (Object.Stream.Reference.Element, Object.Allocator.Reference.Element);
+      return Parse (Object.Stream'Unchecked_Access, Object.Allocator'Unchecked_Access);
    end Parse;
 
    overriding
@@ -221,9 +217,6 @@ package body JSON.Parsers is
       use type Streams.Stream_Element_Array_Access;
    begin
       if Object.Pointer /= null then
-         Object.Stream.Clear;
-         Object.Allocator.Clear;
-
          if Object.Own_Pointer then
             Free (Object.Pointer);
          end if;

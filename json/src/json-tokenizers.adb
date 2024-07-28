@@ -32,7 +32,7 @@ package body JSON.Tokenizers is
       use Ada.Characters.Latin_1;
    begin
       loop
-         C := Stream.Read_Character (Index);
+         Stream.Read_Character (Index, C);
 
          --  An unescaped '"' character denotes the end of the string
          exit when not Escaped and C = '"';
@@ -118,7 +118,7 @@ package body JSON.Tokenizers is
 
       --  Accept sequence of digits, including leading zeroes
       loop
-         C := Stream.Read_Character;
+         Stream.Read_Character (C);
          exit when C not in '0' .. '9';
          SB.Append (Value, C);
       end loop;
@@ -136,7 +136,7 @@ package body JSON.Tokenizers is
 
          --  Require at least one digit after decimal point
          begin
-            C := Stream.Read_Character;
+            Stream.Read_Character (C);
             if C not in '0' .. '9' then
                raise Tokenizer_Error with Error_Dot_Message;
             end if;
@@ -148,7 +148,7 @@ package body JSON.Tokenizers is
 
          --  Accept sequence of digits
          loop
-            C := Stream.Read_Character;
+            Stream.Read_Character (C);
             exit when C not in '0' .. '9';
             SB.Append (Value, C);
          end loop;
@@ -160,7 +160,7 @@ package body JSON.Tokenizers is
          SB.Append (Value, C);
 
          begin
-            C := Stream.Read_Character;
+            Stream.Read_Character (C);
             --  Append optional '+' or '-' character
             if C in '+' | '-' then
                --  If exponent is negative, number will be a float
@@ -171,7 +171,7 @@ package body JSON.Tokenizers is
                SB.Append (Value, C);
 
                --  Require at least one digit after +/- sign
-               C := Stream.Read_Character;
+               Stream.Read_Character (C);
                if C not in '0' .. '9' then
                   raise Tokenizer_Error with Error_One_Digit_Message;
                end if;
@@ -188,7 +188,7 @@ package body JSON.Tokenizers is
 
          --  Accept sequence of digits
          loop
-            C := Stream.Read_Character;
+            Stream.Read_Character (C);
             exit when C not in '0' .. '9';
             SB.Append (Value, C);
          end loop;
@@ -238,7 +238,7 @@ package body JSON.Tokenizers is
    begin
       SB.Append (Value, First);
       loop
-         C := Stream.Read_Character;
+         Stream.Read_Character (C);
          exit when C not in 'a' .. 'z' or else SB.Length (Value) = SB.Max_Length;
          SB.Append (Value, C);
       end loop;
@@ -264,7 +264,7 @@ package body JSON.Tokenizers is
    begin
       loop
          --  Read the first next character and decide which token it could be part of
-         C := Stream.Read_Character;
+         Stream.Read_Character (C);
 
          --  Skip whitespace
          exit when C not in Space | HT | LF | CR;

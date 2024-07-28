@@ -23,7 +23,7 @@ package body JSON.Streams is
 
    use type AS.Stream_Element_Offset;
 
-   procedure Read_Character (Object : in out Stream; Item : out Character) is
+   procedure Read_Character_From_Stream (Object : in out Stream; Item : out Character) is
       function Convert is new Ada.Unchecked_Conversion
         (Source => AS.Stream_Element, Target => Character);
    begin
@@ -33,31 +33,32 @@ package body JSON.Streams is
 
       Item := Convert (Object.Bytes (Object.Index));
       Object.Index := Object.Index + 1;
-   end Read_Character;
+   end Read_Character_From_Stream;
 
    function Has_Buffered_Character (Object : Stream) return Boolean
      is (Object.Next_Character /= Ada.Characters.Latin_1.NUL);
 
-   function Read_Character (Object : in out Stream) return Character is
+   procedure Read_Character (Object : in out Stream; Result : out Character) is
       Index : AS.Stream_Element_Offset;
    begin
-      return Object.Read_Character (Index);
+      Object.Read_Character (Index, Result);
    end Read_Character;
 
-   function Read_Character
+   procedure Read_Character
      (Object : in out Stream;
-      Index  : out AS.Stream_Element_Offset) return Character
+      Index  : out AS.Stream_Element_Offset;
+      Result : out Character)
    is
       C : Character;
    begin
       Index := Object.Index;
       if Object.Next_Character = Ada.Characters.Latin_1.NUL then
-         Object.Read_Character (C);
+         Object.Read_Character_From_Stream (C);
       else
          C := Object.Next_Character;
          Object.Next_Character := Ada.Characters.Latin_1.NUL;
       end if;
-      return C;
+      Result := C;
    end Read_Character;
 
    procedure Write_Character (Object : in out Stream; Next : Character) is

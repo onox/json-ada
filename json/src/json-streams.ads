@@ -29,12 +29,13 @@ package JSON.Streams with SPARK_Mode => On is
 
    function Has_Buffered_Character (Object : Stream) return Boolean;
 
-   function Read_Character (Object : in out Stream) return Character
+   procedure Read_Character (Object : in out Stream; Result : out Character)
      with Post => not Object.Has_Buffered_Character;
 
-   function Read_Character
+   procedure Read_Character
      (Object : in out Stream;
-      Index  : out AS.Stream_Element_Offset) return Character
+      Index  : out AS.Stream_Element_Offset;
+      Result : out Character)
    with Post => not Object.Has_Buffered_Character;
    --  Writes the offset of the read character to Index. This is needed
    --  for string tokens.

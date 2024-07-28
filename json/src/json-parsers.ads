@@ -14,7 +14,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-private with Ada.Containers.Indefinite_Holders;
 private with Ada.Finalization;
 
 with JSON.Types;
@@ -31,7 +30,7 @@ generic
 package JSON.Parsers with SPARK_Mode => On is
    pragma Preelaborate;
 
-   type Parser is tagged limited private;
+   type Parser (<>) is tagged limited private;
 
    function Create
      (Pointer       : not null JSON.Streams.Stream_Element_Array_Access;
@@ -45,23 +44,18 @@ package JSON.Parsers with SPARK_Mode => On is
      (File_Name     : String;
       Maximum_Depth : Positive := Default_Maximum_Depth) return Parser;
 
-   function Parse (Object : in out Parser) return Types.JSON_Value;
+   function Parse (Object : in out Parser) return Types.JSON_Value
+     with SPARK_Mode => Off;
 
    Parse_Error : exception;
 
 private
 
-   package Stream_Holders is new Ada.Containers.Indefinite_Holders
-     (Element_Type => Streams.Stream, "=" => Streams."=");
-
-   package Memory_Holders is new Ada.Containers.Indefinite_Holders
-     (Element_Type => Types.Memory_Allocator, "=" => Types."=");
-
-   package AF renames Ada.Finalization;
-
-   type Parser is limited new AF.Limited_Controlled with record
-      Stream      : Stream_Holders.Holder;
-      Allocator   : Memory_Holders.Holder;
+   type Parser (Maximum_Depth : Positive)
+     is limited new Ada.Finalization.Limited_Controlled with
+   record
+      Stream      : aliased Streams.Stream;
+      Allocator   : aliased Types.Memory_Allocator (Maximum_Depth);
       Pointer     : Streams.Stream_Element_Array_Access;
       Own_Pointer : Boolean;
    end record;
