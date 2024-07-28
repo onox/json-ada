@@ -1,6 +1,6 @@
 name = "json_tools"
 description = "Tools for json-ada"
-version = "5.0.3"
+version = "6.0.0"
 website = "https://github.com/onox/json-ada"
 licenses = "Apache-2.0"
 tags = ["json"]
@@ -13,7 +13,7 @@ maintainers = ["onox <denkpadje@gmail.com>"]
 maintainers-logins = ["onox"]
 
 [[depends-on]]
-json = "^5.0.3"
+json = "^6.0.0"
 
 [[pins]]
 json = { path = "../json" }
