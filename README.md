@@ -13,7 +13,7 @@ Ada 2012's iterator and indexing syntax. The RFC does not support
 comments, thus this library does not support it either. If your JSON data
 contains comments, you should minify the data so that comments are removed.
 
-Unicode may not be supported yet.
+Escaped Unicode (`\u`) in strings is not supported yet.
 
 ## Usage
 
@@ -114,7 +114,7 @@ In order to build the library, you need to have:
 
 Optional dependencies:
 
- * `lcov` to generate a coverage report for unit tests
+ * `gcovr` to generate a coverage report for unit tests
 
  * `make`
 
