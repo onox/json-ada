@@ -20,7 +20,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
     - uses: actions/checkout@v2
-    - uses: alire-project/setup-alire@v1
+    - uses: alire-project/setup-alire@latest
 
     - name: Run tests
       run: make tests

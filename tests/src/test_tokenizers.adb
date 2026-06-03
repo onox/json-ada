@@ -97,6 +97,10 @@ package body Test_Tokenizers is
         (Name & "Reject text '""unexpected\xcharacter""'",
          Test_Unexpected_Escaped_Character_String_Exception'Access));
       Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '""\u00""'", Test_Short_Escaped_Unicode_String_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Reject text '""\u00gg""'", Test_Bad_Escaped_Unicode_String_Exception'Access));
+      Test_Suite.Add_Test (Caller.Create
         (Name & "Reject text '-'", Test_Minus_Number_EOF_Exception'Access));
       Test_Suite.Add_Test (Caller.Create
         (Name & "Reject text '-,'", Test_Minus_Number_Exception'Access));
@@ -482,6 +486,30 @@ package body Test_Tokenizers is
       when Tokenizers.Tokenizer_Error =>
          null;
    end Test_Control_Character_String_Exception;
+
+   procedure Test_Short_Escaped_Unicode_String_Exception (Object : in out Test) is
+      Text : constant String := """\u00""";
+      Stream : aliased Streams.Stream := Streams.Create_Stream (Streams.From_Text (Text));
+      Token : Tokenizers.Token;
+   begin
+      Tokenizers.Read_Token (Stream, Token);
+      Fail ("Expected Tokenizer_Error");
+   exception
+      when Tokenizers.Tokenizer_Error =>
+         null;
+   end Test_Short_Escaped_Unicode_String_Exception;
+
+   procedure Test_Bad_Escaped_Unicode_String_Exception (Object : in out Test) is
+      Text : constant String := """\u00gg""";
+      Stream : aliased Streams.Stream := Streams.Create_Stream (Streams.From_Text (Text));
+      Token : Tokenizers.Token;
+   begin
+      Tokenizers.Read_Token (Stream, Token);
+      Fail ("Expected Tokenizer_Error");
+   exception
+      when Tokenizers.Tokenizer_Error =>
+         null;
+   end Test_Bad_Escaped_Unicode_String_Exception;
 
    procedure Test_Unexpected_Escaped_Character_String_Exception (Object : in out Test) is
       Text : constant String := """unexpected\xcharacter""";

@@ -1,2 +1,5 @@
 pragma Restrictions (No_Obsolescent_Features);
-pragma Profile (No_Implementation_Extensions);
+--  No_Implementation_Extensions removed: under GNAT 15 it implies
+--  No_Implementation_Aspect_Specifications, which rejects this library's own
+--  SPARK_Mode aspects (GNAT 14 did not). The aspects are inert for code
+--  generation, so dropping the profile is functionally safe.

@@ -12,7 +12,8 @@ pragma Restrictions (No_Dependence => Ada.Asynchronous_Task_Control);
 pragma Restrictions (No_Reentrancy);
 
 pragma Restrictions (No_Obsolescent_Features);
-pragma Restrictions (No_Implementation_Aspect_Specifications);
+--  Not No_Implementation_Aspect_Specifications: the json sources use SPARK_Mode,
+--  and since GCC 16 this also applies to the generics instantiated in the tests.
 pragma Restrictions (No_Implementation_Attributes);
 pragma Restrictions (No_Implementation_Identifiers);
 --  pragma Restrictions (No_Implementation_Pragmas);

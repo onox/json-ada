@@ -59,6 +59,8 @@ private
    --  Exceptions
    procedure Test_Control_Character_String_Exception (Object : in out Test);
    procedure Test_Unexpected_Escaped_Character_String_Exception (Object : in out Test);
+   procedure Test_Short_Escaped_Unicode_String_Exception (Object : in out Test);
+   procedure Test_Bad_Escaped_Unicode_String_Exception (Object : in out Test);
    procedure Test_Minus_Number_EOF_Exception (Object : in out Test);
    procedure Test_Minus_Number_Exception (Object : in out Test);
    procedure Test_End_Dot_Number_Exception (Object : in out Test);

@@ -13,8 +13,6 @@ Ada 2012's iterator and indexing syntax. The RFC does not support
 comments, thus this library does not support it either. If your JSON data
 contains comments, you should minify the data so that comments are removed.
 
-Escaped Unicode (`\u`) in strings is not supported yet.
-
 ## Usage
 
 ```ada
