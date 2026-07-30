@@ -228,6 +228,9 @@ package body JSON.Streams with SPARK_Mode => On is
    begin
       Object.Index := 1;
       Object.Has_Next := False;
+      Object.Next_Character := ' ';
+      --  inert once Has_Next is False, but leaves no component holding a
+      --  value from before the call, as the Depends contract states
       Free_Text (Object.Text);
    end Destroy;
 

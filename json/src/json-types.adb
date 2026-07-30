@@ -493,24 +493,32 @@ package body JSON.Types with SPARK_Mode => On is
    procedure Free_Node (Object : in out JSON_Value_Access)
    with Post               => Object = null,
         Always_Terminates,
-        Subprogram_Variant => (Decreases => Size (Object));
+        Subprogram_Variant => (Decreases => Size (Object)),
+        --  matches Free's contract, so that neither this recursion nor Free
+        --  reports the null it writes as an unused assignment
+        Depends            => (Object => null, null => Object);
 
    procedure Free_Node (Object : in out JSON_Value_Access) is
+      Node : JSON_Value_Access := Object;
+      --  the tree, moved out of the parameter so that Object is nulled on
+      --  every path and not only on the ones that iterate
    begin
-      while Object /= null loop
-         pragma Loop_Invariant (Size (Object) <= Size (Object)'Loop_Entry);
-         pragma Loop_Variant (Decreases => Size (Object));
+      Object := null;
 
-         Free_Node (Object.First_Child);
-         Free_Text (Object.Key);
-         Free_Text (Object.Str);
+      while Node /= null loop
+         pragma Loop_Invariant (Size (Node) <= Size (Node)'Loop_Entry);
+         pragma Loop_Variant (Decreases => Size (Node));
+
+         Free_Node (Node.First_Child);
+         Free_Text (Node.Key);
+         Free_Text (Node.Str);
 
          declare
-            Rest : constant JSON_Value_Access := Object.Next;
+            Rest : constant JSON_Value_Access := Node.Next;
          begin
-            Object.Next := null;
-            Dealloc (Object);
-            Object := Rest;
+            Node.Next := null;
+            Dealloc (Node);
+            Node := Rest;
          end;
       end loop;
    end Free_Node;

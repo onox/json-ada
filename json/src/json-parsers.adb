@@ -18,15 +18,6 @@ with JSON.Tokenizers;
 
 package body JSON.Parsers with SPARK_Mode => On is
 
-   --  On error paths, partial documents are released with Types.Free
-   --  before returning. Flow analysis does not model deallocation as an
-   --  effect and does not see the resulting null values being used.
-   pragma Warnings
-     (GNATprove, Off, "statement has no effect",
-      Reason => "Types.Free deallocates partial documents on error paths");
-   pragma Warnings
-     (GNATprove, Off, "*is set by ""Free"" but not used after the call",
-      Reason => "Types.Free sets its parameter to null on error paths");
    pragma Warnings
      (GNATprove, Off, "*is set by ""Parse_Value"" but not used after the call",
       Reason => "only Status matters when the parsed value is not used");
@@ -491,6 +482,9 @@ package body JSON.Parsers with SPARK_Mode => On is
    procedure Destroy (Object : in out Parser) is
    begin
       Streams.Destroy (Object.Stream);
+      Object.Maximum_Depth := Default_Maximum_Depth;
+      --  back to the record's default: Create sets the depth, so no component
+      --  holds a value from before the call, as the Depends contract states
    end Destroy;
 
 end JSON.Parsers;

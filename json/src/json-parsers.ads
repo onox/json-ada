@@ -115,7 +115,11 @@ package JSON.Parsers with SPARK_Mode => On is
 
    procedure Destroy (Object : in out Parser)
      with Always_Terminates,
-          Post => not Has_Storage (Object);
+          Post => not Has_Storage (Object),
+          --  the destroyed parser is a constant, its old text reaching only
+          --  the deallocation: callers that drop it are not dropping a
+          --  computed value
+          Depends => (Object => null, null => Object);
    --  Release the text owned by the parser; the parser then owns no heap
    --  memory
    --  @param Object The parser whose text is released
