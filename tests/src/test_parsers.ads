@@ -34,6 +34,8 @@ private
    procedure Test_Empty_String_Text (Object : in out Test);
    procedure Test_Non_Empty_String_Text (Object : in out Test);
    procedure Test_Number_String_Text (Object : in out Test);
+   procedure Test_2Byte_UTF8_Text (Object : in out Test);
+   procedure Test_Ligature_String_Text (Object : in out Test);
 
    --  Integer/float number
    procedure Test_Integer_Number_Text (Object : in out Test);

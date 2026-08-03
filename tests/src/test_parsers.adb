@@ -44,6 +44,12 @@ package body Test_Parsers is
         (Name & "Parse text '""test""'", Test_Non_Empty_String_Text'Access));
       Test_Suite.Add_Test (Caller.Create
         (Name & "Parse text '""12.34""'", Test_Number_String_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text with 2-byte UTF-8 'Straße' and uppercase accented letters",
+         Test_2Byte_UTF8_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text with UTF-8 'c'+U+0153 LIGATURE OE+'ur' (French 'coeur')",
+         Test_Ligature_String_Text'Access));
 
       Test_Suite.Add_Test (Caller.Create
         (Name & "Parse text '42'", Test_Integer_Number_Text'Access));
@@ -178,6 +184,40 @@ package body Test_Parsers is
       Assert (Value.Kind = String_Kind, "Not a string");
       Assert (Value.Value = "12.34", "String value not equal to 12.34''");
    end Test_Number_String_Text;
+
+   procedure Test_2Byte_UTF8_Text (Object : in out Test) is
+      --  UTF-8 encoding of "ß" (U+00DF): 16#C3# 16#9F#. The second byte, 16#9F#,
+      --  falls in the Latin-1 C1 control range (16#7F# .. 16#9F#) that
+      --  Ada.Characters.Handling.Is_Control recognizes, even though here it is
+      --  simply a UTF-8 continuation byte and not a control character at all.
+      Sharp_S     : constant String := Character'Val (16#C3#) & Character'Val (16#9F#);
+      A_Grave     : constant String := Character'Val (16#C3#) & Character'Val (16#80#);
+      O_Diaeresis : constant String := Character'Val (16#C3#) & Character'Val (16#96#);
+      U_Diaeresis : constant String := Character'Val (16#C3#) & Character'Val (16#9C#);
+      Word : constant String := "Stra" & Sharp_S & "e " & A_Grave & O_Diaeresis
+                                & U_Diaeresis;
+      Text : constant String := '"' & Word & '"';
+
+      Parser : Parsers.Parser := Parsers.Create (Text);
+      Value  : constant JSON_Value := Parser.Parse;
+   begin
+      Assert (Value.Kind = String_Kind, "Not a string");
+      Assert (Value.Value = Word, "String value not equal to " & Word);
+   end Test_2Byte_UTF8_Text;
+
+   procedure Test_Ligature_String_Text (Object : in out Test) is
+      --  UTF-8 encoding of "oe" ligature U+0153 LATIN SMALL LIGATURE OE, as in
+      --  French "coeur" (heart): 16#C5# 16#93#.
+      Oe_Ligature : constant String := Character'Val (16#C5#) & Character'Val (16#93#);
+      Word        : constant String := "c" & Oe_Ligature & "ur";
+      Text        : constant String := '"' & Word & '"';
+
+      Parser : Parsers.Parser := Parsers.Create (Text);
+      Value  : constant JSON_Value := Parser.Parse;
+   begin
+      Assert (Value.Kind = String_Kind, "Not a string");
+      Assert (Value.Value = Word, "String value not equal to 'coeur' with oe ligature");
+   end Test_Ligature_String_Text;
 
    procedure Test_Integer_Number_Text (Object : in out Test) is
       Text : constant String := "42";
