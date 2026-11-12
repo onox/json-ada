@@ -34,6 +34,10 @@ private
    procedure Test_Empty_String_Text (Object : in out Test);
    procedure Test_Non_Empty_String_Text (Object : in out Test);
    procedure Test_Number_String_Text (Object : in out Test);
+   procedure Test_Raw_UTF_8_String_Text (Object : in out Test);
+   procedure Test_Escaped_Unicode_String_Text (Object : in out Test);
+   procedure Test_Surrogate_Pair_String_Text (Object : in out Test);
+   procedure Test_Unpaired_Surrogate_String_Text (Object : in out Test);
 
    --  Integer/float number
    procedure Test_Integer_Number_Text (Object : in out Test);

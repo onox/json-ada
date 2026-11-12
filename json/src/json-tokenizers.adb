@@ -44,8 +44,16 @@ package body JSON.Tokenizers is
                when '"' | '\' | '/' | 'b' | 'f' | 'n' | 'r' | 't' =>
                   null;
                when 'u' =>
-                  --  TODO Support escaped unicode
-                  raise Program_Error with "Escaped unicode not supported yet";
+                  --  Only validated here, as Types.Unescape does the decoding
+                  for Digit in 1 .. 4 loop
+                     Stream.Read_Character (Index, C);
+                     Length := Length + 1;
+
+                     if C not in '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' then
+                        raise Tokenizer_Error with
+                          "Expected four hexadecimal digits after \u in string";
+                     end if;
+                  end loop;
                when others =>
                   raise Tokenizer_Error with "Unexpected escaped character in string";
             end case;

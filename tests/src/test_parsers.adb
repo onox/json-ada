@@ -44,6 +44,15 @@ package body Test_Parsers is
         (Name & "Parse text '""test""'", Test_Non_Empty_String_Text'Access));
       Test_Suite.Add_Test (Caller.Create
         (Name & "Parse text '""12.34""'", Test_Number_String_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text with raw UTF-8", Test_Raw_UTF_8_String_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text with \u", Test_Escaped_Unicode_String_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text with surrogate pair", Test_Surrogate_Pair_String_Text'Access));
+      Test_Suite.Add_Test (Caller.Create
+        (Name & "Parse text with unpaired surrogate",
+         Test_Unpaired_Surrogate_String_Text'Access));
 
       Test_Suite.Add_Test (Caller.Create
         (Name & "Parse text '42'", Test_Integer_Number_Text'Access));
@@ -148,6 +157,53 @@ package body Test_Parsers is
    begin
       Assert (Value.Kind = Null_Kind, "Not a null");
    end Test_Null_Text;
+
+   Euro : constant String :=
+     Character'Val (16#E2#) & Character'Val (16#82#) & Character'Val (16#AC#);
+
+   Emoji : constant String :=
+     Character'Val (16#F0#) & Character'Val (16#9F#)
+     & Character'Val (16#98#) & Character'Val (16#80#);
+
+   Replacement : constant String :=
+     Character'Val (16#EF#) & Character'Val (16#BF#) & Character'Val (16#BD#);
+
+   procedure Test_Raw_UTF_8_String_Text (Object : in out Test) is
+      Text : constant String := """" & Euro & Emoji & """";
+
+      Parser : Parsers.Parser := Parsers.Create (Text);
+      Value  : constant JSON_Value := Parser.Parse;
+   begin
+      Assert (Value.Value = Euro & Emoji, "Bytes not preserved");
+   end Test_Raw_UTF_8_String_Text;
+
+   procedure Test_Escaped_Unicode_String_Text (Object : in out Test) is
+      Text : constant String := """\u0041\u20ac\u20AC\\u0041""";
+
+      Parser : Parsers.Parser := Parsers.Create (Text);
+      Value  : constant JSON_Value := Parser.Parse;
+   begin
+      Assert (Value.Value = "A" & Euro & Euro & "\u0041", "Not decoded to UTF-8");
+   end Test_Escaped_Unicode_String_Text;
+
+   procedure Test_Surrogate_Pair_String_Text (Object : in out Test) is
+      Text : constant String := """x\ud83d\ude00y""";
+
+      Parser : Parsers.Parser := Parsers.Create (Text);
+      Value  : constant JSON_Value := Parser.Parse;
+   begin
+      Assert (Value.Value = "x" & Emoji & "y", "Pair not decoded to UTF-8");
+   end Test_Surrogate_Pair_String_Text;
+
+   procedure Test_Unpaired_Surrogate_String_Text (Object : in out Test) is
+      Text : constant String := """\ud83dx\ude00\ud83d\u0041""";
+
+      Parser : Parsers.Parser := Parsers.Create (Text);
+      Value  : constant JSON_Value := Parser.Parse;
+   begin
+      Assert (Value.Value = Replacement & "x" & Replacement & Replacement & "A",
+              "Unpaired surrogates not replaced");
+   end Test_Unpaired_Surrogate_String_Text;
 
    procedure Test_Empty_String_Text (Object : in out Test) is
       Text : constant String := """""";
